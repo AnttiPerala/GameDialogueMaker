@@ -249,8 +249,7 @@
                         <div style="text-align: right;">
                             <span style="width: 45%; display:inline-block; text-align: right;">Next:</span><input class="next" style="width: 15%; display:inline-block;" type="number">
                         </div>
-
-                        
+   
                     </div>
                     <div style="display: flex; align-items: end; justify-content: center;">
                         <div class="blockPlusButton">+</div>
@@ -269,12 +268,10 @@
                     })
                     .css({ top: newBlockPositionY + 'px', left: newBlockPositionX + 'px' })
                     .children('.block')
-                    .attr('id', 'id' + newBlockId);
-                    
+                    //.attr('id', 'id' + newBlockId);
+                    ;
 
                 addAutoResize();
-
-                
 
                 console.log('newBlockID' + newBlockId);
 
@@ -284,8 +281,12 @@
 
                 newBlockId++;
 
-                let x1Pos = selectedBlock[0].getBoundingClientRect().left + selectedBlock[0].getBoundingClientRect().width / 2;
-                let y1Pos = selectedBlock[0].getBoundingClientRect().top + selectedBlock[0].getBoundingClientRect().height / 2;
+                let plusButton = selectedBlock.parents('.blockWrap').find('.blockPlusButton');
+
+                cheeec = plusButton;
+
+                let x1Pos = plusButton.offset().left + plusButton[0].getBoundingClientRect().width / 2;
+                let y1Pos = plusButton.offset().top + plusButton[0].getBoundingClientRect().height / 2;
                 let x2Pos = $(newBlock)[0].getBoundingClientRect().left + $(newBlock)[0].getBoundingClientRect().width / 2;
                 let y2Pos = $(newBlock)[0].getBoundingClientRect().top + $(newBlock)[0].getBoundingClientRect().height / 2;
 
@@ -377,8 +378,8 @@
                         //let selectedBlockWrap = selectedBlock.parent('.blockWrap'); //get the currently selected block
                         //let thisParent = $(this).parent('.blockWrap'); //clicked block wrap
 
-                        let x1Pos = selectedBlock[0].getBoundingClientRect().left + selectedBlock[0].getBoundingClientRect().width / 2;
-                        let y1Pos = selectedBlock[0].getBoundingClientRect().top + selectedBlock[0].getBoundingClientRect().height / 2;
+                        let x1Pos = selectedBlock[0].offset().left + selectedBlock[0].getBoundingClientRect().width / 2;
+                        let y1Pos = selectedBlock[0].offset().top + selectedBlock[0].getBoundingClientRect().height / 2;
                         let x2Pos = $(this)[0].getBoundingClientRect().left + $(this)[0].getBoundingClientRect().width / 2;
                         let y2Pos = $(this)[0].getBoundingClientRect().top + $(this)[0].getBoundingClientRect().height / 2;
 
@@ -415,13 +416,15 @@
                         let lineBlockConnect1 = $(e).data('block1'); //get the block ids from the lines
                         let lineBlockConnect2 = $(e).data('block2');
 
-                        //console.log('lineBlockConnect1: ' + lineBlockConnect1 + ' lineBlockConnect2: ' + lineBlockConnect2);
+                        console.log('lineBlockConnect1: ' + lineBlockConnect1 + ' lineBlockConnect2: ' + lineBlockConnect2);
 
                         let block1 = $('#' + lineBlockConnect1); //select the block from dom
                         let block2 = $('#' + lineBlockConnect2); //select the block from dom
 
-                        let x1Pos = block1[0].getBoundingClientRect().left + block1[0].getBoundingClientRect().width / 2;
-                        let y1Pos = block1[0].getBoundingClientRect().top + block1[0].getBoundingClientRect().height / 2;
+                        let plusButton = block1.parents('.blockWrap').find('.blockPlusButton');
+
+                        let x1Pos = plusButton.offset().left + plusButton[0].getBoundingClientRect().width / 2;
+                        let y1Pos = plusButton.offset().top + plusButton[0].getBoundingClientRect().height / 2;
                         let x2Pos = block2[0].getBoundingClientRect().left + block2[0].getBoundingClientRect().width / 2;
                         let y2Pos = block2[0].getBoundingClientRect().top + block2[0].getBoundingClientRect().height / 2;
 
