@@ -66,6 +66,9 @@
         
            <div class="blockWrap">
             <div class="contentWrap">
+                <div style="display: flex; align-items:flex-start; justify-content: center;">
+                    <div class="topConnectionSocket">o</div>
+                </div>
                     <div id="id0" class="block">
                         <div style="text-align: left;">
                             <span style="width: 15%; display:inline-block; text-align: right;">ID:</span><input class="next"
@@ -233,6 +236,9 @@
                let newBlock = $(`
             <div class="blockWrap">
             <div class="contentWrap">
+                <div style="display: flex; align-items:flex-start; justify-content: center;">
+                    <div class="topConnectionSocket">o</div>
+                </div>
                     <div id="id0" class="block">
                         <div style="text-align: left;">
                             <span style="width: 15%; display:inline-block; text-align: right;">ID:</span><input class="next"
@@ -282,13 +288,13 @@
                 newBlockId++;
 
                 let plusButton = selectedBlock.parents('.blockWrap').find('.blockPlusButton');
+                let topSocket = $(newBlock).find('.topConnectionSocket');
 
-                cheeec = plusButton;
 
                 let x1Pos = plusButton.offset().left + plusButton[0].getBoundingClientRect().width / 2;
                 let y1Pos = plusButton.offset().top + plusButton[0].getBoundingClientRect().height / 2;
-                let x2Pos = $(newBlock)[0].getBoundingClientRect().left + $(newBlock)[0].getBoundingClientRect().width / 2;
-                let y2Pos = $(newBlock)[0].getBoundingClientRect().top + $(newBlock)[0].getBoundingClientRect().height / 2;
+                let x2Pos = topSocket.offset().left + topSocket[0].getBoundingClientRect().width / 2;
+                let y2Pos = topSocket.offset().top + topSocket[0].getBoundingClientRect().height / 2;
 
                 createLine(x1Pos, y1Pos, x2Pos, y2Pos, selectedBlock.attr('id'), $(newBlock).find('.block').attr('id'));
 
@@ -422,11 +428,12 @@
                         let block2 = $('#' + lineBlockConnect2); //select the block from dom
 
                         let plusButton = block1.parents('.blockWrap').find('.blockPlusButton');
+                        let topSocket =  block2.parents('.blockWrap').find('.topConnectionSocket');
 
                         let x1Pos = plusButton.offset().left + plusButton[0].getBoundingClientRect().width / 2;
                         let y1Pos = plusButton.offset().top + plusButton[0].getBoundingClientRect().height / 2;
-                        let x2Pos = block2[0].getBoundingClientRect().left + block2[0].getBoundingClientRect().width / 2;
-                        let y2Pos = block2[0].getBoundingClientRect().top + block2[0].getBoundingClientRect().height / 2;
+                        let x2Pos = topSocket.offset().left + topSocket[0].getBoundingClientRect().width / 2;
+                        let y2Pos = topSocket.offset().top + topSocket[0].getBoundingClientRect().height / 2;
 
                         $(this).remove();
 

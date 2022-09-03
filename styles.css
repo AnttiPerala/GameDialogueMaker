@@ -107,6 +107,10 @@ body {
 
 }
 
+.topConnectionSocket {
+    margin-bottom: -1rem;
+}
+
 .block input::placeholder {
 
     color: rgb(182, 182, 182);
