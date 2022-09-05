@@ -1,3 +1,15 @@
+
+/* 
+
+TO DO:
+
+Memento pattern undo
+
+Command pattern undo would be more efficient but harder to code
+
+
+*/
+
 //master array for all characters
 
 let characterObjects = [];
@@ -19,7 +31,7 @@ let defaultCharacter = {
 
 
 
-let newBlockId = 1;
+        let newBlockId = 1;
         let moveLineId = "moveLine";
         let cloneMode = false; //for style cloning
         let eraseMode = false; //for erasing blocks and lines

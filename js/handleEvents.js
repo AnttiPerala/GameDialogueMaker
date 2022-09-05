@@ -16,14 +16,17 @@ $('.plus').on('click', function () {
     }
 
     $(`
-           <div class="blockWrap">
+             <div class="blockWrap">
             <div class="contentWrap">
+                <div style="display: flex; align-items:center; justify-content: center;">
+                    <div class="topConnectionSocket">o</div>
+                </div>
                     <div id="id0" class="block">
                         <div style="text-align: left;">
                             <span style="width: 15%; display:inline-block; text-align: right;">ID:</span><input class="next"
                                 style="width: 15%; display:inline-block;" type="number">
                         </div>
-                        <input type="text" class="elementInfoField" placeholder="character name">
+                        <input type="text" class="characterName elementInfoField" placeholder="character name">
                         <select name="blockType" class="selectBlockType">
                             <option value="line">Line</option>
                             <option value="question">Question</option>
@@ -31,18 +34,26 @@ $('.plus').on('click', function () {
 
                         </select>
                         <textarea placeholder="Dialogue" data-autoresize></textarea>
-                        <div style="text-align: right;">
-                            <span style="width: 45%; display:inline-block; text-align: right;">Next:</span><input class="next" style="width: 15%; display:inline-block;" type="number">
+                        <div>
+                        <div class="optionsUnderDialogue" style="text-align: right;">
+                            <div class="option1"></div>
+                            <div class="option2"></div>
+                            <div class="option3">
+                                <span style=" text-align: right;">Next:</span><input class="next"
+                                style="display:inline-block;" type="number">
+                            </div>
+                        </div>
                         </div>
 
                         
                     </div>
-                    <div style="display: flex; align-items: end; justify-content: center;">
-                        <div class="blockPlusButton">+</div>
+                    <div class="plusButtonContainer" style="display: flex; align-items: end; justify-content: center;">
+                        <div class="blockPlusButton" data-buttonindex=0>+</div>
                     </div>
-                </div><!-- end contentwrap -->
+                </div>
                 
-            </div><!-- end blockwrap -->
+            </div>
+                        
                         `)
         .prependTo('#mainArea')
         .draggable({
@@ -51,9 +62,11 @@ $('.plus').on('click', function () {
                 updateLines($(this).find('.block'));
             }
         })
-        .children('.block')
+        .css({ top: newBlockPosition, left: newBlockPosition })
+        .find('.block')
         .attr('id', 'id' + newBlockId)
-        .css({ top: newBlockPosition, left: newBlockPosition });
+        ;
+        
 
     addAutoResize();
 
@@ -98,7 +111,7 @@ $('body').on('click', '.blockPlusButton', function () {
                             <span style="width: 15%; display:inline-block; text-align: right;">ID:</span><input class="next"
                                 style="width: 15%; display:inline-block;" type="number">
                         </div>
-                        <input type="text" class="elementInfoField" placeholder="character name">
+                        <input type="text" class="characterName elementInfoField" placeholder="character name">
                         <select name="blockType" class="selectBlockType">
                             <option value="line">Line</option>
                             <option value="question">Question</option>
@@ -290,7 +303,7 @@ jQuery(document).on('change', '.selectBlockType', function () {
         console.log('question');
 
         jQuery(this).closest('.blockWrap').find('.optionsUnderDialogue').children('.option1').append(`
-            Answers: <input class="answerNumber" type="number" value=3>
+            Answers: <input class="answerNumber" type="number" min="2" max="99" value=3>
         `)
 
         //append more plus buttons
@@ -325,13 +338,45 @@ jQuery(document).on('change', '.answerNumber', function () {
     const selectedValue = $(this).val();
 
     //remove all plus buttons
-    jQuery(this).parents('.blockWrap').find('.blockPlusButton').remove();
+    let blockWrap = jQuery(this).closest('.blockWrap');
+    
+    blockWrap.find('.blockPlusButton').remove();
 
     for (let i = 0; i < selectedValue; i++) {
         //append more plus buttons
-        jQuery(this).parents('.blockWrap').find('.plusButtonContainer').append(`<div class="blockPlusButton" data-buttonindex=${i}>+</div>`);
+        jQuery(this).closest('.blockWrap').find('.plusButtonContainer').first().append(`<div class="blockPlusButton" data-buttonindex=${i}>+</div>`);
         
     }
+
+    //when the number is lowered, we need to delete the blocks connected to the deleted plus buttons:
+
+    $(blockWrap).find('.line').each(function (index) {
+
+        console.log(`this.attr("data-block2") ${$(this).attr("data-block2")}`);
+
+        console.log('inside each loop for lines, this $(this).attr("data-buttonindextoconnectto") is: ' + $(this).attr("data-buttonindextoconnectto") + 'and selectedValue is' + selectedValue);
+
+        if ($(this).attr("data-buttonindextoconnectto") > selectedValue-1){
+
+            //select the end node of the line
+            let endNode = $(this).attr("data-block2");
+
+            console.log('endnode: ' + endNode);
+
+            //select and remove the block from dom
+
+            cheeck = $('#' + endNode).closest('.blockWrap');
+
+            cheeck.remove();
+
+            //delete the line
+
+            $(this).remove();
+
+
+        }
+        
+    });
 
 
 
@@ -357,3 +402,12 @@ $('body').on('mousedown', '.block, .line', function () {
     }
 }
 );
+
+//TYPE IN THE CHARACTER NAME FIELD
+jQuery(document).on('change', '.characterName', function () {
+
+    let valueTyped = $(this).val();
+
+    $(this).parents('.blockWrap').find('.characterName').val(valueTyped);
+
+})
