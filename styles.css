@@ -97,6 +97,10 @@ body {
         
 }
 
+.disabled{
+    background-color: rgb(177, 177, 177);
+}
+
 .optionsUnderDialogue{
     display: grid;
     max-width: 100%;

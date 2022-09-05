@@ -48,7 +48,7 @@ $('.plus').on('click', function () {
                         
                     </div>
                     <div class="plusButtonContainer" style="display: flex; align-items: end; justify-content: center;">
-                        <div class="blockPlusButton" data-buttonindex=0>+</div>
+                        <div class="blockPlusButton" data-buttonindex=0 data-acceptclicks=true>+</div>
                     </div>
                 </div>
                 
@@ -81,6 +81,7 @@ $('.plus').on('click', function () {
 
 $('body').on('click', '.blockPlusButton', function () {
 
+    if ($(this).attr('data-acceptclicks') == 'true'){
 
     //for line connections a bit more down in the code:
 
@@ -133,7 +134,7 @@ $('body').on('click', '.blockPlusButton', function () {
                         
                     </div>
                     <div class="plusButtonContainer" style="display: flex; align-items: end; justify-content: center;">
-                        <div class="blockPlusButton" data-buttonindex=0>+</div>
+                        <div class="blockPlusButton" data-buttonindex=0 data-acceptclicks=true>+</div>
                     </div>
                 </div>
                 
@@ -165,6 +166,10 @@ $('body').on('click', '.blockPlusButton', function () {
     //let plusButton = selectedBlock.parents('.blockWrap').find('.blockPlusButton');
     let topSocket = $(newBlock).find('.topConnectionSocket');
 
+    //make the plus button no longer accept new clicks (while it already has a connection line)
+
+    $(theClickedPlusButton).html('-').addClass('disabled').attr('data-acceptclicks', false);
+
 
     let x1Pos = theClickedPlusButton.offset().left + theClickedPlusButton[0].getBoundingClientRect().width / 2;
     let y1Pos = theClickedPlusButton.offset().top + theClickedPlusButton[0].getBoundingClientRect().height / 2;
@@ -172,6 +177,8 @@ $('body').on('click', '.blockPlusButton', function () {
     let y2Pos = topSocket.offset().top + topSocket[0].getBoundingClientRect().height / 2;
 
     createLine(x1Pos, y1Pos, x2Pos, y2Pos, selectedBlock.attr('id'), $(newBlock).find('.block').attr('id'), theClickedPlusButton.data('buttonindex'));
+
+    }//end if data-acceptclicks = true;
 
 });
 
