@@ -155,9 +155,64 @@ $('body').on('click', '.blockPlusButton', function () {
     let x2Pos = topSocket.offset().left + topSocket[0].getBoundingClientRect().width / 2;
     let y2Pos = topSocket.offset().top + topSocket[0].getBoundingClientRect().height / 2;
 
-    createLine(x1Pos, y1Pos, x2Pos, y2Pos, selectedBlock.attr('id'), $(newBlock).find('.block').attr('id'));
+    createLine(x1Pos, y1Pos, x2Pos, y2Pos, selectedBlock.attr('id'), $(newBlock).find('.block').attr('id'), theClickedPlusButton.data('buttonindex'));
 
 });
+
+
+//MOVE A DRAGGABLE BLOCK WITH LINES CONNECTED TO IT
+
+let allConnectedLines;
+
+function updateLines(element) {
+
+    //let elementChildBlock = $(element).children('.block'); //wrapper was passed in, now drill in to the block
+
+    globalCheck = $(element).attr('id');
+
+    //select the lines connected to the element we are monving based on the data attributes on the lines
+    let allConnectedLines = $('.line[data-block1="' + $(element).attr('id') + '"],.line[data-block2="' + $(element).attr('id') + '"]');
+
+    //console.log('element id is ' + $(element).attr('id') + ' allConnectedLines length: ' + allConnectedLines.length);
+
+
+    //for redrawing them we need to loop through all the selected lines and for each of them we will get the two data attributes, then select two blocks based on those attributes and get the coordinates of those blocks for redrawing
+    //finally we destroy the old connected lines
+
+    allConnectedLines.each(function (i, e) {
+
+        let lineBlockConnect1 = $(e).data('block1'); //get the block ids from the lines
+        let lineBlockConnect2 = $(e).data('block2');
+        let plusButtonNumberConnectedTo = $(e).data('buttonindextoconnectto');
+
+        console.log('lineBlockConnect1: ' + lineBlockConnect1 + ' lineBlockConnect2: ' + lineBlockConnect2);
+
+        let block1 = $('#' + lineBlockConnect1); //select the block from dom
+        let block2 = $('#' + lineBlockConnect2); //select the block from dom
+
+        //pick the right plus button based on the current line
+        
+        //let plusButtonToUSe = $('.line[data-button_index_to_connect_to="' + plusButtonNumberConnectedTo + '"]');
+
+
+        console.log(` plusButtonNumberConnectedTo ${plusButtonNumberConnectedTo}`);
+
+        let plusButton = block1.parents('.blockWrap').find('.blockPlusButton[data-buttonindex="' + plusButtonNumberConnectedTo + '"]');
+        let topSocket = block2.parents('.blockWrap').find('.topConnectionSocket');
+
+        let x1Pos = plusButton.offset().left + plusButton[0].getBoundingClientRect().width / 2;
+        let y1Pos = plusButton.offset().top + plusButton[0].getBoundingClientRect().height / 2;
+        let x2Pos = topSocket.offset().left + topSocket[0].getBoundingClientRect().width / 2;
+        let y2Pos = topSocket.offset().top + topSocket[0].getBoundingClientRect().height / 2;
+
+        $(this).remove();
+
+        createLine(x1Pos, y1Pos, x2Pos, y2Pos, block1.attr('id'), block2.attr('id'), plusButtonNumberConnectedTo);
+
+    })
+
+}
+
 
 
 

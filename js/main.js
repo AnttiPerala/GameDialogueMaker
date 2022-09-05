@@ -1,3 +1,24 @@
+//master array for all characters
+
+let characterObjects = [];
+
+let defaultCharacter = {
+
+        name: "character name",
+        type: "line",
+        dialogue: "",
+        next: ""
+
+}
+
+//not actually so sure if I should create a structure where each branch is nested more and more inside. Maybe the Construct Tutorial data structure is kind of avoiding that by using ID:s
+
+//what if we just try to handle things by dom traversal? in that situation it might be actually useful to nest nodes in the dom so that when you move the topmost node, all the children move with it
+
+
+
+
+
 let newBlockId = 1;
         let moveLineId = "moveLine";
         let cloneMode = false; //for style cloning
@@ -48,7 +69,7 @@ let newBlockId = 1;
 
         //CREATE LINES BETWEEN NODES
 
-         function createLine(x1, y1, x2, y2, block1, block2) {
+         function createLine(x1, y1, x2, y2, block1, block2, buttonindex) {
 
                 let length = Math.sqrt(((x1 - x2) * (x1 - x2)) + ((y1 - y2) * (y1 - y2)));
                 let angle = Math.atan2(y2 - y1, x2 - x1) * 180 / Math.PI;
@@ -71,6 +92,7 @@ let newBlockId = 1;
                     })
                     .attr("data-block1", block1)
                     .attr("data-block2", block2)
+                    .attr("data-buttonindextoconnectto", buttonindex)
                     ;
 
                 /* if (id != null) line.attr('id', id); */
@@ -102,51 +124,7 @@ let newBlockId = 1;
                 })
 
            
-             //MOVE A DRAGGABLE BLOCK WITH LINES CONNECTED TO IT
-
-                let allConnectedLines;
-
-                function updateLines(element){
-
-                    //let elementChildBlock = $(element).children('.block'); //wrapper was passed in, now drill in to the block
-
-                    globalCheck = $(element).attr('id');
-
-                    //select the lines connected to the element we are monving based on the data attributes on the lines
-                    let allConnectedLines = $('.line[data-block1="' + $(element).attr('id') + '"],.line[data-block2="' + $(element).attr('id') + '"]');
-
-                    //console.log('element id is ' + $(element).attr('id') + ' allConnectedLines length: ' + allConnectedLines.length);
-
-
-                    //for redrawing them we need to loop through all the selected lines and for each of them we will get the two data attributes, then select two blocks based on those attributes and get the coordinates of those blocks for redrawing
-                    //finally we destroy the old connected lines
-
-                    allConnectedLines.each(function (i, e) {
-
-                        let lineBlockConnect1 = $(e).data('block1'); //get the block ids from the lines
-                        let lineBlockConnect2 = $(e).data('block2');
-
-                        console.log('lineBlockConnect1: ' + lineBlockConnect1 + ' lineBlockConnect2: ' + lineBlockConnect2);
-
-                        let block1 = $('#' + lineBlockConnect1); //select the block from dom
-                        let block2 = $('#' + lineBlockConnect2); //select the block from dom
-
-                        let plusButton = block1.parents('.blockWrap').find('.blockPlusButton');
-                        let topSocket =  block2.parents('.blockWrap').find('.topConnectionSocket');
-
-                        let x1Pos = plusButton.offset().left + plusButton[0].getBoundingClientRect().width / 2;
-                        let y1Pos = plusButton.offset().top + plusButton[0].getBoundingClientRect().height / 2;
-                        let x2Pos = topSocket.offset().left + topSocket[0].getBoundingClientRect().width / 2;
-                        let y2Pos = topSocket.offset().top + topSocket  [0].getBoundingClientRect().height / 2;
-
-                        $(this).remove();
-
-                        createLine(x1Pos, y1Pos, x2Pos, y2Pos, block1.attr('id'), block2.attr('id'));
-
-                    })
-                
-                }
-
+           
 
            
 
