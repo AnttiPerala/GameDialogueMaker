@@ -168,17 +168,22 @@ $('body').on('click', '.blockPlusButton', function () {
 $('.blockWrap').draggable({
     drag: function (event, ui) {
         //console.log('dragging');
-        updateLines($(this).find('.block'));
+        //updateLines($(this).find('.block'));
         
-        allSelectedBlocks = $(this).find('.block');
+        let allSelectedBlocks = $(this).parents().find('.block');
 
-        allSelectedBlocks.each(function (index) {
-            console.log(index + ": " + $(this).text());
-            updateLines($(this));
+        allSelectedBlocks.each(function (index, elem) {
+            updateLines(elem);
         });
 
     }
 });
+
+//MOUSE DOWN LOG FOR EASIER DEBUGGING
+$(document).mousedown(function () {
+    console.log("NEW MOUSEDOWN!!!!!!!");
+});
+
 
 let allConnectedLines;
 
@@ -191,13 +196,15 @@ function updateLines(element) {
     //select the lines connected to the element we are moving based on the data attributes on the lines
     let allConnectedLines = $('.line[data-block1="' + $(element).attr('id') + '"],.line[data-block2="' + $(element).attr('id') + '"]');
 
-    //console.log('element id is ' + $(element).attr('id') + ' allConnectedLines length: ' + allConnectedLines.length);
+    console.log('ELEMENT id is ' + $(element).attr('id') + ' allConnectedLines length: ' + allConnectedLines.length);
 
 
     //for redrawing them we need to loop through all the selected lines and for each of them we will get the two data attributes, then select two blocks based on those attributes and get the coordinates of those blocks for redrawing
     //finally we destroy the old connected lines
 
     allConnectedLines.each(function (i, e) {
+
+        //console.log('inside allConnectedLines.each and the current element id is: ' + $(e).attr('id'));
 
         let lineBlockConnect1 = $(e).data('block1'); //get the block ids from the lines
         let lineBlockConnect2 = $(e).data('block2');
@@ -213,7 +220,7 @@ function updateLines(element) {
         //let plusButtonToUSe = $('.line[data-button_index_to_connect_to="' + plusButtonNumberConnectedTo + '"]');
 
 
-        console.log(` plusButtonNumberConnectedTo ${plusButtonNumberConnectedTo}`);
+        //console.log(` plusButtonNumberConnectedTo ${plusButtonNumberConnectedTo}`);
 
         let plusButton = block1.closest('.blockWrap').find('.blockPlusButton[data-buttonindex="' + plusButtonNumberConnectedTo + '"]');
         let topSocket = block2.closest('.blockWrap').find('.topConnectionSocket');

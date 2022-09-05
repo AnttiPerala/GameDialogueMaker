@@ -73,8 +73,11 @@ let newBlockId = 1;
                 offsetX = (x1 > x2) ? x2 : x1;
                 offsetY = (y1 > y2) ? y2 : y1;
 
+                //get the parent of the first block so that we can prepend the line to it
+                let blockWrapToPrependTo = $('#'+block1).closest('.blockWrap');
+
                 let line = $('<div>')
-                    .prependTo('#mainArea') //prepend makes lines appear in the back without having to use z-index
+                    .prependTo(blockWrapToPrependTo) //prepend makes lines appear in the back without having to use z-index
                     .addClass('line')
                     .css({
                         'position': 'absolute',
