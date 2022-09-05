@@ -55,12 +55,7 @@ let newBlockId = 1;
         $("#mainArea").draggable();
         $("#mainArea").draggable('enable');
 
-        $('.blockWrap').draggable({
-            drag: function (event, ui) {
-                //console.log('dragging');
-                updateLines($(this).find('.block'));
-            }
-        });
+        
 
         //CREATE BLOCKS BY CLICKING ON THE PLUS BUTTON:
 
@@ -223,23 +218,7 @@ let newBlockId = 1;
                 })
 
             
-                //clicking on a block with erasemode on
-
-
-                    $('body').on('mousedown', '.block, .line', function () {
-                        if (eraseMode) {
-                            //console.log(`erase ${this}`);
-
-                            //loop through the connected lines that should also be erased
-                             let allConnectedLines = $('.line[data-block1="' + $(this).attr('id') + '"],.line[data-block2="' + $(this).attr('id') + '"]');
-
-                             $(allConnectedLines).remove();
-
-                            $(this).remove();
-
-                        }
-                    }
-                    );
+               
 
            
            //SAVE PAGE TO LOCALSTORAGE

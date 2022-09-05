@@ -1,3 +1,4 @@
+//CLICK ON THE MAIN PLUS BUTTON TO ADD A NEW CHARACTER 
 
 $('.plus').on('click', function () {
 
@@ -72,15 +73,17 @@ $('body').on('click', '.blockPlusButton', function () {
 
     const theClickedPlusButton = $(this);
 
-    let selectedBlock = $(this).parents('.blockWrap').find('.block');
+    let selectedBlock = $(this).closest('.blockWrap').find('.block');
+
+    let topMostParent = $(this).closest('.blockWrap');
 
     //calculate where to place the item
 
     let newBlockPositionY = 0;
     let newBlockPositionX = 0;
 
-    newBlockPositionY = $(this).offset().top - 150;
-    newBlockPositionX = $(this).offset().left - 125;
+    newBlockPositionY = $(this).position().top - 30;
+    newBlockPositionX = $(this).position().left - 55;
     console.log("newBlockPositionY: " + newBlockPositionY + $(this).attr("class"));
 
 
@@ -124,7 +127,7 @@ $('body').on('click', '.blockPlusButton', function () {
             </div>
                         `);
 
-    newBlock.appendTo('#mainArea')
+    newBlock.appendTo(topMostParent)
         .draggable({
             drag: function (event, ui) {
                 //console.log('dragging');
@@ -162,15 +165,30 @@ $('body').on('click', '.blockPlusButton', function () {
 
 //MOVE A DRAGGABLE BLOCK WITH LINES CONNECTED TO IT
 
+$('.blockWrap').draggable({
+    drag: function (event, ui) {
+        //console.log('dragging');
+        updateLines($(this).find('.block'));
+        
+        allSelectedBlocks = $(this).find('.block');
+
+        allSelectedBlocks.each(function (index) {
+            console.log(index + ": " + $(this).text());
+            updateLines($(this));
+        });
+
+    }
+});
+
 let allConnectedLines;
 
 function updateLines(element) {
 
-    //let elementChildBlock = $(element).children('.block'); //wrapper was passed in, now drill in to the block
+    //passed in _element_ is the block, not the blockWrap
 
-    globalCheck = $(element).attr('id');
+    //globalCheck = $(element).attr('id');
 
-    //select the lines connected to the element we are monving based on the data attributes on the lines
+    //select the lines connected to the element we are moving based on the data attributes on the lines
     let allConnectedLines = $('.line[data-block1="' + $(element).attr('id') + '"],.line[data-block2="' + $(element).attr('id') + '"]');
 
     //console.log('element id is ' + $(element).attr('id') + ' allConnectedLines length: ' + allConnectedLines.length);
@@ -197,8 +215,8 @@ function updateLines(element) {
 
         console.log(` plusButtonNumberConnectedTo ${plusButtonNumberConnectedTo}`);
 
-        let plusButton = block1.parents('.blockWrap').find('.blockPlusButton[data-buttonindex="' + plusButtonNumberConnectedTo + '"]');
-        let topSocket = block2.parents('.blockWrap').find('.topConnectionSocket');
+        let plusButton = block1.closest('.blockWrap').find('.blockPlusButton[data-buttonindex="' + plusButtonNumberConnectedTo + '"]');
+        let topSocket = block2.closest('.blockWrap').find('.topConnectionSocket');
 
         let x1Pos = plusButton.offset().left + plusButton[0].getBoundingClientRect().width / 2;
         let y1Pos = plusButton.offset().top + plusButton[0].getBoundingClientRect().height / 2;
@@ -264,27 +282,30 @@ jQuery(document).on('change', '.selectBlockType', function () {
     if(selectedValue == "question"){
         console.log('question');
 
-        jQuery(this).parents('.blockWrap').find('.optionsUnderDialogue').children('.option1').append(`
+        jQuery(this).closest('.blockWrap').find('.optionsUnderDialogue').children('.option1').append(`
             Answers: <input class="answerNumber" type="number" value=3>
         `)
 
         //append more plus buttons
-        jQuery(this).parents('.blockWrap').find('.plusButtonContainer').append('<div class="blockPlusButton" data-buttonindex=1>+</div>');
-        jQuery(this).parents('.blockWrap').find('.plusButtonContainer').append('<div class="blockPlusButton" data-buttonindex=2>+</div>');
+        jQuery(this).closest('.blockWrap').find('.plusButtonContainer').append('<div class="blockPlusButton" data-buttonindex=1>+</div>');
+        jQuery(this).closest('.blockWrap').find('.plusButtonContainer').append('<div class="blockPlusButton" data-buttonindex=2>+</div>');
 
-        jQuery(this).parents('.blockWrap').find('textarea').attr("placeholder", "Type the question");
+        jQuery(this).closest('.blockWrap').find('textarea').attr("placeholder", "Type the question");
 
     }
 
     if (selectedValue == "line") {
 
+        //remove input for number of answers
+        jQuery(this).closest('.blockWrap').find('.optionsUnderDialogue').children('.option1').html('');
+
         //remove all plus buttons
-        jQuery(this).parents('.blockWrap').find('.blockPlusButton').remove();
+        jQuery(this).closest('.blockWrap').find('.blockPlusButton').remove();
         
         //then bring back just one
-        jQuery(this).parents('.blockWrap').find('.plusButtonContainer').append('<div class="blockPlusButton">+</div>');
+        jQuery(this).closest('.blockWrap').find('.plusButtonContainer').append('<div class="blockPlusButton">+</div>');
 
-        jQuery(this).parents('.blockWrap').find('textarea').attr("placeholder", "Type the line");
+        jQuery(this).closest('.blockWrap').find('textarea').attr("placeholder", "Type the line");
 
     }
 })
@@ -309,3 +330,23 @@ jQuery(document).on('change', '.answerNumber', function () {
 
     }
 )
+
+
+//CLICKING ON A BLOCK WITH ERASEMODE ON
+
+$('body').on('mousedown', '.block, .line', function () {
+    if (eraseMode) {
+        //console.log(`erase ${this}`);
+
+        //loop through the connected lines that should also be erased
+        let allConnectedLines = $('.line[data-block1="' + $(this).attr('id') + '"],.line[data-block2="' + $(this).attr('id') + '"]');
+
+        $(allConnectedLines).remove();
+
+        $(this).closest('.blockWrap').remove();
+
+        //$(this).remove();
+
+    }
+}
+);
