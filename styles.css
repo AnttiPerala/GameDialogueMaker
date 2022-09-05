@@ -16,7 +16,7 @@ body {
     background: rgb(46, 46, 46);
     padding: 2rem;
     z-index: 10;
-    position: relative;
+    position: fixed;
 
 }
 
@@ -30,6 +30,7 @@ body {
 
  /* min-height: 90vh; */    
  /* min-width: 100vw; */
+    top: 250px;
     width: 10000px;
     height: 10000px;
     position: relative; /* For panning to work */
@@ -96,19 +97,32 @@ body {
         
 }
 
-.circle input {
+.optionsUnderDialogue{
+    display: grid;
+    max-width: 100%;
+    grid-template-columns: 1fr 1fr 1fr;
+}
 
-    width: 95%;
-    background-color: inherit;
-    color: inherit;
+.block input {
+
+/*     width: 95%; */
+    background-color: white;
+    color: black;
     border: none;
     text-align: center;
-    flex: 2;
+    
+}
 
+.block .optionsUnderDialogue input{
+    width: 2.5rem;
+}
+
+.block input, .block select, .block textarea {
+    margin: 0.3rem;
 }
 
 .topConnectionSocket {
-    margin-bottom: -1rem;
+    margin-bottom: -2.2rem;
 }
 
 .block input::placeholder {
