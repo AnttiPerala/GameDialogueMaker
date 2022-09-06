@@ -158,7 +158,7 @@ $('body').on('click', '.blockPlusButton', function () {
         let newBlockPositionX = 0;
 
         newBlockPositionY = $(this).position().top - 30;
-        newBlockPositionX = $(this).position().left - 55;
+        newBlockPositionX = $(this).position().left - 250 + (20 * (theClickedPlusButton.attr('data-buttonindex')+1));
         console.log("newBlockPositionY: " + newBlockPositionY + $(this).attr("class"));
 
 
@@ -368,7 +368,7 @@ jQuery(document).on('change', '.selectBlockType', function () {
         console.log('question');
 
         jQuery(this).closest('.blockWrap').find('.optionsUnderDialogue').children('.option1').append(`
-            Answers: <input class="answerNumber" type="number" min="2" max="99" value=3>
+            Answers: <input class="answerNumber" type="number" min="2" max="9" value=3>
         `)
 
         //append more plus buttons
