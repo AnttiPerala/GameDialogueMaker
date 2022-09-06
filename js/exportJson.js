@@ -14,6 +14,21 @@ function exportJson(){
 
 let blockWraps = $('.blockWrap');
 
+beforeSort = blockWraps;
+
+    jqueryArray = blockWraps.toArray();
+
+//lets try to sort to storyId order
+
+     function getSorted(arrayToSort) {
+        return arrayToSort.sort(function (a, b) {
+            var aVal = parseInt(a.children[1].children[1].children[0].children[1]),
+                bVal = parseInt(b.children[1].children[1].children[0].children[1]);
+            return aVal - bVal;
+        });
+    }
+
+    afterSort = getSorted(jqueryArray); 
 
     //problem: this idObject is empty again when we try to add answers to it. So maybe we need to take out from the loop and empty it manually after other types than question
 
@@ -142,15 +157,16 @@ blockWraps.each(function (index, blockWrapElem) {
 
         idObjectNow = idObject;
 
-        //can we add a dynamic key to the object like this (the dynamic key is numberOfThisAnswer)
+        
         lastObject = idObject.dialogs[idObject.dialogs.length - 1];
 
         console.log('lastObject: ' + JSON.stringify(lastObject));
         
         console.log(`dialogsWhiteSpacesAndEmptyElementsStripped.join(' ') ${dialogsWhiteSpacesAndEmptyElementsStripped.join(' ') }`);
-        
+        //can we add a dynamic key to the object like this (the dynamic key is numberOfThisAnswer)
         lastObject[numberOfThisAnswer] = dialogsWhiteSpacesAndEmptyElementsStripped.join(' ');
-
+        //also nextscene0 nextscene1 etc needed for every answer
+        //lastObject["nextscene"+numberOfThisAnswer.substring(6, 7)] = $(blockWrapElem).find('.next').val();
 
 
         /* Model:

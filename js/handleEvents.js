@@ -274,7 +274,7 @@ function updateLines(element) {
     //select the lines connected to the element we are moving based on the data attributes on the lines
     let allConnectedLines = $('.line[data-block1="' + $(element).attr('id') + '"],.line[data-block2="' + $(element).attr('id') + '"]');
 
-    console.log('ELEMENT id is ' + $(element).attr('id') + ' allConnectedLines length: ' + allConnectedLines.length);
+    //console.log('ELEMENT id is ' + $(element).attr('id') + ' allConnectedLines length: ' + allConnectedLines.length);
 
 
     //for redrawing them we need to loop through all the selected lines and for each of them we will get the two data attributes, then select two blocks based on those attributes and get the coordinates of those blocks for redrawing
@@ -288,7 +288,7 @@ function updateLines(element) {
         let lineBlockConnect2 = $(e).data('block2');
         let plusButtonNumberConnectedTo = $(e).data('buttonindextoconnectto');
 
-        console.log('lineBlockConnect1: ' + lineBlockConnect1 + ' lineBlockConnect2: ' + lineBlockConnect2);
+        //console.log('lineBlockConnect1: ' + lineBlockConnect1 + ' lineBlockConnect2: ' + lineBlockConnect2);
 
         let block1 = $('#' + lineBlockConnect1); //select the block from dom
         let block2 = $('#' + lineBlockConnect2); //select the block from dom
