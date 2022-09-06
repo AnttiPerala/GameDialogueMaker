@@ -17,7 +17,7 @@ $('.plus').on('click', function () {
 
     $(`
              <div class="blockWrap">
-            <div class="contentWrap">
+            <div class="contentWrap characterRoot">
                 <div style="display: flex; align-items:center; justify-content: center;">
                     <div class="topConnectionSocket">o</div>
                 </div>
@@ -33,7 +33,7 @@ $('.plus').on('click', function () {
                             <option value="fight">Fight</option>
 
                         </select>
-                        <textarea placeholder="Dialogue" data-autoresize></textarea>
+                        <textarea class="dialogue" placeholder="Dialogue" data-autoresize></textarea>
                         <div>
                         <div class="optionsUnderDialogue" style="text-align: right;">
                             <div class="option1"></div>
@@ -83,100 +83,136 @@ $('body').on('click', '.blockPlusButton', function () {
 
     if ($(this).attr('data-acceptclicks') == 'true'){
 
-    //for line connections a bit more down in the code:
+        //for line connections a bit more down in the code:
 
-    const theClickedPlusButton = $(this);
+        const theClickedPlusButton = $(this);
 
-    let selectedBlock = $(this).closest('.blockWrap').find('.block');
+        let selectedBlock = $(this).closest('.blockWrap').find('.block');
 
-    let topMostParent = $(this).closest('.blockWrap');
+        let topMostParent = $(this).closest('.blockWrap');
 
-    //calculate where to place the item
+        let parentBlockType = $(this).closest('.blockWrap').find('.selectBlockType').val();
 
-    let newBlockPositionY = 0;
-    let newBlockPositionX = 0;
+        let parentBlockCharacterName = $(this).closest('.blockWrap').find('.characterName').val();
 
-    newBlockPositionY = $(this).position().top - 30;
-    newBlockPositionX = $(this).position().left - 55;
-    console.log("newBlockPositionY: " + newBlockPositionY + $(this).attr("class"));
+        console.log(`parentBlockType ${parentBlockType}`);
+
+        //answers should have read-only selects
+
+        let selectElementContentBasedOnParentBlockType = ``;
+
+        //Dialogue box placeholder is also depending on the type
+
+        let dialoguePlaceholderBasedOnParentBlockType = ``;
+
+        if (parentBlockType == "line"){
+
+            selectElementContentBasedOnParentBlockType = `
+
+            <select name="blockType" class="selectBlockType">
+                <option value="line">Line</option>
+                <option value="question">Question</option>
+                <option value="fight">Fight</option>
+            </select>
+            `
+            dialoguePlaceholderBasedOnParentBlockType = "Type the dialogue here";
+
+        } else if (parentBlockType == "question") {
+
+            selectElementContentBasedOnParentBlockType = `
+
+            <select name="blockType" class="selectBlockType">
+                <option value="answer${theClickedPlusButton.attr('data-buttonindex')}">answer</option>
+            </select>
+            `
+
+            dialoguePlaceholderBasedOnParentBlockType = "Type the answer option here";
+
+        }
+
+        
+
+        //calculate where to place the item
+
+        let newBlockPositionY = 0;
+        let newBlockPositionX = 0;
+
+        newBlockPositionY = $(this).position().top - 30;
+        newBlockPositionX = $(this).position().left - 55;
+        console.log("newBlockPositionY: " + newBlockPositionY + $(this).attr("class"));
 
 
-    let newBlock = $(`
-               <div class="blockWrap">
-            <div class="contentWrap">
-                <div style="display: flex; align-items:center; justify-content: center;">
-                    <div class="topConnectionSocket">o</div>
-                </div>
-                    <div id="id0" class="block">
-                        <div style="text-align: left;">
-                            <span style="width: 15%; display:inline-block; text-align: right;">ID:</span><input class="next"
-                                style="width: 15%; display:inline-block;" type="number">
-                        </div>
-                        <input type="text" class="characterName elementInfoField" placeholder="character name">
-                        <select name="blockType" class="selectBlockType">
-                            <option value="line">Line</option>
-                            <option value="question">Question</option>
-                            <option value="fight">Fight</option>
-
-                        </select>
-                        <textarea placeholder="Dialogue" data-autoresize></textarea>
-                        <div>
-                        <div class="optionsUnderDialogue" style="text-align: right;">
-                            <div class="option1"></div>
-                            <div class="option2"></div>
-                            <div class="option3">
-                                <span style=" text-align: right;">Next:</span><input class="next"
-                                style="display:inline-block;" type="number">
+        let newBlock = $(`
+                <div class="blockWrap">
+                <div class="contentWrap">
+                    <div style="display: flex; align-items:center; justify-content: center;">
+                        <div class="topConnectionSocket">o</div>
+                    </div>
+                        <div id="id0" class="block">
+                            <div style="text-align: left;">
+                                <span style="width: 15%; display:inline-block; text-align: right;">ID:</span><input class="next"
+                                    style="width: 15%; display:inline-block;" type="number">
                             </div>
-                        </div>
-                        </div>
+                            <input type="text" class="characterName elementInfoField" placeholder="character name" value="${parentBlockCharacterName}">
+                            ${selectElementContentBasedOnParentBlockType}
+                            <textarea class="dialogue" placeholder="${dialoguePlaceholderBasedOnParentBlockType}" data-autoresize></textarea>
+                            <div>
+                            <div class="optionsUnderDialogue" style="text-align: right;">
+                                <div class="option1"></div>
+                                <div class="option2"></div>
+                                <div class="option3">
+                                    <span style=" text-align: right;">Next:</span><input class="next"
+                                    style="display:inline-block;" type="number">
+                                </div>
+                            </div>
+                            </div>
 
-                        
+                            
+                        </div>
+                        <div class="plusButtonContainer" style="display: flex; align-items: end; justify-content: center;">
+                            <div class="blockPlusButton" data-buttonindex=0 data-acceptclicks=true>+</div>
+                        </div>
                     </div>
-                    <div class="plusButtonContainer" style="display: flex; align-items: end; justify-content: center;">
-                        <div class="blockPlusButton" data-buttonindex=0 data-acceptclicks=true>+</div>
-                    </div>
+                    
                 </div>
-                
-            </div>
-                        `);
+                            `);
 
-    newBlock.appendTo(topMostParent)
-        .draggable({
-            drag: function (event, ui) {
-                //console.log('dragging');
-                updateLines($(this).find('.block'));
-            }
-        })
-        .css({ top: newBlockPositionY + 'px', left: newBlockPositionX + 'px' })
-        .children('.block')
-        //.attr('id', 'id' + newBlockId);
-        ;
+        newBlock.appendTo(topMostParent)
+            .draggable({
+                drag: function (event, ui) {
+                    //console.log('dragging');
+                    updateLines($(this).find('.block'));
+                }
+            })
+            .css({ top: newBlockPositionY + 'px', left: newBlockPositionX + 'px' })
+            .children('.block')
+            //.attr('id', 'id' + newBlockId);
+            ;
 
-    addAutoResize();
+        addAutoResize();
 
-    console.log('newBlockID' + newBlockId);
+        console.log('newBlockID' + newBlockId);
 
-    //add line connection
+        //add line connection
 
-    newBlock.find('.block').attr('id', 'id' + newBlockId);
+        newBlock.find('.block').attr('id', 'id' + newBlockId);
 
-    newBlockId++;
+        newBlockId++;
 
-    //let plusButton = selectedBlock.parents('.blockWrap').find('.blockPlusButton');
-    let topSocket = $(newBlock).find('.topConnectionSocket');
+        //let plusButton = selectedBlock.parents('.blockWrap').find('.blockPlusButton');
+        let topSocket = $(newBlock).find('.topConnectionSocket');
 
-    //make the plus button no longer accept new clicks (while it already has a connection line)
+        //make the plus button no longer accept new clicks (while it already has a connection line)
 
-    $(theClickedPlusButton).html('-').addClass('disabled').attr('data-acceptclicks', false);
+        $(theClickedPlusButton).html('-').addClass('disabled').attr('data-acceptclicks', false);
 
 
-    let x1Pos = theClickedPlusButton.offset().left + theClickedPlusButton[0].getBoundingClientRect().width / 2;
-    let y1Pos = theClickedPlusButton.offset().top + theClickedPlusButton[0].getBoundingClientRect().height / 2;
-    let x2Pos = topSocket.offset().left + topSocket[0].getBoundingClientRect().width / 2;
-    let y2Pos = topSocket.offset().top + topSocket[0].getBoundingClientRect().height / 2;
+        let x1Pos = theClickedPlusButton.offset().left + theClickedPlusButton[0].getBoundingClientRect().width / 2;
+        let y1Pos = theClickedPlusButton.offset().top + theClickedPlusButton[0].getBoundingClientRect().height / 2;
+        let x2Pos = topSocket.offset().left + topSocket[0].getBoundingClientRect().width / 2;
+        let y2Pos = topSocket.offset().top + topSocket[0].getBoundingClientRect().height / 2;
 
-    createLine(x1Pos, y1Pos, x2Pos, y2Pos, selectedBlock.attr('id'), $(newBlock).find('.block').attr('id'), theClickedPlusButton.data('buttonindex'));
+        createLine(x1Pos, y1Pos, x2Pos, y2Pos, selectedBlock.attr('id'), $(newBlock).find('.block').attr('id'), theClickedPlusButton.data('buttonindex'));
 
     }//end if data-acceptclicks = true;
 
@@ -314,8 +350,8 @@ jQuery(document).on('change', '.selectBlockType', function () {
         `)
 
         //append more plus buttons
-        jQuery(this).closest('.blockWrap').find('.plusButtonContainer').append('<div class="blockPlusButton" data-buttonindex=1>+</div>');
-        jQuery(this).closest('.blockWrap').find('.plusButtonContainer').append('<div class="blockPlusButton" data-buttonindex=2>+</div>');
+        jQuery(this).closest('.blockWrap').find('.plusButtonContainer').append('<div class="blockPlusButton" data-buttonindex=1 data-acceptclicks=true>+</div>');
+        jQuery(this).closest('.blockWrap').find('.plusButtonContainer').append('<div class="blockPlusButton" data-buttonindex=2 data-acceptclicks=true>+</div>');
 
         jQuery(this).closest('.blockWrap').find('textarea').attr("placeholder", "Type the question");
 
@@ -411,10 +447,19 @@ $('body').on('mousedown', '.block, .line', function () {
 );
 
 //TYPE IN THE CHARACTER NAME FIELD
-jQuery(document).on('change', '.characterName', function () {
+jQuery(document).on('change keyup', '.characterName', function () {
 
     let valueTyped = $(this).val();
 
     $(this).parents('.blockWrap').find('.characterName').val(valueTyped);
+
+})
+
+
+//CLICKED ON THE EXPORT JSON BUTTON (code handled in separate exportJson.js file)
+jQuery(document).on('click', '#export', function () {
+
+    console.log(`Export json ${this}`);
+    exportJson(); //defined in separate exportJson.js file
 
 })
