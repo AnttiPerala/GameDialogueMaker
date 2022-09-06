@@ -1,0 +1,43 @@
+{
+    "scene": [
+        {
+            "id": "1",
+            "dialogs": [
+                {
+                    "char": "mr boba",
+                    "type": "line",
+                    "line": "call me fantastic"
+                },
+                {
+                    "type": "end"
+                }
+            ]
+        },
+        {
+            "id": "2",
+            "dialogs": [
+                {
+                    "char": "mr boba",
+                    "type": "line",
+                    "line": "mista mista"
+                },
+                {
+                    "type": "end"
+                }
+            ]
+        },
+        {
+            "id": "3",
+            "dialogs": [
+                {
+                    "char": "mr boba",
+                    "type": "line",
+                    "line": "louvv"
+                },
+                {
+                    "type": "end"
+                }
+            ]
+        }
+    ]
+}

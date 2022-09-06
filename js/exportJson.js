@@ -70,7 +70,10 @@ blockWraps.each(function (index, blockWrapElem) {
         });//end  dialogsWhiteSpacesAndEmptyElementsStripped.forEach
 
         console.log(`IDOBJECT.dialogs have now all the dialogs from the line block: ${JSON.stringify(idObject)}`);
-
+        //we need to add end statements as the last dialogue except for questions
+        idObject.dialogs.push({
+            "type": "end"
+        });
         jsonToExport.scene.push(idObject);
         console.log(`jsonToExport.scene.length:  ${jsonToExport.scene.length}`);
         console.log(`blocktype was: ${blockType}, blockStoryId was ${blockStoryId} and jsonToExport should have gotten a push just now and it looks like this: ${JSON.stringify(jsonToExport)}`);
@@ -171,6 +174,8 @@ blockWraps.each(function (index, blockWrapElem) {
         if (numberOfThisAnswer.substring(6, 7) >= idObject.dialogs[idObject.dialogs.length - 1].nbanswers-1){ 
             
             console.log(`about to push q and a. The state of jsonToExport is:  ${JSON.stringify(jsonToExport) }`);
+
+            
 
             jsonToExport.scene.push(idObject);
 
