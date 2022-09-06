@@ -7,6 +7,10 @@ Memento pattern undo
 
 Command pattern undo would be more efficient but harder to code
 
+turn relevant (connected) plus buttons gray when user changes the number of answers to a question
+
+draw a dotted line when the user connects a node to another node without the plus button (by manually setting the "next" value)
+
 
 */
 
@@ -31,7 +35,8 @@ let defaultCharacter = {
 
 
 
-        let newBlockId = 1;
+        let newBlockId = 1; //give each block unique id regardless of questions/answers
+        let storyId = 1; //this one will remain the same for questions and their answers but otherwise changes 
         let moveLineId = "moveLine";
         let cloneMode = false; //for style cloning
         let eraseMode = false; //for erasing blocks and lines

@@ -21,10 +21,10 @@ $('.plus').on('click', function () {
                 <div style="display: flex; align-items:center; justify-content: center;">
                     <div class="topConnectionSocket">o</div>
                 </div>
-                    <div id="id0" class="block">
+                    <div id="id${newBlockId}" class="block">
                         <div style="text-align: left;">
-                            <span style="width: 15%; display:inline-block; text-align: right;">ID:</span><input class="next"
-                                style="width: 15%; display:inline-block;" type="number">
+                            <span style="width: 15%; display:inline-block; text-align: right;">ID:</span><input class="blockid"
+                                style="width: 15%; display:inline-block;" readonly type="number" value="${storyId}">
                         </div>
                         <input type="text" class="characterName elementInfoField" placeholder="character name">
                         <select name="blockType" class="selectBlockType">
@@ -45,15 +45,15 @@ $('.plus').on('click', function () {
                         </div>
                         </div>
 
-                        
+
                     </div>
                     <div class="plusButtonContainer" style="display: flex; align-items: end; justify-content: center;">
                         <div class="blockPlusButton" data-buttonindex=0 data-acceptclicks=true>+</div>
                     </div>
                 </div>
-                
+
             </div>
-                        
+
                         `)
         .prependTo('#mainArea')
         .draggable({
@@ -71,6 +71,7 @@ $('.plus').on('click', function () {
     addAutoResize();
 
     newBlockId++;
+    storyId++;
 
 });
 
@@ -95,6 +96,8 @@ $('body').on('click', '.blockPlusButton', function () {
 
         let parentBlockCharacterName = $(this).closest('.blockWrap').find('.characterName').val();
 
+        let parentBlockNextInputField = $(this).closest('.blockWrap').find('.next');
+
         console.log(`parentBlockType ${parentBlockType}`);
 
         //answers should have read-only selects
@@ -116,6 +119,9 @@ $('body').on('click', '.blockPlusButton', function () {
             </select>
             `
             dialoguePlaceholderBasedOnParentBlockType = "Type the dialogue here";
+            storyId++;
+
+            parentBlockNextInputField.val(storyId);
 
         } else if (parentBlockType == "question") {
 
@@ -127,6 +133,20 @@ $('body').on('click', '.blockPlusButton', function () {
             `
 
             dialoguePlaceholderBasedOnParentBlockType = "Type the answer option here";
+
+        } else if (parentBlockType == "answer" || "fight") {
+
+            selectElementContentBasedOnParentBlockType = `
+
+            <select name="blockType" class="selectBlockType">
+                <option value="line">Line</option>
+                <option value="question">Question</option>
+                <option value="fight">Fight</option>
+            </select>
+            `
+            dialoguePlaceholderBasedOnParentBlockType = "Type the dialogue here";
+            storyId++;
+            parentBlockNextInputField.val(storyId);
 
         }
 
@@ -148,10 +168,10 @@ $('body').on('click', '.blockPlusButton', function () {
                     <div style="display: flex; align-items:center; justify-content: center;">
                         <div class="topConnectionSocket">o</div>
                     </div>
-                        <div id="id0" class="block">
+                        <div id="id${newBlockId}" class="block">
                             <div style="text-align: left;">
-                                <span style="width: 15%; display:inline-block; text-align: right;">ID:</span><input class="next"
-                                    style="width: 15%; display:inline-block;" type="number">
+                                <span style="width: 15%; display:inline-block; text-align: right;">ID:</span><input class="blockid"
+                                    style="width: 15%; display:inline-block;" readonly type="number" value="${storyId}">
                             </div>
                             <input type="text" class="characterName elementInfoField" placeholder="character name" value="${parentBlockCharacterName}">
                             ${selectElementContentBasedOnParentBlockType}
@@ -213,6 +233,8 @@ $('body').on('click', '.blockPlusButton', function () {
         let y2Pos = topSocket.offset().top + topSocket[0].getBoundingClientRect().height / 2;
 
         createLine(x1Pos, y1Pos, x2Pos, y2Pos, selectedBlock.attr('id'), $(newBlock).find('.block').attr('id'), theClickedPlusButton.data('buttonindex'));
+
+        //when a plus plutton is used to create a new connected node the next field of the parent node should automatically take the value of the connected nodes storyId except for question/answer combos where next for the question can be left empty
 
     }//end if data-acceptclicks = true;
 
@@ -387,7 +409,7 @@ jQuery(document).on('change', '.answerNumber', function () {
 
     for (let i = 0; i < selectedValue; i++) {
         //append more plus buttons
-        jQuery(this).closest('.blockWrap').find('.plusButtonContainer').first().append(`<div class="blockPlusButton" data-buttonindex=${i}>+</div>`);
+        jQuery(this).closest('.blockWrap').find('.plusButtonContainer').first().append(`<div class="blockPlusButton" data-buttonindex=${i} data-acceptclicks=true>+</div>`);
         
     }
 
