@@ -95,7 +95,7 @@ blockWraps.each(function (index, blockWrapElem) {
 
                 "char": characterName,
                 "type": "line", //changed to question only for the last one
-                "line": element
+                "question": element
 
             }
 
@@ -190,6 +190,14 @@ blockWraps.each(function (index, blockWrapElem) {
 
     }); //end blockWraps.each
 
+    function downloadTextFile(text, name) {
+        const a = document.createElement('a');
+        const type = name.split(".").pop();
+        a.href = URL.createObjectURL(new Blob([text], { type: `text/${type === "txt" ? "plain" : type}` }));
+        a.download = name;
+        a.click();
+    }
 
+    downloadTextFile(JSON.stringify(jsonToExport), 'dialogue.json');
 
 } //End exportJson()
