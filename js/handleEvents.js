@@ -175,7 +175,7 @@ $('body').on('click', '.blockPlusButton', function () {
                             </div>
                             <input type="text" class="characterName elementInfoField" placeholder="character name" value="${parentBlockCharacterName}">
                             ${selectElementContentBasedOnParentBlockType}
-                            <textarea class="dialogue" placeholder="${dialoguePlaceholderBasedOnParentBlockType}" data-autoresize></textarea>
+                            <textarea class="dialogue" placeholder="${dialoguePlaceholderBasedOnParentBlockType}" data-autoresize>CHILD NODE FOR TESTING</textarea>
                             <div>
                             <div class="optionsUnderDialogue" style="text-align: right;">
                                 <div class="option1"></div>

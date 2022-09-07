@@ -4,9 +4,9 @@
             "id": "1",
             "dialogs": [
                 {
-                    "char": "mr boba",
+                    "char": "koo",
                     "type": "line",
-                    "line": "call me fantastic"
+                    "line": "fgf"
                 },
                 {
                     "type": "end"
@@ -14,15 +14,32 @@
             ]
         },
         {
-            "id": "2",
+            "id": "5",
             "dialogs": [
                 {
-                    "char": "mr boba",
+                    "char": "koo",
                     "type": "line",
-                    "line": "mista mista"
+                    "line": "ff"
                 },
                 {
-                    "type": "end"
+                    "type": "end",
+                    "answer1": "hhh",
+                    "nextscene1": "4"
+                }
+            ]
+        },
+        {
+            "id": "4",
+            "dialogs": [
+                {
+                    "char": "koo",
+                    "type": "line",
+                    "line": "gg"
+                },
+                {
+                    "type": "end",
+                    "answer2": "jjj",
+                    "nextscene2": "3"
                 }
             ]
         },
@@ -30,9 +47,9 @@
             "id": "3",
             "dialogs": [
                 {
-                    "char": "mr boba",
+                    "char": "koo",
                     "type": "line",
-                    "line": "louvv"
+                    "line": "hh"
                 },
                 {
                     "type": "end"

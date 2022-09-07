@@ -18,12 +18,15 @@ beforeSort = blockWraps;
 
     jqueryArray = blockWraps.toArray();
 
+    //console.log('HERE COMES THE ARRAY: ' +JSON.stringify(jqueryArray));
+
 //lets try to sort to storyId order
 
      function getSorted(arrayToSort) {
         return arrayToSort.sort(function (a, b) {
-            var aVal = parseInt(a.children[1].children[1].children[0].children[1]),
-                bVal = parseInt(b.children[1].children[1].children[0].children[1]);
+  
+            var aVal = parseInt(a.querySelector('.blockid').value),
+                bVal = parseInt(b.querySelector('.blockid').value);
             return aVal - bVal;
         });
     }
