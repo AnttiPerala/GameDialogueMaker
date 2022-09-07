@@ -48,8 +48,9 @@ blockWraps.each(function (index, blockWrapElem) {
     let blockStoryId = $(blockWrapElem).find('.blockid').val();
     let dialogs = $(blockWrapElem).find(".dialogue").val().split(/\r?\n/);
     let dialogsWhiteSpacesAndEmptyElementsStripped = dialogs.filter(function (str) {
-        return /\S/.test(str);
-    });
+            return /\S/.test(str);
+        });
+    let nextVal = $(blockWrapElem).find('.next').val();
 
 
     //set the id
@@ -88,6 +89,14 @@ blockWraps.each(function (index, blockWrapElem) {
         });//end  dialogsWhiteSpacesAndEmptyElementsStripped.forEach
 
         console.log(`IDOBJECT.dialogs have now all the dialogs from the line block: ${JSON.stringify(idObject)}`);
+        
+        //we need to add "nextscene" properties to the last node if the block has one set
+       /*  if (nextVal != ''){
+            idObject.dialogs[idObject.dialogs.length-1]({
+                "nextscene": nextVal
+            });
+        }
+         */
         //we need to add end statements as the last dialogue except for questions
         idObject.dialogs.push({
             "type": "end"
