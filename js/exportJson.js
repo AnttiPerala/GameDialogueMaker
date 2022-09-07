@@ -4,6 +4,16 @@ function exportJson(){
 
     let jsonToExport = {
         "scene": [ //push ids here
+        //dont really know why the block with id:0 is needed but it seems to make it work better to have it in. I'm especially confused why it says nextscene:3. Why 3?
+            {
+                "id": 0,
+                "dialogs": [
+                    {
+                        "type": "end",
+                        "nextscene": 3
+                    }
+                ]
+            },
 
         ]
     }
@@ -90,7 +100,7 @@ blockWraps.each(function (index, blockWrapElem) {
 
         console.log(`IDOBJECT.dialogs have now all the dialogs from the line block: ${JSON.stringify(idObject)}`);
         
-        //we need to add "nextscene" properties to the last node if the block has one set.
+       /*  //we need to add "nextscene" properties to the last node if the block has one set.
          if (nextVal != ''){
              idObject.dialogs[(idObject.dialogs.length - 1)]["nextscene"] = parseInt(nextVal); //access the last object in the array and add the nextscene property to it
                 
@@ -100,8 +110,24 @@ blockWraps.each(function (index, blockWrapElem) {
              idObject.dialogs.push({
                  "type": "end"
              });
-        }
+        } */
         
+
+        //above we added stuff directly after the dialogue lines, but now lets add it as a new object instead
+
+        if (nextVal != '') {
+            idObject.dialogs.push({
+                "nextscene": nextVal,
+                "type": "end"
+            });
+
+
+        } else {
+            //we need to add end statements as the last dialogue except for questions
+            idObject.dialogs.push({
+                "type": "end"
+            });
+        }
         
         jsonToExport.scene.push(idObject);
         console.log(`jsonToExport.scene.length:  ${jsonToExport.scene.length}`);
