@@ -15,9 +15,11 @@ $('.plus').on('click', function () {
 
     }
 
+    storyId++;
+
     $(`
-             <div class="blockWrap">
-            <div class="contentWrap characterRoot">
+             <div class="blockWrap characterRoot">
+            <div class="contentWrap">
                 <div style="display: flex; align-items:center; justify-content: center;">
                     <div class="topConnectionSocket">o</div>
                 </div>
@@ -71,7 +73,7 @@ $('.plus').on('click', function () {
     addAutoResize();
 
     newBlockId++;
-    storyId++;
+    //storyId++;
 
 });
 
@@ -483,5 +485,12 @@ jQuery(document).on('click', '#export', function () {
 
     console.log(`Export json ${this}`);
     exportJson(); //defined in separate exportJson.js file
+
+})
+
+//CLICK ON THE TUTORIAL TO DESTROY IT
+jQuery(document).on('click', '#tutorial', function () {
+
+    this.remove();
 
 })
