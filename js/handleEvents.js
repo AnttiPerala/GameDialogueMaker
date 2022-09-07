@@ -100,7 +100,7 @@ $('body').on('click', '.blockPlusButton', function () {
 
         let parentBlockNextInputField = $(this).closest('.blockWrap').find('.next');
 
-        console.log(`parentBlockType ${parentBlockType}`);
+       //console.log(`parentBlockType ${parentBlockType}`);
 
         //answers should have read-only selects
 
@@ -161,7 +161,7 @@ $('body').on('click', '.blockPlusButton', function () {
 
         newBlockPositionY = $(this).position().top - 30;
         newBlockPositionX = $(this).position().left - 250 + (20 * (theClickedPlusButton.attr('data-buttonindex')+1));
-        console.log("newBlockPositionY: " + newBlockPositionY + $(this).attr("class"));
+       //console.log("newBlockPositionY: " + newBlockPositionY + $(this).attr("class"));
 
 
         let newBlock = $(`
@@ -213,7 +213,7 @@ $('body').on('click', '.blockPlusButton', function () {
 
         addAutoResize();
 
-        console.log('newBlockID' + newBlockId);
+       //console.log('newBlockID' + newBlockId);
 
         //add line connection
 
@@ -261,7 +261,7 @@ $('.blockWrap').draggable({
 
 //MOUSE DOWN LOG FOR EASIER DEBUGGING
 $(document).mousedown(function () {
-    console.log("NEW MOUSEDOWN!!!!!!!");
+   //console.log("NEW MOUSEDOWN!!!!!!!");
 });
 
 
@@ -367,7 +367,7 @@ jQuery(document).on('change', '.selectBlockType', function () {
     const selectedValue = $(this).val();
 
     if(selectedValue == "question"){
-        console.log('question');
+       //console.log('question');
 
         jQuery(this).closest('.blockWrap').find('.optionsUnderDialogue').children('.option1').append(`
             Answers: <input class="answerNumber" type="number" min="2" max="9" value=3>
@@ -419,16 +419,16 @@ jQuery(document).on('change', '.answerNumber', function () {
 
     $(blockWrap).find('.line').each(function (index) {
 
-        console.log(`this.attr("data-block2") ${$(this).attr("data-block2")}`);
+       //console.log(`this.attr("data-block2") ${$(this).attr("data-block2")}`);
 
-        console.log('inside each loop for lines, this $(this).attr("data-buttonindextoconnectto") is: ' + $(this).attr("data-buttonindextoconnectto") + 'and selectedValue is' + selectedValue);
+       //console.log('inside each loop for lines, this $(this).attr("data-buttonindextoconnectto") is: ' + $(this).attr("data-buttonindextoconnectto") + 'and selectedValue is' + selectedValue);
 
         if ($(this).attr("data-buttonindextoconnectto") > selectedValue-1){
 
             //select the end node of the line
             let endNode = $(this).attr("data-block2");
 
-            console.log('endnode: ' + endNode);
+           //console.log('endnode: ' + endNode);
 
             //select and remove the block from dom
 
@@ -483,7 +483,7 @@ jQuery(document).on('change keyup', '.characterName', function () {
 //CLICKED ON THE EXPORT JSON BUTTON (code handled in separate exportJson.js file)
 jQuery(document).on('click', '#export', function () {
 
-    console.log(`Export json ${this}`);
+   //console.log(`Export json ${this}`);
     exportJson(); //defined in separate exportJson.js file
 
 })

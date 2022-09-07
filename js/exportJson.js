@@ -1,6 +1,6 @@
 function exportJson(){
 
-    console.log(` hello from export ${''}`);
+   //console.log(` hello from export ${''}`);
 
     let jsonToExport = {
         "scene": [ //push ids here
@@ -41,7 +41,7 @@ beforeSort = blockWraps;
         });
     }
 
-    afterSort = getSorted(jqueryArray); 
+    afterSort = getSorted(blockWraps); 
 
     //problem: this idObject is empty again when we try to add answers to it. So maybe we need to take out from the loop and empty it manually after other types than question
 
@@ -50,7 +50,7 @@ beforeSort = blockWraps;
         dialogs:[]
     }
 
-blockWraps.each(function (index, blockWrapElem) {
+afterSort.each(function (index, blockWrapElem) {
         //console.log($(this));
 
     let blockType = $(blockWrapElem).find('.selectBlockType').val();
@@ -66,9 +66,9 @@ blockWraps.each(function (index, blockWrapElem) {
     //set the id
     //idObject.id = blockStoryId;
 
-    console.log(`blocktype was: ${blockType} and blockStoryId was ${blockStoryId}`);
+   //console.log(`blocktype was: ${blockType} and blockStoryId was ${blockStoryId}`);
 
-    console.log(`IDOBJECT when each loop index is: ${index} is like this: ${JSON.stringify(idObject)}`);
+   //console.log(`IDOBJECT when each loop index is: ${index} is like this: ${JSON.stringify(idObject)}`);
 
     //check if the types should be set to line or question or answer
 
@@ -80,7 +80,7 @@ blockWraps.each(function (index, blockWrapElem) {
             dialogs: []
         };
 
-        console.log(`IDOBJECT should have been now totally emptied when each loop index is: ${index} is like this: ${JSON.stringify(idObject)}`);
+       //console.log(`IDOBJECT should have been now totally emptied when each loop index is: ${index} is like this: ${JSON.stringify(idObject)}`);
 
 
         dialogsWhiteSpacesAndEmptyElementsStripped.forEach(element => {
@@ -98,7 +98,7 @@ blockWraps.each(function (index, blockWrapElem) {
             
         });//end  dialogsWhiteSpacesAndEmptyElementsStripped.forEach
 
-        console.log(`IDOBJECT.dialogs have now all the dialogs from the line block: ${JSON.stringify(idObject)}`);
+       //console.log(`IDOBJECT.dialogs have now all the dialogs from the line block: ${JSON.stringify(idObject)}`);
         
        /*  //we need to add "nextscene" properties to the last node if the block has one set.
          if (nextVal != ''){
@@ -130,14 +130,14 @@ blockWraps.each(function (index, blockWrapElem) {
         }
         
         jsonToExport.scene.push(idObject);
-        console.log(`jsonToExport.scene.length:  ${jsonToExport.scene.length}`);
-        console.log(`blocktype was: ${blockType}, blockStoryId was ${blockStoryId} and jsonToExport should have gotten a push just now and it looks like this: ${JSON.stringify(jsonToExport)}`);
+       //console.log(`jsonToExport.scene.length:  ${jsonToExport.scene.length}`);
+       //console.log(`blocktype was: ${blockType}, blockStoryId was ${blockStoryId} and jsonToExport should have gotten a push just now and it looks like this: ${JSON.stringify(jsonToExport)}`);
 
          
 
     } else if (blockType == "question"){
 
-        console.log(`blocktype question, line 76 and jsonToExport looks like:  ${JSON.stringify(jsonToExport) }`);
+       //console.log(`blocktype question, line 76 and jsonToExport looks like:  ${JSON.stringify(jsonToExport) }`);
 
         //empty idObject dialogues when a new block starts as long as its not the answer block:
         idObject = {
@@ -145,7 +145,7 @@ blockWraps.each(function (index, blockWrapElem) {
             dialogs: []
         };
 
-        console.log(`IDOBJECT.dialogs shoudl have been now emptied when each loop index is: ${index} is like this: ${JSON.stringify(idObject)}`);
+       //console.log(`IDOBJECT.dialogs shoudl have been now emptied when each loop index is: ${index} is like this: ${JSON.stringify(idObject)}`);
 
         dialogsWhiteSpacesAndEmptyElementsStripped.forEach(element => {
 
@@ -160,7 +160,7 @@ blockWraps.each(function (index, blockWrapElem) {
             //idObject is basically one block which can have several dialogue objects due to line breaks (or a question block plus its answers) 
             idObject.dialogs.push(dialogObject);
 
-            console.log(`blocktype question, line 94 and jsonToExport looks like:  ${JSON.stringify(jsonToExport)}`);
+           //console.log(`blocktype question, line 94 and jsonToExport looks like:  ${JSON.stringify(jsonToExport)}`);
             
 
             //change the LAST type to question (there can be regular lines before the question comes):
@@ -173,12 +173,12 @@ blockWraps.each(function (index, blockWrapElem) {
         }); //END dialogsWhiteSpacesAndEmptyElementsStripped.forEach    
 
 
-        console.log(`blocktype question, line 107 and jsonToExport looks like:  ${JSON.stringify(jsonToExport)}`);
+       //console.log(`blocktype question, line 107 and jsonToExport looks like:  ${JSON.stringify(jsonToExport)}`);
 
         //only take the first 6 characters for the comparison to cut out the numbers at the end ie answer1 answer2 ect
     } else if (blockType.substring(0, 6) == "answer"){ 
 
-        console.log(`blocktype answer, line 112 and jsonToExport looks like:  ${JSON.stringify(jsonToExport)}`);
+       //console.log(`blocktype answer, line 112 and jsonToExport looks like:  ${JSON.stringify(jsonToExport)}`);
         
         //might need answer1 answer2 etc
         //how do we make sure that the answers belong to the right question node? by taking the id of the question node
@@ -193,16 +193,16 @@ blockWraps.each(function (index, blockWrapElem) {
         //figure out the number of the answer
         let numberOfThisAnswer = $(blockWrapElem).find('.selectBlockType').val();
 
-        console.log(` numberOfThisAnswer: ${numberOfThisAnswer}`);
+       //console.log(` numberOfThisAnswer: ${numberOfThisAnswer}`);
 
         idObjectNow = idObject;
 
-        
-        lastObject = idObject.dialogs[idObject.dialogs.length - 1];
+        //I think I'm attempting to select the last object from the dialogs array in order to add more to it
+       let lastObject = idObject.dialogs[idObject.dialogs.length - 1];
 
-        console.log('lastObject: ' + JSON.stringify(lastObject));
+       //console.log('lastObject: ' + JSON.stringify(lastObject));
         
-        console.log(`dialogsWhiteSpacesAndEmptyElementsStripped.join(' ') ${dialogsWhiteSpacesAndEmptyElementsStripped.join(' ') }`);
+       //console.log(`dialogsWhiteSpacesAndEmptyElementsStripped.join(' ') ${dialogsWhiteSpacesAndEmptyElementsStripped.join(' ') }`);
         //can we add a dynamic key to the object like this (the dynamic key is numberOfThisAnswer)
         lastObject[numberOfThisAnswer] = dialogsWhiteSpacesAndEmptyElementsStripped.join(' ');
         //also nextscene0 nextscene1 etc needed for every answer
@@ -224,12 +224,12 @@ blockWraps.each(function (index, blockWrapElem) {
 
         //if we have the last answer, then push the whole question/answer object into the array. But how do we do this? Should we count how many times we have excecuted the blockType = answer code? But what if there are more answer blocks in the tree? Maybe for the sake of ease lets limit the number of max answers to 9 so that we can then do an easy substring to get the actual number?
 
-        console.log(`numberOfThisAnswer.substring(6, 7): ${numberOfThisAnswer.substring(6, 7)} idObject.dialogs[idObject.dialogs.length - 1].nbanswers ${idObject.dialogs[idObject.dialogs.length - 1].nbanswers}`);
+       //console.log(`numberOfThisAnswer.substring(6, 7): ${numberOfThisAnswer.substring(6, 7)} idObject.dialogs[idObject.dialogs.length - 1].nbanswers ${idObject.dialogs[idObject.dialogs.length - 1].nbanswers}`);
 
         //shouldnt we compare the current answer to the total amount of answers from the parent block? we can get this from the object now too:
         if (numberOfThisAnswer.substring(6, 7) >= idObject.dialogs[idObject.dialogs.length - 1].nbanswers-1){ 
             
-            console.log(`about to push q and a. The state of jsonToExport is:  ${JSON.stringify(jsonToExport) }`);
+           //console.log(`about to push q and a. The state of jsonToExport is:  ${JSON.stringify(jsonToExport) }`);
 
             
 
@@ -241,9 +241,9 @@ blockWraps.each(function (index, blockWrapElem) {
 
     } //end if answer
 
-    console.log(`jsonToExport.scene.length:  ${jsonToExport.scene.length}`);
+   //console.log(`jsonToExport.scene.length:  ${jsonToExport.scene.length}`);
 
-    console.log(`If statements have ended. blocWraps index: ${index}  jsonToExport ${JSON.stringify(jsonToExport)}`);
+   //console.log(`If statements have ended. blocWraps index: ${index}  jsonToExport ${JSON.stringify(jsonToExport)}`);
 
     jsonReady = jsonToExport;
 

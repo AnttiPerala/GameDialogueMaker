@@ -158,7 +158,7 @@ let defaultCharacter = {
             //CHANGE ZOOM WHEN RANGE SLIDER IS MOVED
 
                 $('#zoomAmount').on('change input', function () {
-                    console.log(`change zoom to ${$(this).val()} %`);
+                   //console.log(`change zoom to ${$(this).val()} %`);
                     //$('.selected').css("width", $(this).val());
                     let zoomValue = $(this).val();
                     $('#mainArea').css({ 'zoom': zoomValue + '%' });
@@ -204,7 +204,7 @@ let defaultCharacter = {
             
                 $('body').on('mousedown', '.block', function () {
                     if (cloneMode) {
-                        console.log(`set values now, selectedColor is ${selectedColor}`);
+                       //console.log(`set values now, selectedColor is ${selectedColor}`);
                         $(this).css('transform', 'scale(' + selectedSize + ')');
                         $(this).css('background-color', selectedColor);
                         $(this).children('input').css('font-size', selectedFontSize);
