@@ -23,8 +23,17 @@
         <div id="siteTitle" title="Click on the plus button to add new elements. Shift click on an element to add a connecting line to it.">Dialogue Maker</div>
         <!-- <div id="instructions">Shift + click on a block to add a connecting line</div>
  -->
-        <a href="#" title="Click here to add new elements."><div class="plus">+</div></a>
+        
+
         <div id="ui">
+
+            <div class="uiElem">
+                <p title="Click here to add new elements.">ADD CHARACTER TREE</p>
+                <a href="#" title="Click here to add new elements.">
+                    <div class="plus">+</div>
+                </a>
+            </div>
+
             <div class="uiElem">
                 <p title="Change the size of the selected element">BLOCK SIZE</p>
                 <input type="range" min="25" max="1000" value="200" name="blocksize" id="blocksize">
@@ -107,8 +116,16 @@
                 
             </div><!-- end blockwrap -->
         
+            <div id="tutorial">
 
-    </div>
+                <h1>INSTRUCTIONS (click to destroy)</h1>
+                <h2>Here's some information on how to use the app:</h2>
+                <p>This app is meant to work together with the official Construct 3 tutorial from Laura_D called <a href="https://www.construct.net/en/tutorials/branching-dialogue-using-json-2395/branching-dialogue-4">Branching Dialogue Using Json:</a></p>
+                                
+
+            </div>
+
+    </div><!-- End main area -->
 
     <script src="js/jquery-3.6.0.min.js"></script>
     <script src="js/jquery-ui.min.js"></script>
