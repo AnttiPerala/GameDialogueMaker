@@ -206,7 +206,7 @@ afterSort.each(function (index, blockWrapElem) {
         //can we add a dynamic key to the object like this (the dynamic key is numberOfThisAnswer)
         lastObject[numberOfThisAnswer] = dialogsWhiteSpacesAndEmptyElementsStripped.join(' ');
         //also nextscene0 nextscene1 etc needed for every answer
-        //lastObject["nextscene"+numberOfThisAnswer.substring(6, 7)] = $(blockWrapElem).find('.next').val();
+        lastObject["nextscene"+numberOfThisAnswer.substring(6, 7)] = parseInt($(blockWrapElem).find('.next').val());
 
 
         /* Model:

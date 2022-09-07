@@ -37,6 +37,8 @@ let defaultCharacter = {
 
         let newBlockId = 1; //give each block unique id regardless of questions/answers
         let storyId = 1; //this one will remain the same for questions and their answers but otherwise changes 
+        //this is so that answers can inherit the same id as the question they are connected to. Doesn't feel like very fool proof, especially if the user is deleting or otherwise manipulating the nodes.
+        let latestQuestionStoryID = 0;
         let moveLineId = "moveLine";
         let cloneMode = false; //for style cloning
         let eraseMode = false; //for erasing blocks and lines

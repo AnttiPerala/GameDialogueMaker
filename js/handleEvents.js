@@ -106,6 +106,10 @@ $('body').on('click', '.blockPlusButton', function () {
 
         let selectElementContentBasedOnParentBlockType = ``;
 
+        
+
+        let storyIdToAssignBasedOnBlockType;
+
         //Dialogue box placeholder is also depending on the type
 
         let dialoguePlaceholderBasedOnParentBlockType = ``;
@@ -122,10 +126,15 @@ $('body').on('click', '.blockPlusButton', function () {
             `
             dialoguePlaceholderBasedOnParentBlockType = "Type the dialogue here";
             storyId++;
-
+            storyIdToAssignBasedOnBlockType = storyId;
             parentBlockNextInputField.val(storyId);
 
-        } else if (parentBlockType == "question") {
+            console.log(`inside line and storyIdToAssignBasedOnBlockType: ${storyIdToAssignBasedOnBlockType} the storyId was:  ${storyId}`);
+            
+
+        } else if (parentBlockType == "question") { //note that the previous node was a question so now we are actually creating an answer
+
+            latestQuestionStoryID = storyId; 
 
             selectElementContentBasedOnParentBlockType = `
 
@@ -133,10 +142,16 @@ $('body').on('click', '.blockPlusButton', function () {
                 <option value="answer${theClickedPlusButton.attr('data-buttonindex')}">answer</option>
             </select>
             `
-
+            //notice that we are not progressing the storyID after a question node. But if the user creates other nodes before the answer node, things can get messy... thats why we have now the latestQuestionStoryID
             dialoguePlaceholderBasedOnParentBlockType = "Type the answer option here";
+            storyIdToAssignBasedOnBlockType = latestQuestionStoryID;
+            
+
+            console.log(`inside question and storyIdToAssignBasedOnBlockType: ${storyIdToAssignBasedOnBlockType} the storyId was:  ${storyId}`);
 
         } else if (parentBlockType == "answer" || "fight") {
+
+            console.log(`inside answer and latestQuestionStoryID: ${latestQuestionStoryID} the storyId was:  ${storyId}`);
 
             selectElementContentBasedOnParentBlockType = `
 
@@ -148,7 +163,11 @@ $('body').on('click', '.blockPlusButton', function () {
             `
             dialoguePlaceholderBasedOnParentBlockType = "Type the dialogue here";
             storyId++;
+            storyIdToAssignBasedOnBlockType = storyId; //not sure if in right place
+            
             parentBlockNextInputField.val(storyId);
+
+            console.log(`inside answer and storyIdToAssignBasedOnBlockType: ${storyIdToAssignBasedOnBlockType} the storyId was:  ${storyId}`);
 
         }
 
@@ -163,6 +182,7 @@ $('body').on('click', '.blockPlusButton', function () {
         newBlockPositionX = $(this).position().left - 250 + (20 * (theClickedPlusButton.attr('data-buttonindex')+1));
        //console.log("newBlockPositionY: " + newBlockPositionY + $(this).attr("class"));
 
+        console.log(`before creating newBlock and storyIdToAssignBasedOnBlockType: ${storyIdToAssignBasedOnBlockType} the storyId was:  ${storyId}`);
 
         let newBlock = $(`
                 <div class="blockWrap">
@@ -173,7 +193,7 @@ $('body').on('click', '.blockPlusButton', function () {
                         <div id="id${newBlockId}" class="block">
                             <div style="text-align: left;">
                                 <span style="width: 15%; display:inline-block; text-align: right;">ID:</span><input class="blockid"
-                                    style="width: 15%; display:inline-block;" readonly type="number" value="${storyId}">
+                                    style="width: 15%; display:inline-block;" readonly type="number" value="${storyIdToAssignBasedOnBlockType}">
                             </div>
                             <input type="text" class="characterName elementInfoField" placeholder="character name" value="${parentBlockCharacterName}">
                             ${selectElementContentBasedOnParentBlockType}
