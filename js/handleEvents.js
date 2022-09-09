@@ -394,10 +394,24 @@ jQuery(document).on('change', '.selectBlockType', function () {
         `)
 
         //append more plus buttons
-        jQuery(this).closest('.blockWrap').find('.plusButtonContainer').append('<div class="blockPlusButton" data-buttonindex=1 data-acceptclicks=true>+</div>');
-        jQuery(this).closest('.blockWrap').find('.plusButtonContainer').append('<div class="blockPlusButton" data-buttonindex=2 data-acceptclicks=true>+</div>');
+        jQuery(this).closest('.blockWrap').find('.plusButtonContainer').first().append('<div class="blockPlusButton" data-buttonindex=1 data-acceptclicks=true>+</div>');
+        jQuery(this).closest('.blockWrap').find('.plusButtonContainer').first().append('<div class="blockPlusButton" data-buttonindex=2 data-acceptclicks=true>+</div>');
 
         jQuery(this).closest('.blockWrap').find('textarea').attr("placeholder", "Type the question");
+
+        //if there are block already connected to the block turned into a question block, change their mode to "answer". Maybe this could be done by checking the "next" values?
+        let theQuestionBlockNextValue = jQuery(this).closest('.blockWrap').find('.next').first().val();
+        let childNodeIdValue = jQuery(this).closest('.blockWrap').find('.blockWrap').first().find('.blockid').val();
+
+        console.log('theQuestionBlockNextValue' + theQuestionBlockNextValue + 'childNodeIdValue' + childNodeIdValue);
+        if (theQuestionBlockNextValue == childNodeIdValue){
+            console.log('match');
+            jQuery(this).closest('.blockWrap').children('.blockWrap').find('.selectBlockType').html(`
+            <select name="blockType" class="selectBlockType">
+                <option value="answer0">answer</option>
+            </select>
+            `)
+        }
 
     }
 
