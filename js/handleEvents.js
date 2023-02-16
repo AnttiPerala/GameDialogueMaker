@@ -534,23 +534,30 @@ jQuery(document).on('click', '#tutorial', function () {
 /* CLICK ON THE CONDITION CIRCLE TO EXPAND IT */
 jQuery(document).on('click', '.conditionCircle', function () {
 
-    $(this).append(`
-    <div class="conditionInputsWrap">
-    <h3>Add a condition for the transition</h3>
-    <input type="text" class="variableName elementInfoField" placeholder="Variable name to check" value="">
-    <select class="comparisonOperator">
-        <option value="&lt;">&lt;</option>
-        <option value="&gt;">&gt;</option>
-        <option value="=">=</option>
-        <option value="!=">!=</option>
-        <option value="&gt;=">&gt;=</option>
-        <option value="&lt;=">&lt;=</option>
-    </select>
-    <input type="text" class="variableValue elementInfoField" placeholder="Variable value" value="">
-    <button class="okTransition">ADD</button>
+    //check if the circle already contains the inputs
+    if ($(this).find('.conditionInputsWrap').length) {
+        console.log('The parent element already contains a child with the class ".conditionInputsWrap"');
+    } else {
 
-    </div>
-    `);
+        $(this).append(`
+        <div class="conditionInputsWrap">
+        <h3>Add a condition for the transition</h3>
+        <input type="text" class="variableName elementInfoField" placeholder="Variable name to check" value="">
+        <select class="comparisonOperator">
+            <option value="&lt;">&lt;</option>
+            <option value="&gt;">&gt;</option>
+            <option value="=">=</option>
+            <option value="!=">!=</option>
+            <option value="&gt;=">&gt;=</option>
+            <option value="&lt;=">&lt;=</option>
+        </select>
+        <input type="text" class="variableValue elementInfoField" placeholder="Variable value" value="">
+        <button class="okTransition">ADD</button>
+
+        </div>
+        `);
+
+    } //end else
     
     $(this).animate({
         width: '20vw',
@@ -567,6 +574,32 @@ jQuery(document).on('click', '.conditionCircle .okTransition', function () {
 
 console.log('OK');
 
+    let parentLine = $(this).closest('.line'); //grab the line the circle belongs to
+    let conditionCircle = $(this).closest('.conditionCircle');
+
+    let variableNameFromInput = $(conditionCircle).find('.variableName').val();
+    let comparisonOperatorFromInput = $(conditionCircle).find('.comparisonOperator').val();
+    let variableValueFromInput = $(conditionCircle).find('.variableValue').val();
+
+    myElem = {
+        'block1': parentLine.data('block1'),
+        'block2': parentLine.data('block2'),
+        'variableName': variableNameFromInput,
+        'comparisonOperator': comparisonOperatorFromInput,
+        'variableValue': variableValueFromInput,
+
+    }
+
+    //NOTE! What we set with .data() will NOT be visible in the HTML! It's only in memory. .attr() makes visible also in html
+    //let's give this multiple data attributes at the same time:
+    $(conditionCircle).data({
+        'block1': parentLine.data('block1'),
+        'block2': parentLine.data('block2'),
+        'variableName': variableNameFromInput,
+        'comparisonOperator': comparisonOperatorFromInput,
+        'variableValue': variableValueFromInput
+    
+    });//end data
 
 
-})
+}) //end click
