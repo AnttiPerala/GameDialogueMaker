@@ -121,7 +121,7 @@ let defaultCharacter = {
                     ;
 
                     conditionCircle.css({
-                        'transform': 'translate(-50%, -50%)',
+                        'transform': `translate(-50%, -50%) rotate(${angle*-1}deg)`, //rotate this in the opposite direction of the parent line in order to keep it straight
                         'top': '50%',
                         'left': '50%'
 

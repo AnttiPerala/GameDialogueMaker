@@ -531,3 +531,42 @@ jQuery(document).on('click', '#tutorial', function () {
 
 })
 
+/* CLICK ON THE CONDITION CIRCLE TO EXPAND IT */
+jQuery(document).on('click', '.conditionCircle', function () {
+
+    $(this).append(`
+    <div class="conditionInputsWrap">
+    <h3>Add a condition for the transition</h3>
+    <input type="text" class="variableName elementInfoField" placeholder="Variable name to check" value="">
+    <select class="comparisonOperator">
+        <option value="&lt;">&lt;</option>
+        <option value="&gt;">&gt;</option>
+        <option value="=">=</option>
+        <option value="!=">!=</option>
+        <option value="&gt;=">&gt;=</option>
+        <option value="&lt;=">&lt;=</option>
+    </select>
+    <input type="text" class="variableValue elementInfoField" placeholder="Variable value" value="">
+    <button class="okTransition">ADD</button>
+
+    </div>
+    `);
+    
+    $(this).animate({
+        width: '20vw',
+        height: '20vw'
+    }, 800);
+
+
+
+})
+
+/* CLICK ON THE CONDITION CIRCLE OK BUTTON TO ACCEPT THE CONDITION */
+
+jQuery(document).on('click', '.conditionCircle .okTransition', function () {
+
+console.log('OK');
+
+
+
+})
