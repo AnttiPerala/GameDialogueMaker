@@ -367,14 +367,16 @@ $('body').on('mousedown', '.block', function () {
 
 $('body').on('mousedown', '.line', function () {
 
-    //console.log(`Line click ${''}`);
+    // Check if the clicked element is the line itself or a child of the line.
+    if (!$(event.target).is('.conditionCircle')) {
 
-    if (!event.shiftKey) {
+        if (!event.shiftKey) {
 
-        $('.line').removeClass('selected');
-        $(this).addClass('selected');
+            $('.line').removeClass('selected');
+            $(this).addClass('selected');
 
 
+        }
     }
 
 })
@@ -528,3 +530,4 @@ jQuery(document).on('click', '#tutorial', function () {
     this.remove();
 
 })
+

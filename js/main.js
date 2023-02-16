@@ -71,6 +71,8 @@ let defaultCharacter = {
             )
         });
 
+        /* Note: tooltips are style with this class: .ui-tooltip-content */
+
         $("#mainArea").draggable();
         $("#mainArea").draggable('enable');
 
@@ -95,6 +97,11 @@ let defaultCharacter = {
                 //get the parent of the first block so that we can prepend the line to it
                 let blockWrapToPrependTo = $('#'+block1).closest('.blockWrap');
 
+                //create a condition circle element that will be added to the center of the line
+
+             const conditionCircle = $('<div class="conditionCircle"title="Click here to add a condition for the transition">');
+
+
                 let line = $('<div>')
                     .prependTo(blockWrapToPrependTo) //prepend makes lines appear in the back without having to use z-index
                     .addClass('line')
@@ -110,14 +117,32 @@ let defaultCharacter = {
                     .attr("data-block1", block1)
                     .attr("data-block2", block2)
                     .attr("data-buttonindextoconnectto", buttonindex)
+                    .append(conditionCircle)
                     ;
+
+                    conditionCircle.css({
+                        'transform': 'translate(-50%, -50%)',
+                        'top': '50%',
+                        'left': '50%'
+
+                    })
+
+            /*  const centerX = (x1 + x2) / 2;
+             const centerY = (y1 + y2) / 2;
+
+             conditionCircle.offset({
+                 left: offsetX + length /2,
+                 top: offsetY
+             }).css({
+                 'transform': transform
+             }) */
 
                 /* if (id != null) line.attr('id', id); */
 
                 return line;
             }
 
-             //SHIFT CLICK TO DRAW A LINE
+             //SHIFT CLICK TO DRAW A LINE (are we even using this?)
 
                 $('body').on('mouseup', '.block', function (event) {
 
