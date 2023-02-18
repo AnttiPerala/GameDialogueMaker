@@ -84,7 +84,7 @@ body {
     /* min-width: 200px; */
     width: 350px;
     background: #4b4b4b;
-    margin: 0.5rem;
+    margin: 1rem;
     border-radius: 1rem;
     display: grid;
     align-items: center;
@@ -110,6 +110,7 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
+    position: relative;
         
 }
 
@@ -184,6 +185,7 @@ body {
     height: 5px;
     background: rgb(46, 46, 46);
     box-sizing: border-box;
+    position: absolute;
 
 }
 
