@@ -1,3 +1,5 @@
+
+
 //CLICK ON THE MAIN PLUS BUTTON TO ADD A NEW CHARACTER 
 
 $('.plus').on('click', function () {

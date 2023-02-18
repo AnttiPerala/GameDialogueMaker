@@ -13,6 +13,8 @@ draw a dotted line when the user connects a node to another node without the plu
 
 
 */
+let cloneMode = false;
+let eraseMode = false;
 
 //these make moving/dragging the canvas possible
 $("#mainArea").draggable();
@@ -116,14 +118,7 @@ let gameDialogueMakerProject = {
                 dialogueNodeY: 10,
                 outgoingSockets: 1,
                 outgoingLines: [
-                    {
-                        fromNode: 3,
-                        fromSocket: 1,
-                        toNode: 4,
-                        transitionConditions: [
-                            
-                        ]
-                    }
+                    
                 ] //end lines
             },
             {
@@ -135,14 +130,7 @@ let gameDialogueMakerProject = {
                 dialogueNodeY: -160,
                 outgoingSockets: 1,
                 outgoingLines: [
-                    {
-                        fromNode: 3,
-                        fromSocket: 1,
-                        toNode: 4,
-                        transitionConditions: [
-                            
-                        ]
-                    }
+                  
                 ] //end lines
             }
 
@@ -235,6 +223,22 @@ function drawDialogueMakerProject(){
             //loop through all outgoing lines of a dialogue node
             for (let k = 0; k < gameDialogueMakerProject.characters[i].dialogueNodes[j].outgoingLines.length; k++) {
                 console.log(gameDialogueMakerProject.characters[i].dialogueNodes[j].outgoingLines[k].fromNode);
+
+                let x1 = gameDialogueMakerProject.characters[i].dialogueNodes[j].dialogueNodeX;
+                let y1 = gameDialogueMakerProject.characters[i].dialogueNodes[j].dialogueNodeY;
+
+                //for the second node I think we need to search the nodes based on the toNode value of the line and take it's x and y
+
+                const foundObject = gameDialogueMakerProject.characters[i].dialogueNodes.find(obj => obj.dialogueID == gameDialogueMakerProject.characters[i].dialogueNodes[j].outgoingLines[k].toNode);
+
+                let x2 = foundObject.dialogueNodeX;
+                let y2 = foundObject.dialogueNodeY;
+
+                let block1 =  gameDialogueMakerProject.characters[i].dialogueNodes[j].outgoingLines[k].fromNode;
+                let block2 = gameDialogueMakerProject.characters[i].dialogueNodes[j].outgoingLines[k].toNode;
+                let buttonindex = gameDialogueMakerProject.characters[i].dialogueNodes[j].outgoingLines[k].buttonindex;
+
+                createLine(x1, y1, x2, y2, block1, block2, buttonindex); //x1, y1, x2, y2, block1, block2, buttonindex. //block1 and block2 are html element id's
                 
                 //loop through all transition conditions of a line
                 for (let l = 0; l < gameDialogueMakerProject.characters[i].dialogueNodes[j].outgoingLines[k].transitionConditions.length; l++) {
@@ -421,3 +425,5 @@ function createDialogueNode(dialogueID,dialogueType,dialogueText,nextNode,dialog
             
             return newBlock;
 }
+
+
