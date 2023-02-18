@@ -367,14 +367,16 @@ $('body').on('mousedown', '.block', function () {
 
 $('body').on('mousedown', '.line', function () {
 
-    //console.log(`Line click ${''}`);
+    // Check if the clicked element is the line itself or a child of the line.
+    if (!$(event.target).is('.conditionCircle')) {
 
-    if (!event.shiftKey) {
+        if (!event.shiftKey) {
 
-        $('.line').removeClass('selected');
-        $(this).addClass('selected');
+            $('.line').removeClass('selected');
+            $(this).addClass('selected');
 
 
+        }
     }
 
 })
@@ -528,3 +530,99 @@ jQuery(document).on('click', '#tutorial', function () {
     this.remove();
 
 })
+
+/* CLICK ON THE CONDITION CIRCLE TO EXPAND IT */
+jQuery(document).on('click', '.conditionCircle', function () {
+
+    //check if the circle already contains the inputs
+    if ($(this).find('.conditionInputsWrap').length) {
+        console.log('The parent element already contains a child with the class ".conditionInputsWrap"');
+    } else {
+
+        $(this).append(`
+        <div class="conditionInputsWrap">
+        <h3>Add a condition for the transition</h3>
+        <input type="text" class="variableName elementInfoField" placeholder="Variable name to check" value="">
+        <select class="comparisonOperator">
+            <option value="&lt;">&lt;</option>
+            <option value="&gt;">&gt;</option>
+            <option value="=">=</option>
+            <option value="!=">!=</option>
+            <option value="&gt;=">&gt;=</option>
+            <option value="&lt;=">&lt;=</option>
+        </select>
+        <input type="text" class="variableValue elementInfoField" placeholder="Variable value" value="">
+        <button class="okTransition">ADD</button>
+
+        </div>
+        `);
+
+    } //end else
+    
+    $(this).animate({
+        width: '20vw',
+        height: '20vw'
+    }, 800);
+
+
+
+})
+
+/* CLICK ON THE CONDITION CIRCLE OK BUTTON TO ACCEPT THE CONDITION */
+
+jQuery(document).on('click', '.conditionCircle .okTransition', function () {
+
+console.log('OK');
+
+    let parentLine = $(this).closest('.line'); //grab the line the circle belongs to
+    let conditionCircle = $(this).closest('.conditionCircle');
+
+    let variableNameFromInput = $(conditionCircle).find('.variableName').val();
+    let comparisonOperatorFromInput = $(conditionCircle).find('.comparisonOperator').val();
+    let variableValueFromInput = $(conditionCircle).find('.variableValue').val();
+
+    myElem = {
+        'block1': parentLine.data('block1'),
+        'block2': parentLine.data('block2'),
+        'variableName': variableNameFromInput,
+        'comparisonOperator': comparisonOperatorFromInput,
+        'variableValue': variableValueFromInput,
+
+    }
+
+    //NOTE! What we set with .data() will NOT be visible in the HTML! It's only in memory. .attr() makes visible also in html
+    //let's give this multiple data attributes at the same time:
+    $(conditionCircle).data({
+        'block1': parentLine.data('block1'),
+        'block2': parentLine.data('block2'),
+        'variableName': variableNameFromInput,
+        'comparisonOperator': comparisonOperatorFromInput,
+        'variableValue': variableValueFromInput
+    
+    });//end data
+
+
+}) //end click
+
+
+//CHANGE BLOCK SIZE WHEN RANGE SLIDER IS MOVED
+
+$('#blocksize').on('change input', function(){
+    //console.log(`change ${$(this).val()}`);
+    //$('.selected').css("width", $(this).val());
+    let scaleValue = $(this).val()/100;
+    $('.selected').css({ 'transform': 'scale(' + scaleValue + ')'});
+    //$('.block input').css("font-size", $(this).val()/8+10 +'px');
+    selectedSize = scaleValue;
+})
+
+//CHANGE ZOOM WHEN RANGE SLIDER IS MOVED
+
+    $('#zoomAmount').on('change input', function () {
+       //console.log(`change zoom to ${$(this).val()} %`);
+        //$('.selected').css("width", $(this).val());
+        let zoomValue = $(this).val();
+        $('#mainArea').css({ 'zoom': zoomValue + '%' });
+        //$('.block input').css("font-size", $(this).val()/8+10 +'px');
+        
+    })

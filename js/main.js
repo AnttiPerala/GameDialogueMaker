@@ -31,11 +31,73 @@ let defaultCharacter = {
 
 //what if we just try to handle things by dom traversal? in that situation it might be actually useful to nest nodes in the dom so that when you move the topmost node, all the children move with it
 
+//Okay edit in 18.2.2023: I will create a master object after all, something like this:
+
+let gameDialogueMakerProject = {
+    settings: {},
+    characters:[{
+        characterName: 'Mike',
+        characterID: 1,
+        characterNodeX: 10,
+        characterNodeY: 10,
+        dialogueNodes: [
+            {
+                dialogueID: 1,
+                dialogueType: 'line',
+                dialogueText: 'Example dialogue, hello!',
+                nextNode: 2,
+                dialogueNodeX: 100,
+                dialogueNodeY: 100,
+                outgoingSockets: 1,
+                outgoingLines: [
+                    {
+                        fromNode: dialogueID,
+                        fromSocket: 1,
+                        toNode: 2,
+                        transitionConditions: [
+                            {
+                                variableName: 'myvar',
+                                comparisonOperator: '=',
+                                variableValue: 'false'
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                dialogueID: 2,
+                dialogueType: 'question',
+                dialogueText: 'How are you today?',
+                nextNode: -1,
+                dialogueNodeX: 150,
+                dialogueNodeY: 200,
+                outgoingSockets: 3,
+                outgoingLines: [
+                    {
+                        fromNode: dialogueID,
+                        fromSocket: 1,
+                        toNode: 3,
+                        transitionConditions: [
+                            {
+                                variableName: 'only write option if all transition conditions are true',
+                                comparisonOperator: '=',
+                                variableValue: 'false'
+                            }
+                        ]
+                    }
+                ] //end lines
+            }
+
+        ]//end dialoguenodes
+
+    }]
+}
 
 
 
 
-        let newBlockId = 1; //give each block unique id regardless of questions/answers
+
+        let newBlockId = 2; //give each block unique id regardless of questions/answers
         let storyId = 1; //this one will remain the same for questions and their answers but otherwise changes 
         //this is so that answers can inherit the same id as the question they are connected to. Doesn't feel like very fool proof, especially if the user is deleting or otherwise manipulating the nodes.
         let latestQuestionStoryID = 0;
@@ -71,6 +133,8 @@ let defaultCharacter = {
             )
         });
 
+        /* Note: tooltips are style with this class: .ui-tooltip-content */
+
         $("#mainArea").draggable();
         $("#mainArea").draggable('enable');
 
@@ -85,6 +149,10 @@ let defaultCharacter = {
 
          function createLine(x1, y1, x2, y2, block1, block2, buttonindex) {
 
+            //block1 and block seem to depend on the selected block class, so they are unreliable here
+
+             console.log(`In the begnning, block1 is: ${block1} and block2 is ${block2}`);
+
                 let length = Math.sqrt(((x1 - x2) * (x1 - x2)) + ((y1 - y2) * (y1 - y2)));
                 let angle = Math.atan2(y2 - y1, x2 - x1) * 180 / Math.PI;
                 let transform = 'rotate(' + angle + 'deg)';
@@ -93,31 +161,109 @@ let defaultCharacter = {
                 offsetY = (y1 > y2) ? y2 : y1;
 
                 //get the parent of the first block so that we can prepend the line to it
-                let blockWrapToPrependTo = $('#'+block1).closest('.blockWrap');
+               let blockWrapToPrependTo = $('#'+block1).closest('.blockWrap');
 
-                let line = $('<div>')
-                    .prependTo(blockWrapToPrependTo) //prepend makes lines appear in the back without having to use z-index
-                    .addClass('line')
-                    .css({
-                        'position': 'absolute',
-                        'transform': transform
-                    })
-                    .width(length)
-                    .offset({
-                        left: offsetX,
-                        top: offsetY
-                    })
-                    .attr("data-block1", block1)
-                    .attr("data-block2", block2)
-                    .attr("data-buttonindextoconnectto", buttonindex)
-                    ;
+                //create a condition circle element that will be added to the center of the line
 
-                /* if (id != null) line.attr('id', id); */
+             const conditionCircle = $('<div class="conditionCircle"title="Click here to add a condition for the transition">');
 
-                return line;
+             //check if the line already exists and if it does, just move it. Seems like can't maybe trust on the "block1 and block2" much.. 
+
+
+             let linesToCheck = blockWrapToPrependTo.closest('.blockWrap').find('.line'); //go to the earlier parent and look for lines
+             if (linesToCheck[0] !== undefined) {
+                 console.log(`linesToCheck: ${linesToCheck.eq(0).data('block1')}`);
+             }
+
+             let attribute1 = 'block1'; // set the names of the data attributes you want to match
+             let attribute2 = 'block2';
+             let attribute3 = 'buttonindextoconnectto';
+
+            
+
+             let matchingElements = linesToCheck.filter(function () {
+
+                 console.log(`
+                    $(this).data(attribute1) was ${$(this).data(attribute1)}
+                    block1 was ${block1}
+                    $(this).data(attribute2) was ${$(this).data(attribute2)}
+                    block1 was ${block2}
+                    $(this).data(attribute3) was ${$(this).data(attribute3)}
+                    buttonindextoconnectto was ${buttonindex}
+              `);
+
+                 if ($(this).data(attribute1) === block1 && // check if the three data attributes match
+                     $(this).data(attribute2) === block2 &&
+                     $(this).data(attribute3) === buttonindex){
+                         return this; // return the element that matches the three data attributes
+                     }
+                
+             });
+
+             if (matchingElements.length > 0) {
+                 // At least one element matches the three data attributes so just redraw
+                 console.log('line redraw only');
+                 let matchedLine = matchingElements[0];
+                 matchedLine.css({
+                     'position': 'absolute',
+                     'transform': transform
+                 })
+                     .width(length)
+                     .offset({
+                         left: offsetX,
+                         top: offsetY
+                     })
+
+             } else {
+                 // No elements match the three data attributes so append
+                 console.log('create line too');
+                 let line = $('<div>')
+                     .prependTo(blockWrapToPrependTo) //prepend makes lines appear in the back without having to use z-index
+                     .addClass('line')
+                     .css({
+                         'position': 'absolute',
+                         'transform': transform
+                     })
+                     .width(length)
+                     .offset({
+                         left: offsetX,
+                         top: offsetY
+                     })
+                     .attr("data-block1", block1)
+                     .attr("data-block2", block2)
+                     .attr("data-buttonindextoconnectto", buttonindex)
+                     .append(conditionCircle)
+                     ;
+
+                 conditionCircle.css({
+                     'transform': `translate(-50%, -50%) rotate(${angle * -1}deg)`, //rotate this in the opposite direction of the parent line in order to keep it straight
+                     'top': '50%',
+                     'left': '50%'
+
+                 })
+
+                 /*  const centerX = (x1 + x2) / 2;
+                  const centerY = (y1 + y2) / 2;
+     
+                  conditionCircle.offset({
+                      left: offsetX + length /2,
+                      top: offsetY
+                  }).css({
+                      'transform': transform
+                  }) */
+
+                 /* if (id != null) line.attr('id', id); */
+
+                 return line;
+             }
+
+
+
+
+              
             }
 
-             //SHIFT CLICK TO DRAW A LINE
+             //SHIFT CLICK TO DRAW A LINE (are we even using this?)
 
                 $('body').on('mouseup', '.block', function (event) {
 
@@ -146,27 +292,7 @@ let defaultCharacter = {
            
 
 
-            //CHANGE BLOCK SIZE WHEN RANGE SLIDER IS MOVED
-
-            $('#blocksize').on('change input', function(){
-                //console.log(`change ${$(this).val()}`);
-                //$('.selected').css("width", $(this).val());
-                let scaleValue = $(this).val()/100;
-                $('.selected').css({ 'transform': 'scale(' + scaleValue + ')'});
-                //$('.block input').css("font-size", $(this).val()/8+10 +'px');
-                selectedSize = scaleValue;
-            })
-
-            //CHANGE ZOOM WHEN RANGE SLIDER IS MOVED
-
-                $('#zoomAmount').on('change input', function () {
-                   //console.log(`change zoom to ${$(this).val()} %`);
-                    //$('.selected').css("width", $(this).val());
-                    let zoomValue = $(this).val();
-                    $('#mainArea').css({ 'zoom': zoomValue + '%' });
-                    //$('.block input').css("font-size", $(this).val()/8+10 +'px');
-                    
-                })
+            
 
             //COLOR PICKER
        
