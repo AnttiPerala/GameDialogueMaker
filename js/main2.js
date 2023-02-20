@@ -70,6 +70,12 @@ function drawDialogueMakerProject(){
             
 
             dialogueNode.appendTo(latestNode) //latestnode is set below after append
+                .draggable({
+                    drag: function (event, ui) {
+                        //console.log('dragging');
+                        updateLines($(this).find('.block')); //called only when dragged
+                    }
+                })
             .css({ top: rigidY + 'px', left: rigidX + 'px' });
 
         
@@ -87,14 +93,14 @@ function drawDialogueMakerProject(){
         
 
         gameDialogueMakerProject.characters[i].nodeElement.prependTo('#mainArea')
+            .draggable({
+                drag: function (event, ui) {
+                    //console.log('dragging');
+                    updateLines($(this).find('.block')); //called only when dragged
+                }
+            })
         .css({ top: 10, left: 10 });
 
-        $('.blockWrap').draggable({
-            drag: function (event, ui) {
-                //console.log('dragging');
-                updateLines($(this).find('.block')); //called only when dragged
-            }
-        })
         addAutoResize();
 
       } // end i loop
