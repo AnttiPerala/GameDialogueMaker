@@ -84,8 +84,6 @@ let gameDialogueMakerProject = {
             {
                 dialogueID: 3,
                 dialogueType: 'answer',
-                siblings: 3,
-                siblingNumber: 1,
                 dialogueText: 'Fine thank you',
                 nextNode: 4,
                 dialogueNodeX: -100,
@@ -99,8 +97,6 @@ let gameDialogueMakerProject = {
             {
                 dialogueID: 4,
                 dialogueType: 'answer',
-                siblings: 3,
-                siblingNumber: 2,
                 dialogueText: 'Not so great',
                 nextNode: 6,
                 dialogueNodeX: 250,
@@ -114,8 +110,6 @@ let gameDialogueMakerProject = {
             {
                 dialogueID: 5,
                 dialogueType: 'answer',
-                siblings: 3,
-                siblingNumber: 3,
                 dialogueText: 'third',
                 nextNode: 6,
                 dialogueNodeX: 550,
