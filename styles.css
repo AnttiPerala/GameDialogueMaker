@@ -95,6 +95,7 @@ body {
     transform-origin: 50% 50%;
     overflow: hidden;
     padding:15px;
+    box-shadow: #000000c2 2px 2px 2px 2px;
 
 }
 
@@ -162,7 +163,7 @@ body {
 
 .selected {
 
-    border: 3px solid #B9A44C;
+    border: 3px solid #0075ff;
 
 }
 

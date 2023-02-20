@@ -6,6 +6,7 @@ let gameDialogueMakerProject = {
         characterID: 1,
         characterNodeX: 0,
         characterNodeY: 0,
+        nodeElement: $('<div class="blockWrap characterRoot"></div>'),
         dialogueNodes: [
             {
                 dialogueID: 1,
@@ -15,10 +16,11 @@ let gameDialogueMakerProject = {
                 dialogueNodeX: 0,
                 dialogueNodeY: 20,
                 outgoingSockets: 1,
+                nodeElement: $('<div></div>'),
                 outgoingLines: [
                     {
                         fromNode: 1,
-                        fromSocket: 1,
+                        fromSocket: 0,
                         toNode: 2,
                         transitionConditions: [
                             {
@@ -38,10 +40,11 @@ let gameDialogueMakerProject = {
                 dialogueNodeX: 0,
                 dialogueNodeY: 20,
                 outgoingSockets: 3,
+                nodeElement: $('<div></div>'),
                 outgoingLines: [
                     {
                         fromNode: 2,
-                        fromSocket: 1,
+                        fromSocket: 0,
                         toNode: 3,
                         transitionConditions: [
                             {
@@ -53,8 +56,20 @@ let gameDialogueMakerProject = {
                     },
                     {
                         fromNode: 2,
-                        fromSocket: 2,
+                        fromSocket: 1,
                         toNode: 4,
+                        transitionConditions: [
+                            {
+                                variableName: 'myvar',
+                                comparisonOperator: '=',
+                                variableValue: 'false'
+                            }
+                        ]
+                    },
+                    {
+                        fromNode: 2,
+                        fromSocket: 1,
+                        toNode: 5,
                         transitionConditions: [
                             {
                                 variableName: 'myvar',
@@ -74,6 +89,7 @@ let gameDialogueMakerProject = {
                 dialogueNodeX: -100,
                 dialogueNodeY: 20,
                 outgoingSockets: 1,
+                nodeElement: $('<div></div>'),
                 outgoingLines: [
                     
                 ] //end lines
@@ -86,8 +102,22 @@ let gameDialogueMakerProject = {
                 dialogueNodeX: 250,
                 dialogueNodeY: -160,
                 outgoingSockets: 1,
+                nodeElement: $('<div></div>'),
                 outgoingLines: [
                   
+                ] //end lines
+            },
+            {
+                dialogueID: 5,
+                dialogueType: 'answer',
+                dialogueText: 'third',
+                nextNode: 6,
+                dialogueNodeX: 550,
+                dialogueNodeY: -360,
+                outgoingSockets: 1,
+                nodeElement: $('<div></div>'),
+                outgoingLines: [
+
                 ] //end lines
             }
 
