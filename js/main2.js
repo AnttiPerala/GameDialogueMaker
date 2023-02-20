@@ -61,8 +61,8 @@ function drawDialogueMakerProject(){
             let rigidY;
             if (currJ.dialogueType == "answer"){
 
-                rigidX = (currJ.siblings*310*-1)/2-150 + currJ.siblingNumber*310;
-                rigidY = 190+currJ.siblingNumber *190*-1;
+                rigidX = ((currJ.siblings-1)*320) - currJ.siblingNumber*320;
+                rigidY = currJ*190 - currJ.siblingNumber*190;
 
             }
 
