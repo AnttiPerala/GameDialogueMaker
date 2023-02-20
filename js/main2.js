@@ -61,7 +61,8 @@ function drawDialogueMakerProject(){
             let rigidY;
             if (currJ.dialogueType == "answer"){
 
-                rigidX = currJ.siblingNumber*290;
+                rigidX = (currJ.siblings*310*-1)/2-150 + currJ.siblingNumber*310;
+                rigidY = 190+currJ.siblingNumber *190*-1;
 
             }
 
@@ -76,7 +77,7 @@ function drawDialogueMakerProject(){
                         updateLines($(this).find('.block')); //called only when dragged
                     }
                 })
-            .css({ top: rigidY + 'px', left: rigidX + 'px' });
+            .css({ top: rigidY + 'px', left: rigidX + 'px', position: 'absolute' });
 
         
 
