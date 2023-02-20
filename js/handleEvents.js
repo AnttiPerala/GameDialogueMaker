@@ -267,7 +267,7 @@ $('body').on('click', '.blockPlusButton', function () {
 
 //MOVE A DRAGGABLE BLOCK WITH LINES CONNECTED TO IT
 
-$('.blockWrap').draggable({
+/* $('.blockWrap').draggable({
     drag: function (event, ui) {
         //console.log('dragging');
         //updateLines($(this).find('.block'));
@@ -280,7 +280,7 @@ $('.blockWrap').draggable({
 
     }
 });
-
+ */
 //MOUSE DOWN LOG FOR EASIER DEBUGGING
 $(document).mousedown(function () {
    //console.log("NEW MOUSEDOWN!!!!!!!");
