@@ -166,6 +166,7 @@ function drawDialogueMakerProject(){
                         color: '#0075ff',
                         size: 4,
                         dash: false,
+                        path: 'straight' //deafult is straight, arc, fluid, magnet, grid
                       }
                 );
 
