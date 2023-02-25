@@ -302,11 +302,17 @@ function updateLines(element) {
 
     console.log('element id: ' + element.attr('id'));
 
+    let parent = element.parent();
+
     let justTheIdNumber = element.attr('id').replace(/\D/g, '');
+
+    let justTheIdNumberForParent = parent.attr('id').replace(/\D/g, '');
 
     console.log('just the id number: '+ justTheIdNumber);
 
     let theNodeInTheMasterObject = getDialogueNodeById(justTheIdNumber);
+
+    let theParentNodeInTheMasterObject = getDialogueNodeById(justTheIdNumberForParent);
 
     console.log('theNodeInTheMasterObject: ' + theNodeInTheMasterObject);
 
@@ -318,6 +324,16 @@ function updateLines(element) {
           line.lineElem.position();
         }
       }
+
+      //if not null, loop through each line
+    if (theParentNodeInTheMasterObject) {
+        for (let i = 0; i < theParentNodeInTheMasterObject.outgoingLines.length; i++) {
+          let line = theParentNodeInTheMasterObject.outgoingLines[i];
+          console.log('should update linelem next, elem is: ' + line);
+          line.lineElem.position();
+        }
+      }
+
 
 
 
