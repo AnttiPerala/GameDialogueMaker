@@ -296,29 +296,31 @@ function updateLines(element) {
     //globalCheck = $(element).attr('id');
 
     //select the lines connected to the element we are moving based on the data attributes on the lines
-    let allConnectedLines = $('.line[data-block1="' + $(element).attr('id') + '"],.line[data-block2="' + $(element).attr('id') + '"]');
+    //let allConnectedLines = $('.line[data-block1="' + $(element).attr('id') + '"],.line[data-block2="' + $(element).attr('id') + '"]');
 
-    console.log('ELEMENT id is ' + $(element).attr('id') + ' allConnectedLines length: ' + allConnectedLines.length);
+    //console.log('ELEMENT id is ' + $(element).attr('id') + ' allConnectedLines length: ' + allConnectedLines.length);
 
 
     //for redrawing them we need to loop through all the selected lines and for each of them we will get the two data attributes, then select two blocks based on those attributes and get the coordinates of those blocks for redrawing
     //finally we destroy the old connected lines
 
+    allConnectedLines = $(element).parent().find('.line');
+
     allConnectedLines.each(function (i, e) {
 
         //console.log('inside allConnectedLines.each and the current element id is: ' + $(e).attr('id'));
 
-        let lineBlockConnect1 = $(e).data('block1'); //get the block ids from the lines
-        let lineBlockConnect2 = $(e).data('block2');
-        let plusButtonNumberConnectedTo = $(e).data('buttonindextoconnectto');
+        //let lineBlockConnect1 = $(e).data('block1'); //get the block ids from the lines
+        //let lineBlockConnect2 = $(e).data('block2');
+        //let plusButtonNumberConnectedTo = $(e).data('buttonindextoconnectto');
 
-        console.log('lineBlockConnect1: ' + lineBlockConnect1 + ' lineBlockConnect2: ' + lineBlockConnect2 + ' plusButtonNumberConnectedTo: ' + plusButtonNumberConnectedTo);
+        //console.log('lineBlockConnect1: ' + lineBlockConnect1 + ' lineBlockConnect2: ' + lineBlockConnect2 + ' plusButtonNumberConnectedTo: ' + plusButtonNumberConnectedTo);
 
-        let block1 = $('#' + lineBlockConnect1); //select the block from dom
-        let block2 = $('#' + lineBlockConnect2); //select the block from dom
+        //let block1 = $('#' + lineBlockConnect1); //select the block from dom
+        //let block2 = $('#' + lineBlockConnect2); //select the block from dom
 
-        console.log(`block1 id:  ${block1.id}`);
-        myElem = block2;
+        //console.log(`block1 id:  ${block1.id}`);
+        //myElem = block2;
 
         //pick the right plus button based on the current line
         
@@ -326,19 +328,22 @@ function updateLines(element) {
 
 
         //console.log(` plusButtonNumberConnectedTo ${plusButtonNumberConnectedTo}`);
-
+/* 
         let plusButton = block1.closest('.blockWrap').find('.blockPlusButton[data-buttonindex="' + plusButtonNumberConnectedTo + '"]');
         let topSocket = block2.closest('.blockWrap').find('.topConnectionSocket');
 
         let x1Pos = plusButton.offset().left + plusButton[0].getBoundingClientRect().width / 2;
         let y1Pos = plusButton.offset().top + plusButton[0].getBoundingClientRect().height / 2;
         let x2Pos = topSocket.offset().left + topSocket[0].getBoundingClientRect().width / 2;
-        let y2Pos = topSocket.offset().top + topSocket[0].getBoundingClientRect().height / 2;
+        let y2Pos = topSocket.offset().top + topSocket[0].getBoundingClientRect().height / 2; */
 
-        $(this).remove();
+        //$(this).remove();
 
-        createLine(x1Pos, y1Pos, x2Pos, y2Pos, block1.attr('id'), block2.attr('id'), plusButtonNumberConnectedTo, latestNodeForLines);
+        console.log('each lines, line number: ' + i)
 
+        //createLine(x1Pos, y1Pos, x2Pos, y2Pos, block1.attr('id'), block2.attr('id'), plusButtonNumberConnectedTo, latestNodeForLines);
+
+        e.position();
     })
 
 }

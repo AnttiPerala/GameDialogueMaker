@@ -74,7 +74,7 @@ function drawDialogueMakerProject(){
                 .draggable({
                     drag: function (event, ui) {
                         //console.log('dragging');
-                        updateLines($(this).find('.block')); //called only when dragged
+                        updateLines(ui.helper); //called only when dragged
                     }
                 })
             .css({ top: rigidY + 'px', left: rigidX + 'px', position: 'absolute' }); //absolute needs to be called AFTER draggable
@@ -129,7 +129,7 @@ function drawDialogueMakerProject(){
             .draggable({
                 drag: function (event, ui) {
                     //console.log('dragging');
-                    updateLines($(this).find('.block')); //called only when dragged
+                    updateLines(ui.helper); //called only when dragged
                 }
             })
         .css({ top: 10, left: 10 });
@@ -161,7 +161,13 @@ function drawDialogueMakerProject(){
 
                 new LeaderLine(
                     lineStartNode.get(0), //get(0) converts jQuery object to regular dom object
-                    lineEndNodeElement.get(0)
+                    lineEndNodeElement.get(0),
+                    {
+                        color: 'blue',
+                        size: 2,
+                        dash: true,
+                        class: 'line' // add a class to the line
+                      }
                 );
                 
             }//end k loop
