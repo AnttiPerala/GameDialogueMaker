@@ -22,6 +22,7 @@ let gameDialogueMakerProject = {
                         fromNode: 1,
                         fromSocket: 0,
                         toNode: 2,
+                        lineElem: '',
                         transitionConditions: [
                             {
                                 variableName: 'myvar',
@@ -46,6 +47,7 @@ let gameDialogueMakerProject = {
                         fromNode: 2,
                         fromSocket: 0,
                         toNode: 3,
+                        lineElem: '',
                         transitionConditions: [
                             {
                                 variableName: 'myvar',
@@ -58,6 +60,7 @@ let gameDialogueMakerProject = {
                         fromNode: 2,
                         fromSocket: 1,
                         toNode: 4,
+                        lineElem: '',
                         transitionConditions: [
                             {
                                 variableName: 'myvar',
@@ -70,6 +73,7 @@ let gameDialogueMakerProject = {
                         fromNode: 2,
                         fromSocket: 1,
                         toNode: 5,
+                        lineElem: '',
                         transitionConditions: [
                             {
                                 variableName: 'myvar',

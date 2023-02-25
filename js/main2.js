@@ -159,27 +159,31 @@ function drawDialogueMakerProject(){
 
                 let lineEndNodeElement = lineEndNode.nodeElement;
 
-                new LeaderLine(
+                let theLine = new LeaderLine(
                     lineStartNode.get(0), //get(0) converts jQuery object to regular dom object
                     lineEndNodeElement.get(0),
                     {
-                        color: 'blue',
-                        size: 2,
-                        dash: true,
-                        class: 'line' // add a class to the line
+                        color: '#0075ff',
+                        size: 4,
+                        dash: false,
                       }
                 );
+
+                myline = theLine; //just a global tester
+
+                currLine.lineElem = theLine;
+
+                //myLine.start is the native way of selecting the fromNode but only seems to work for the reference, not for dom
+                //myLine.end is the native way of selecting the toNode
+
+                //maybe store the line reference in the master object and then select from there?
+                
                 
             }//end k loop
 
           } //end j loop
 
-        
-
       } // end i loop
-
-    
-
 
 } // end function drawDialogueMakerProject
 

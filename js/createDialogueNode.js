@@ -83,8 +83,9 @@ function createDialogueNode(nodeElement, dialogueIDSent, dialogueType, dialogueT
     }
 
 
-    //console.log('dialogueIDSent: ' + dialogueIDSent);
-    nodeElement.classList = "blockWrap";
+    console.log('dialogueIDSent: ' + dialogueIDSent);
+    nodeElement.get(0).id = `dialogue${dialogueIDSent}`;
+    nodeElement.get(0).classList = "blockWrap";
     nodeElement.append(`
 
                 <div class="contentWrap">

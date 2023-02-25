@@ -108,8 +108,6 @@ $('body').on('click', '.blockPlusButton', function () {
 
         let selectElementContentBasedOnParentBlockType = ``;
 
-        
-
         let storyIdToAssignBasedOnBlockType;
 
         //Dialogue box placeholder is also depending on the type
@@ -131,8 +129,7 @@ $('body').on('click', '.blockPlusButton', function () {
             storyIdToAssignBasedOnBlockType = storyId;
             parentBlockNextInputField.val(storyId);
 
-            console.log(`inside line and storyIdToAssignBasedOnBlockType: ${storyIdToAssignBasedOnBlockType} the storyId was:  ${storyId}`);
-            
+            console.log(`inside line and storyIdToAssignBasedOnBlockType: ${storyIdToAssignBasedOnBlockType} the storyId was:  ${storyId}`);   
 
         } else if (parentBlockType == "question") { //note that the previous node was a question so now we are actually creating an answer
 
@@ -147,7 +144,6 @@ $('body').on('click', '.blockPlusButton', function () {
             //notice that we are not progressing the storyID after a question node. But if the user creates other nodes before the answer node, things can get messy... thats why we have now the latestQuestionStoryID
             dialoguePlaceholderBasedOnParentBlockType = "Type the answer option here";
             storyIdToAssignBasedOnBlockType = latestQuestionStoryID;
-            
 
             console.log(`inside question and storyIdToAssignBasedOnBlockType: ${storyIdToAssignBasedOnBlockType} the storyId was:  ${storyId}`);
 
@@ -172,8 +168,6 @@ $('body').on('click', '.blockPlusButton', function () {
             console.log(`inside answer and storyIdToAssignBasedOnBlockType: ${storyIdToAssignBasedOnBlockType} the storyId was:  ${storyId}`);
 
         }
-
-        
 
         //calculate where to place the item
 
@@ -306,6 +300,29 @@ function updateLines(element) {
     //for redrawing them we need to loop through all the selected lines and for each of them we will get the two data attributes, then select two blocks based on those attributes and get the coordinates of those blocks for redrawing
     //finally we destroy the old connected lines
 
+    console.log('element id: ' + element.attr('id'));
+
+    let justTheIdNumber = element.attr('id').replace(/\D/g, '');
+
+    console.log('just the id number: '+ justTheIdNumber);
+
+    let theNodeInTheMasterObject = getDialogueNodeById(justTheIdNumber);
+
+    console.log('theNodeInTheMasterObject: ' + theNodeInTheMasterObject);
+
+    //if not null, loop through each line
+    if (theNodeInTheMasterObject) {
+        for (let i = 0; i < theNodeInTheMasterObject.outgoingLines.length; i++) {
+          let line = theNodeInTheMasterObject.outgoingLines[i];
+          console.log('should update linelem next, elem is: ' + line);
+          line.lineElem.position();
+        }
+      }
+
+
+
+
+
     allConnectedLines = $(element).parent().find('.line');
 
     myelems = allConnectedLines;
@@ -347,10 +364,25 @@ function updateLines(element) {
 
         //createLine(x1Pos, y1Pos, x2Pos, y2Pos, block1.attr('id'), block2.attr('id'), plusButtonNumberConnectedTo, latestNodeForLines);
 
-        e.position();
+        e.get(0).position();
     })
 
 }
+
+
+//for searching dialogue nodes based on their ids
+function getDialogueNodeById(id) {
+    for (let i = 0; i < gameDialogueMakerProject.characters.length; i++) {
+      let character = gameDialogueMakerProject.characters[i];
+      for (let j = 0; j < character.dialogueNodes.length; j++) {
+        let node = character.dialogueNodes[j];
+        if (node.dialogueID == id) {
+          return node;
+        }
+      }
+    }
+    return null; // node not found
+  }
 
 
 /* TRY TO IMPROVE UPDATELIONES FUNCTION */
