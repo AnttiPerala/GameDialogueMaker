@@ -136,10 +136,39 @@ function drawDialogueMakerProject(){
 
         addAutoResize();
 
-        new LeaderLine(
-            lineStartNode.get(0), //get(0) converts jQuery object to regular dom object
-            lineEndNodeElement.get(0)
-        );
+        //loop through the object again to create the lines
+
+        //loop through all dialogue nodes of a character
+        for (let j = 0; j < gameDialogueMakerProject.characters[i].dialogueNodes.length; j++) {
+
+            //loop through the lines of a dialogue node
+            for (let k = 0; k < gameDialogueMakerProject.characters[i].dialogueNodes[j].outgoingLines.length; k++){
+
+                let lineStartNode = gameDialogueMakerProject.characters[i].dialogueNodes[j].nodeElement; //node which we are handling currently
+
+                let currLine; 
+                
+                //check that there are lines
+                if (gameDialogueMakerProject.characters[i].dialogueNodes[j].outgoingLines.length != 0){
+                    currLine = gameDialogueMakerProject.characters[i].dialogueNodes[j].outgoingLines[k]; //line we are handling currently
+                }
+
+                let lineEndNodeId = currLine.toNode;
+
+                let lineEndNode = currI.dialogueNodes.find(obj => obj.dialogueID == lineEndNodeId);
+
+                let lineEndNodeElement = lineEndNode.nodeElement;
+
+                new LeaderLine(
+                    lineStartNode.get(0), //get(0) converts jQuery object to regular dom object
+                    lineEndNodeElement.get(0)
+                );
+                
+            }//end k loop
+
+          } //end j loop
+
+        
 
       } // end i loop
 
