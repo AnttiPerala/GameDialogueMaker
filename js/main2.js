@@ -13,158 +13,252 @@ draw a dotted line when the user connects a node to another node without the plu
 
 
 */
-let cloneMode = false;
-let eraseMode = false;
-let latestNodeForLines;
 
 //these make moving/dragging the canvas possible
 $("#mainArea").draggable();
 $("#mainArea").draggable('enable');
 
+let newBlockId = 2; //give each block unique id regardless of questions/answers
+let storyId = 1; //this one will remain the same for questions and their answers but otherwise changes. Not sure if I like this design choice anymore now with the new system.. Using just a single blockID sounds simpler..
 
 
+//calculate where to place the item
+
+let newBlockPosition = 0;
+if (newBlockId < 20) {
+
+    newBlockPosition = newBlockId * 5;
+
+} else {
+
+    newBlockPosition = 20;
+
+}
+
+//not actually so sure if I should create a structure where each branch is nested more and more inside. Maybe the Construct Tutorial data structure is kind of avoiding that by using ID:s
+
+//what if we just try to handle things by dom traversal? in that situation it might be actually useful to nest nodes in the dom so that when you move the topmost node, all the children move with it
+
+//Okay edit in 18.2.2023: I will create a master object after all, something like this:
+
+let gameDialogueMakerProject = {
+    settings: {},
+    characters:[{
+        characterName: 'Mike',
+        characterID: 1,
+        characterNodeX: 10,
+        characterNodeY: 10,
+        dialogueNodes: [
+            {
+                dialogueID: 1,
+                dialogueType: 'line',
+                dialogueText: 'Example dialogue, hello!',
+                nextNode: 2,
+                dialogueNodeX: 10,
+                dialogueNodeY: 10,
+                outgoingSockets: 1,
+                outgoingLines: [
+                    {
+                        fromNode: 1,
+                        fromSocket: 1,
+                        toNode: 2,
+                        transitionConditions: [
+                            {
+                                variableName: 'myvar',
+                                comparisonOperator: '=',
+                                variableValue: 'false'
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                dialogueID: 2,
+                dialogueType: 'question',
+                dialogueText: 'How are you today?',
+                nextNode: -1,
+                dialogueNodeX: 10,
+                dialogueNodeY: 10,
+                outgoingSockets: 3,
+                outgoingLines: [
+                    {
+                        fromNode: 2,
+                        fromSocket: 1,
+                        toNode: 3,
+                        transitionConditions: [
+                            {
+                                variableName: 'only write option if all transition conditions are true',
+                                comparisonOperator: '=',
+                                variableValue: 'false'
+                            }
+                        ]
+                    },
+                    {
+                        fromNode: 2,
+                        fromSocket: 2,
+                        toNode: 5,
+                        transitionConditions: [
+                            {
+                                variableName: 'only write option if all transition conditions are true',
+                                comparisonOperator: '=',
+                                variableValue: 'false'
+                            }
+                        ]
+                    }
+                ] //end lines
+            },
+            {
+                dialogueID: 3,
+                dialogueType: 'answer',
+                dialogueText: 'Fine thank you',
+                nextNode: 4,
+                dialogueNodeX: -100,
+                dialogueNodeY: 10,
+                outgoingSockets: 1,
+                outgoingLines: [
+                    {
+                        fromNode: 3,
+                        fromSocket: 1,
+                        toNode: 4,
+                        transitionConditions: [
+                            
+                        ]
+                    }
+                ] //end lines
+            },
+            {
+                dialogueID: 5,
+                dialogueType: 'answer',
+                dialogueText: 'Not so great',
+                nextNode: 6,
+                dialogueNodeX: 250,
+                dialogueNodeY: -160,
+                outgoingSockets: 1,
+                outgoingLines: [
+                    {
+                        fromNode: 3,
+                        fromSocket: 1,
+                        toNode: 4,
+                        transitionConditions: [
+                            
+                        ]
+                    }
+                ] //end lines
+            }
+
+        ]//end dialoguenodes
+
+    }]
+}
 /* This function will recursively loop through the entire project object and write it to the page as nodes */
 function drawDialogueMakerProject(){
 
     //store the previously create node after every node creation so right parents can be appended to. Don't change this for answer nodes, because they should all go inside the same parent (the question node)
     let latestNode;
-    //store every node, including answers in this one for line appending:
-    
-    //loop through each character
+
     for (let i = 0; i < gameDialogueMakerProject.characters.length; i++) {
-        //console.log(gameDialogueMakerProject.characters[i].characterName);
+        console.log(gameDialogueMakerProject.characters[i].characterName);
 
-        let currI = gameDialogueMakerProject.characters[i];
+        let blockWrap = $('<div/>', {
+            class: 'blockWrap characterRoot',
+          });
+
         /* Creating the character roots here  */
+        blockWrap.append(`
+            <div class="contentWrap">
+                <div style="display: flex; align-items:center; justify-content: center;">
+          
+                </div>
+                    <div id="id${newBlockId}" class="block">
+                        <div style="text-align: left;">
+                            <span style="width: 35%; display:inline-block; text-align: right;">Character ID:</span><input class="blockid"
+                                style="width: 15%; display:inline-block;" readonly type="number" value="${gameDialogueMakerProject.characters[i].characterID}">
+                        </div>
+                        <input type="text" class="characterName elementInfoField" placeholder="character name" value="${gameDialogueMakerProject.characters[i].characterName}">
+              
+                        
+                    </div>
+                    <div class="plusButtonContainer" style="display: flex; align-items: end; justify-content: center;">
+                        <div class="blockPlusButton" data-buttonindex=0 data-acceptclicks=true>+</div>
+                    </div>
+            </div>
 
-        //set some values for the stuff inside the characterNodeHTML
-        characterNodeHTML.strictSelect('.blockid').val(`${currI.characterID}`);
-        characterNodeHTML.strictSelect('.characterName').val(`${currI.characterName}`);
-        currI.nodeElement.attr('id', `char${currI.characterID}`);
-        currI.nodeElement.append(characterNodeHTML);
-
-        latestNode = currI.nodeElement;
-        
-        //loop through all dialogue nodes of a character
-        for (let j = 0; j < gameDialogueMakerProject.characters[i].dialogueNodes.length; j++) {
-            //console.log(gameDialogueMakerProject.characters[i].dialogueNodes[j].dialogueText);
-            //append the dialogue node to the previous dialogue node. But if it's a answer node, maybe it needs to be appended to the closest question node.
-
-            let currJ = gameDialogueMakerProject.characters[i].dialogueNodes[j];
-
-            let dialogueNode = createDialogueNode(currJ.nodeElement, currJ.dialogueID, currJ.dialogueType, currJ.dialogueText, currJ.nextNode, currJ.dialogueNodeX, currJ.dialogueNodeY, currJ.outgoingSockets, currJ.outgoingLines); // nodeElement, dialogueID,dialogueType,
-            
-            //calculate rigid dialogue block position:
-            //for x we need to know for answer nodes if the node has siblings (nodes connecting to the same parent node). 
-
-            let rigidX;
-            let rigidY;
-            if (currJ.dialogueType == "answer"){
-
-                rigidX = ((currJ.siblings-1)*320) - currJ.siblingNumber*320;
-                rigidY = currJ*190 - currJ.siblingNumber*190;
-
-            }
-
-            //for y I think we can check how many non-answer nodes there are
-
-            
-
-            dialogueNode.appendTo(latestNode) //latestnode is set below after append
-                .draggable({
-                    drag: function (event, ui) {
-                        //console.log('dragging');
-                        updateLines($(this).find('.block')); //called only when dragged
-                    }
-                })
-            .css({ top: rigidY + 'px', left: rigidX + 'px', position: 'absolute' });
-
-        
-
-            //set the appended node to be the new lastestNode (except for answers)
-            if (currJ.dialogueType !== 'answer'){
-                latestNode = dialogueNode;
-                //console.log('latest node set to ' + latestNode.attr("class"));
-            }
-            //this is set also for answers because the are parents for lines
-            latestNodeForLines = dialogueNode;
-
-          } //end j loop
-
-        
-
-        gameDialogueMakerProject.characters[i].nodeElement.prependTo('#mainArea')
-            .draggable({
-                drag: function (event, ui) {
-                    //console.log('dragging');
-                    updateLines($(this).find('.block')); //called only when dragged
-                }
-            })
-        .css({ top: 10, left: 10 });
+        `);
 
         addAutoResize();
 
+        latestNode = blockWrap; //always store the latest created node here for parenting purposes (just not for answer nodes)
+        
+        //newBlockId++; Not needed since all values should come from object directly
+
+
+
+        /*  */
+
+        //loop through all dialogue nodes of a character
+        for (let j = 0; j < gameDialogueMakerProject.characters[i].dialogueNodes.length; j++) {
+            console.log(gameDialogueMakerProject.characters[i].dialogueNodes[j].dialogueText);
+            //append the dialogue node to the previous dialogue node. But if it's a answer node, maybe it needs to be appended to the closest question node.
+
+
+
+            let dialogueNode = createDialogueNode(gameDialogueMakerProject.characters[i].dialogueNodes[j].dialogueID, gameDialogueMakerProject.characters[i].dialogueNodes[j].dialogueType, gameDialogueMakerProject.characters[i].dialogueNodes[j].dialogueText, gameDialogueMakerProject.characters[i].dialogueNodes[j].nextNode, gameDialogueMakerProject.characters[i].dialogueNodes[j].dialogueNodeX, gameDialogueMakerProject.characters[i].dialogueNodes[j].dialogueNodeY, gameDialogueMakerProject.characters[i].dialogueNodes[j].outgoingSockets, gameDialogueMakerProject.characters[i].dialogueNodes[j].outgoingLines); // dialogueID,dialogueType,dialogueText,nextNode,dialogueNodeX,dialogueNodeY,outgoingSockets,outgoingLines 
+            //newBlockId++; //increase the global id after creating a block. Nope, take directly from object instead.
+
+            //calculate where to place the item, other elements seem position themselves according to neighboring elements, but answers should be next to each other horizontally
+            //we need the position of the parent node and the type of the node to be created for calculating the position
+            //actually, we should only calculate a position if the element is completely new, since all other positions should come from the existing node information in the object
+            //so actually maybe it's simplest to calculate this much earlier, at the point of clicking on a plus button
+            //so all nodes should already know their exact position before even placed in the object structure
+
+            
+            dialogueNode.appendTo(latestNode) //latestnode is set below after append
+            .draggable({
+                drag: function (event, ui) {
+                    //console.log('dragging');
+                    updateLines($(this).find('.block'));
+                }
+            })
+            .css({ top: gameDialogueMakerProject.characters[i].dialogueNodes[j].dialogueNodeY + 'px', left: gameDialogueMakerProject.characters[i].dialogueNodes[j].dialogueNodeX + 'px' })
+           
+            ;
+
+        addAutoResize();
+
+            //set the appended node to be the new lastestNode (except for answers)
+            if (gameDialogueMakerProject.characters[i].dialogueNodes[j].dialogueType !== 'answer'){
+                latestNode = dialogueNode;
+                console.log('latest node set to ' + latestNode.attr("class"));
+            }
+
+
+            //loop through all outgoing lines of a dialogue node
+            for (let k = 0; k < gameDialogueMakerProject.characters[i].dialogueNodes[j].outgoingLines.length; k++) {
+                console.log(gameDialogueMakerProject.characters[i].dialogueNodes[j].outgoingLines[k].fromNode);
+                
+                //loop through all transition conditions of a line
+                for (let l = 0; l < gameDialogueMakerProject.characters[i].dialogueNodes[j].outgoingLines[k].transitionConditions.length; l++) {
+                    console.log(gameDialogueMakerProject.characters[i].dialogueNodes[j].outgoingLines[k].transitionConditions[l].variableName);
+                    
+                  } //end l loop
+
+              } //end k loop
+
+          } //end j loop
+
+        blockWrap.prependTo('#mainArea')
+        .draggable({
+            drag: function (event, ui) {
+                //console.log('dragging');
+                updateLines($(this).find('.block'));
+            }
+        })
+        .css({ top: newBlockPosition, left: newBlockPosition })
+        .find('.block')
+        .attr('id', 'id' + newBlockId)
+        ;
+
       } // end i loop
-
-
-    /* LOOP A SECOND TIME AFTER APPEND FOR LINES: */
-
-//loop through each character
-for (let i = 0; i < gameDialogueMakerProject.characters.length; i++) {
-
-    //loop through all dialogue nodes of a character
-    for (let j = 0; j < gameDialogueMakerProject.characters[i].dialogueNodes.length; j++) {
-        //console.log(gameDialogueMakerProject.characters[i].dialogueNodes[j].dialogueText);
-        //append the dialogue node to the previous dialogue node. But if it's a answer node, maybe it needs to be appended to the closest question node.
-
-
-        //set the appended node to be the new lastestNode (except for answers)
-        if (gameDialogueMakerProject.characters[i].dialogueNodes[j].dialogueType !== 'answer') {
-
-            //console.log('latest node set to ' + latestNode.attr("class"));
-        }
- 
-        //loop through all outgoing lines of a dialogue node
-        for (let k = 0; k < gameDialogueMakerProject.characters[i].dialogueNodes[j].outgoingLines.length; k++) {
-            //console.log(gameDialogueMakerProject.characters[i].dialogueNodes[j].outgoingLines[k].fromNode);
-
-            let x1 = 14; //gameDialogueMakerProject.characters[i].dialogueNodes[j].dialogueNodeX
-            let y1 = gameDialogueMakerProject.characters[i].dialogueNodes[j].dialogueNodeY;
-
-            //for the second node I think we need to search the nodes based on the toNode value of the line and take it's x and y
-
-            //find the node to connect to based on the outgoingLine's toNode: 
-            const foundObject = gameDialogueMakerProject.characters[i].dialogueNodes.find(obj => obj.dialogueID == gameDialogueMakerProject.characters[i].dialogueNodes[j].outgoingLines[k].toNode);
-
-            gameDialogueMakerProject.characters[i].dialogueNodes[j].nodeElement.addClass('blockWrap');
-            let connectionNode1 = gameDialogueMakerProject.characters[i].dialogueNodes[j].nodeElement;
-            let connectionNode2 = foundObject.nodeElement; //access the actual div of the wrap (hopefully)
-
-            let x2 = foundObject.dialogueNodeX + 14;
-            let y2 = foundObject.dialogueNodeY + 50;
-
-            let block1 = gameDialogueMakerProject.characters[i].dialogueNodes[j].outgoingLines[k].fromNode;
-            let block2 = gameDialogueMakerProject.characters[i].dialogueNodes[j].outgoingLines[k].toNode;
-            let buttonindex = gameDialogueMakerProject.characters[i].dialogueNodes[j].outgoingLines[k].fromSocket;
-
-            //console.log(`x1: ${x1} y1: ${y1} x2: ${x2} y2: ${y2} before calling createline latestNodeForLines is: ${latestNodeForLines}`)
-
-            createLine(x1, y1, x2, y2, block1, block2, buttonindex, latestNodeForLines, connectionNode1, connectionNode2); //x1, y1, x2, y2, block1, block2, buttonindex, latest html parent element. //block1 and block2 are html element id's 
-
-            //loop through all transition conditions of a line
-            for (let l = 0; l < gameDialogueMakerProject.characters[i].dialogueNodes[j].outgoingLines[k].transitionConditions.length; l++) {
-                console.log(gameDialogueMakerProject.characters[i].dialogueNodes[j].outgoingLines[k].transitionConditions[l].variableName);
-
-            } //end l loop
-
-        } //end k loop
-
-    } //end j loop
-
-   
-}
-
- // end i loop
 
 } // end function drawDialogueMakerProject
 
@@ -172,6 +266,29 @@ drawDialogueMakerProject();
 
 
 
+function loopThroughArraysCustom(obj) {
+  if (Array.isArray(obj)) { // if the object is an array
+    // do custom stuff for arrays that belong to a certain object
+    if (obj.length > 0 && obj[0].hasOwnProperty('characterName')) {
+      // do custom stuff for arrays that belong to the "characters" object
+    }
+    for (let i = 0; i < obj.length; i++) {
+      loopThroughArraysCustom(obj[i]); // recursively call the function with the current element
+    }
+  } else if (typeof obj === 'object' && obj !== null) { // if the object is an object (but not null)
+    for (const key in obj) {
+      if (Array.isArray(obj[key])) {
+        // do custom stuff for object properties that are arrays
+        if (key === 'dialogueNodes') {
+          // do custom stuff for arrays that belong to the "dialogueNodes" object
+        }
+      }
+      loopThroughArraysCustom(obj[key]); // recursively call the function with the current property value
+    }
+  }
+}
+
+//loopThroughArraysCustom(gameDialogueMakerProject);
 
 
  //auto resize text area, the textareas need  data-autoresize attribute, also need to call addAutoResize() after adding to dom:
@@ -187,7 +304,7 @@ drawDialogueMakerProject();
     });
 }
 
-function createDialogueNode(nodeElement,dialogueIDSent,dialogueType,dialogueText,nextNode,dialogueNodeX,dialogueNodeY,outgoingSockets,outgoingLines){
+function createDialogueNode(dialogueID,dialogueType,dialogueText,nextNode,dialogueNodeX,dialogueNodeY,outgoingSockets,outgoingLines){
    //answers should have read-only selects
     let selectElementContentBasedOnParentBlockType = ``;
     let storyIdToAssignBasedOnBlockType;
@@ -213,7 +330,7 @@ function createDialogueNode(nodeElement,dialogueIDSent,dialogueType,dialogueText
         dialoguePlaceholderBasedOnParentBlockType = "Type the dialogue here";
  
 
-        //console.log(`inside line and storyIdToAssignBasedOnBlockType: ${storyIdToAssignBasedOnBlockType} the storyId was:  ${storyId}`);
+        console.log(`inside line and storyIdToAssignBasedOnBlockType: ${storyIdToAssignBasedOnBlockType} the storyId was:  ${storyId}`);
         
 
     } else if (dialogueType == "question") { //note that the previous node was a question so now we are actually creating an answer
@@ -236,12 +353,9 @@ function createDialogueNode(nodeElement,dialogueIDSent,dialogueType,dialogueText
             Answers: <input class="answerNumber" type="number" min="2" max="9" value=${outgoingSockets}>
         `;
 
-        //add as many plus buttons as there are outgoingSockets
        for (i=1; i < outgoingSockets; i++){
-
-            plusButtons += `<div class="blockPlusButton" data-buttonindex=${i} data-acceptclicks=true>+</div>`;
-       
-        }
+        plusButtons += singlePlusButton;
+       }
         
 
     } else if (dialogueType == "answer") {
@@ -272,18 +386,17 @@ function createDialogueNode(nodeElement,dialogueIDSent,dialogueType,dialogueText
 }
 
 
-    //console.log('dialogueIDSent: ' + dialogueIDSent);
-    nodeElement.classList = "blockWrap";
-    nodeElement.append(`
-
+    
+    let newBlock = $(`
+            <div class="blockWrap id${dialogueID}">
                 <div class="contentWrap">
                 <div style="display: flex; align-items:center; justify-content: center;">
                     <div class="topConnectionSocket">o</div>
                 </div>
-                    <div id="id${dialogueIDSent}" class="block">
+                    <div id="id${dialogueID}" class="block">
                         <div style="text-align: left;">
                             <span style="width: 15%; display:inline-block; text-align: right;">ID:</span><input class="blockid"
-                                style="width: 15%; display:inline-block;" readonly type="number" value="${dialogueIDSent}">
+                                style="width: 15%; display:inline-block;" readonly type="number" value="${dialogueID}">
                         </div>
                         ${selectElementContentBasedOnParentBlockType}
                         <textarea class="dialogue" placeholder="${dialoguePlaceholderBasedOnParentBlockType}" data-autoresize>${dialogueText}</textarea>
@@ -301,8 +414,10 @@ function createDialogueNode(nodeElement,dialogueIDSent,dialogueType,dialogueText
                         ${plusButtons}
                     </div>
                 </div>
+                
+            </div>
                         `);
-      
-    return nodeElement;
-}
 
+            
+            return newBlock;
+}
