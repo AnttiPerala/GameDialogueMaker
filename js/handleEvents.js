@@ -291,6 +291,8 @@ let allConnectedLines;
 
 function updateLines(element) {
 
+    console.log('calling updateLines');
+
     //passed in _element_ is the block, not the blockWrap
 
     //globalCheck = $(element).attr('id');
@@ -305,6 +307,8 @@ function updateLines(element) {
     //finally we destroy the old connected lines
 
     allConnectedLines = $(element).parent().find('.line');
+
+    myelems = allConnectedLines;
 
     allConnectedLines.each(function (i, e) {
 
