@@ -112,7 +112,10 @@ function drawDialogueMakerProject(){
                 let lineEndNodeElement = lineEndNode.nodeElement;
 
 
-                createLine("x1", "y1", "x2", "y2", "block1", "block2", "buttonindex", latestNodeForLines, lineStartNode, lineEndNodeElement);
+                //createLine("x1", "y1", "x2", "y2", "block1", "block2", "buttonindex", latestNodeForLines, lineStartNode, lineEndNodeElement);
+                
+                //tried to create lines here, but it's too difficult since none of the elements are in dom
+
                 
                 
 
@@ -133,15 +136,14 @@ function drawDialogueMakerProject(){
 
         addAutoResize();
 
+        new LeaderLine(
+            lineStartNode.get(0), //get(0) converts jQuery object to regular dom object
+            lineEndNodeElement.get(0)
+        );
+
       } // end i loop
 
-    new LeaderLine(
-        gameDialogueMakerProject.characters[0].dialogueNodes[1].nodeElement,
-        gameDialogueMakerProject.characters[0].dialogueNodes[2].nodeElement
-    );
-
     
-
 
 
 } // end function drawDialogueMakerProject
