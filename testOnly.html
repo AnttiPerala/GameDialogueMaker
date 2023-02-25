@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <script>
+        // Define the nested elements you want to draw lines between
+        const parentElement = document.createElement('div');
+        const childElement = document.createElement('div');
+
+        // Set the positions of the elements
+        const parentPosition = { x: 50, y: 50 };
+        const childPosition = { x: 100, y: 100 };
+
+        // Set the CSS position and dimensions of the elements
+        parentElement.style.position = 'absolute';
+        parentElement.style.left = `${parentPosition.x}px`;
+        parentElement.style.top = `${parentPosition.y}px`;
+        parentElement.style.width = '50px';
+        parentElement.style.height = '50px';
+        parentElement.style.backgroundColor = "gray";
+
+        childElement.style.position = 'absolute';
+        childElement.style.left = `${childPosition.x}px`;
+        childElement.style.top = `${childPosition.y}px`;
+        childElement.style.width = '50px';
+        childElement.style.height = '50px';
+        childElement.style.backgroundColor = "yellow";
+
+        // Add the child element to the parent element
+        parentElement.appendChild(childElement);
+
+        // Add the parent and child elements to the document
+        document.body.appendChild(parentElement);
+        document.body.appendChild(childElement);
+
+        // Calculate the positions of the elements relative to the viewport
+        const parentRect = parentElement.getBoundingClientRect();
+        const childRect = childElement.getBoundingClientRect();
+
+        console.log('parentRect', parentRect);
+        console.log('childRect', childRect);
+
+        // Calculate the angle between the parent and child elements
+        const dx = childRect.left - parentRect.left;
+        const dy = childRect.top - parentRect.top;
+        const angle = (Math.atan2(dy, dx) * 180) / Math.PI;
+
+        console.log('dx', dx);
+        console.log('dy', dy);
+        console.log('angle', angle);
+
+        // Create a div element for the line and add it to the document
+        const lineElement = document.createElement('div');
+        lineElement.classList.add('line');
+        document.body.appendChild(lineElement);
+
+        // Set the CSS styles for the line element
+        lineElement.style.position = 'absolute';
+        lineElement.style.borderTop = '2px solid red';
+        lineElement.style.left = `${parentRect.left + parentRect.width / 2}px`;
+        lineElement.style.top = `${parentRect.top + parentRect.height / 2}px`;
+        lineElement.style.width = `${childRect.left + childRect.width / 2 - parentRect.left - parentRect.width / 2}px`;
+        lineElement.style.transform = `translate(-50%, -50%) rotate(${angle}deg)`;
+        lineElement.style.zIndex = '-1'; // Ensure the line appears behind the parent and child elements
+
+        console.log('lineElement', lineElement);
+    </script>
+</body>
+
+</html>

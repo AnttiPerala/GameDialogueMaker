@@ -114,7 +114,7 @@ function drawDialogueMakerProject(){
 
                 createLine("x1", "y1", "x2", "y2", "block1", "block2", "buttonindex", latestNodeForLines, lineStartNode, lineEndNodeElement);
                 
-
+                
 
             }//end k loop
 
@@ -135,10 +135,19 @@ function drawDialogueMakerProject(){
 
       } // end i loop
 
+    new LeaderLine(
+        gameDialogueMakerProject.characters[0].dialogueNodes[1].nodeElement,
+        gameDialogueMakerProject.characters[0].dialogueNodes[2].nodeElement
+    );
+
+    
+
+
 
 } // end function drawDialogueMakerProject
 
 drawDialogueMakerProject();
+
 
 
 

@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        .line {
+            position: absolute;
+            border-top: 2px solid red;
+            z-index: -1;
+        }
+
+        .parent {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            background-color: gray;
+        }
+
+        .child {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            background-color: yellow;
+        }
+    </style>
+</head>
+
+<body>
+    <script>
+        // Define the nested elements you want to draw lines between
+        const parentElement = document.createElement('div');
+        parentElement.classList.add('parent');
+        parentElement.style.left = '50px';
+        parentElement.style.top = '50px';
+
+        const childElement = document.createElement('div');
+        childElement.classList.add('child');
+        childElement.style.left = '200px';
+        childElement.style.top = '300px';
+
+        // Append the elements to the document
+        document.body.appendChild(parentElement);
+        document.body.appendChild(childElement);
+
+        // Calculate the positions of the elements relative to the viewport
+        const parentRect = parentElement.getBoundingClientRect();
+        const childRect = childElement.getBoundingClientRect();
+
+        // Calculate the center positions of the parent and child elements
+        const parentCenterX = parentRect.left + parentRect.width / 2;
+        const parentCenterY = parentRect.top + parentRect.height / 2;
+        const childCenterX = childRect.left + childRect.width / 2;
+        const childCenterY = childRect.top + childRect.height / 2;
+
+        // Calculate the angle between the parent and child elements
+        const dx = childCenterX - parentCenterX;
+        const dy = childCenterY - parentCenterY;
+        const angle = (Math.atan2(dy, dx) * 180) / Math.PI;
+
+        // Calculate the length of the line using the Pythagorean theorem
+        const distance = Math.sqrt(dx * dx + dy * dy);
+
+        // Create a div element for the line and add it to the parent element
+        const lineElement = document.createElement('div');
+        lineElement.classList.add('line');
+        lineElement.style.width = `${distance}px`;
+        lineElement.style.transform = `translate(-50%, -50%) rotate(${angle}deg)`;
+        parentElement.appendChild(lineElement);
+
+        // Position the line at the center of the parent element
+        lineElement.style.left = `${parentCenterX}px`;
+        lineElement.style.top = `${parentCenterY}px`;
+    </script>
+</body>
+
+</html>
