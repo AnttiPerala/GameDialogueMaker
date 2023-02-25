@@ -28,35 +28,44 @@
 
 <body>
 
-    <div id="elem1">1</div>
-    <div id="elem2">2</div>
+   <!--  <div id="elem1">1</div>
+    <div id="elem2">2</div> -->
  
 
     <script src="js/libs/leader-line.min.js"></script>
     <script src="js/libs/jquery-3.6.0.min.js"></script>
     <script src="js/libs/jquery-ui.min.js"></script>
+    <script src="js/gameDialogueMakerProjectExampleObject.js"></script>
 
     <script>
 
         $(document).ready(function(){
 
-            let elem1 = document.getElementById('elem1'); //cannot be jQuery elements for LeaderLine to work
-            let elem2 = document.getElementById('elem2');
-            
-            
+            let elem1 = gameDialogueMakerProject.characters[0].dialogueNodes[1].nodeElement.get(0); //cannot be jQuery elements for LeaderLine to work
+            let elem2 = gameDialogueMakerProject.characters[0].dialogueNodes[2].nodeElement.get(0);
+
             $(elem1).draggable({
-                    drag: function (event, ui) {
-                        //console.log('dragging');
-                        updateLines(); //called only when dragged
-                    }
-                });
+                drag: function (event, ui) {
+                    //console.log('dragging');
+                    updateLines(); //called only when dragged
+                }
+            });
 
             $(elem2).draggable({
-                            drag: function (event, ui) {
-                                //console.log('dragging');
-                                updateLines(); //called only when dragged
-                            }
-                        });
+                drag: function (event, ui) {
+                    //console.log('dragging');
+                    updateLines(); //called only when dragged
+                }
+            });
+
+            elem1.id = 'elem1';
+            elem2.id = 'elem2';
+
+            document.body.appendChild(elem1);
+            document.body.appendChild(elem2);
+            
+            
+            
 
             let line =  new LeaderLine(
                 elem1,
