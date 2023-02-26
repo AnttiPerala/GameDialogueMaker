@@ -283,6 +283,18 @@ $(document).mousedown(function () {
 
 let allConnectedLines;
 
+//when the mainArea is dragged or an update for all lines is needed for some reason
+function updateAllLines(){
+    gameDialogueMakerProject.characters.forEach((character) => {
+        character.dialogueNodes.forEach((dialogueNode) => {
+            dialogueNode.outgoingLines.forEach((outgoingLine) => {
+                const lineElem = outgoingLine.lineElem;
+                lineElem.position(); //LeaderLine function call
+            });
+        });
+    });
+}
+
 function updateLines(element) {
 
     console.log('calling updateLines');
@@ -325,7 +337,7 @@ function updateLines(element) {
         }
       }
 
-      //if not null, loop through each line
+      //if not null, loop through each line for PARENT
     if (theParentNodeInTheMasterObject) {
         for (let i = 0; i < theParentNodeInTheMasterObject.outgoingLines.length; i++) {
           let line = theParentNodeInTheMasterObject.outgoingLines[i];

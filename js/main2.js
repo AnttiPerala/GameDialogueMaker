@@ -18,8 +18,13 @@ let eraseMode = false;
 let latestNodeForLines;
 
 //these make moving/dragging the canvas possible
-$("#mainArea").draggable();
-$("#mainArea").draggable('enable');
+$("#mainArea").draggable({drag: function (event, ui) {
+    //console.log('dragging');
+    updateAllLines(ui.helper); //called only when dragged
+}});
+$("#mainArea").draggable(
+    'enable'
+);
 
 
 
