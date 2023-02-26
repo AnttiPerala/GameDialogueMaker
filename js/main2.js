@@ -63,17 +63,15 @@ function drawDialogueMakerProject(){
             //for x we need to know for answer nodes if the node has siblings (nodes connecting to the same parent node). 
 
             let rigidX;
-            let rigidY;
-            if (currJ.dialogueType == "answer"){
-
-                rigidX = ((currJ.siblings-1)*320) - currJ.siblingNumber*320;
-                rigidY = currJ*190 - currJ.siblingNumber*190;
-
+            let rigidY = 138 * (j+1);
+            console.log(`rigid y ${rigidY}`);
+            if (currJ.dialogueType == "answer") {
+                rigidX = ((currJ.siblings - 1) * 320 * -1) + currJ.siblingNumber * 320; //NOTE: ONLY answernodes have a siblingNumber
+                rigidY = ((currJ.siblingNumber+1)*277) - currJ.siblingNumber * 277;
             }
 
-            //for y I think we can check how many non-answer nodes there are
 
-            
+            //for y I think we can check how many non-answer nodes there are
 
             dialogueNode.appendTo(latestNode) //latestnode is set below after append
                 .draggable({

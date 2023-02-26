@@ -71,7 +71,7 @@ let gameDialogueMakerProject = {
                     },
                     {
                         fromNode: 2,
-                        fromSocket: 1,
+                        fromSocket: 2,
                         toNode: 5,
                         lineElem: '',
                         transitionConditions: [
