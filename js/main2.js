@@ -151,6 +151,8 @@ function drawDialogueMakerProject(){
 
                 let lineStartNode = gameDialogueMakerProject.characters[i].dialogueNodes[j].nodeElement; //node which we are handling currently
 
+                
+                
                 let currLine; 
                 
                 //check that there are lines
@@ -158,15 +160,23 @@ function drawDialogueMakerProject(){
                     currLine = gameDialogueMakerProject.characters[i].dialogueNodes[j].outgoingLines[k]; //line we are handling currently
                 }
 
+                //select the correct plus button to draw the line from
+                let plusButtonToConnectTo = currLine.fromSocket;
+
+                let plusButtonElem = $(lineStartNode).find('.blockPlusButton[data-buttonindex="' + plusButtonToConnectTo + '"]');
+
                 let lineEndNodeId = currLine.toNode;
 
                 let lineEndNode = currI.dialogueNodes.find(obj => obj.dialogueID == lineEndNodeId);
 
                 let lineEndNodeElement = lineEndNode.nodeElement;
 
+                //get the top socket
+                let lineEndElementTopSocket = $(lineEndNodeElement).find('.topConnectionSocket');
+
                 let theLine = new LeaderLine(
-                    lineStartNode.get(0), //get(0) converts jQuery object to regular dom object
-                    lineEndNodeElement.get(0),
+                    plusButtonElem.get(0), //get(0) converts jQuery object to regular dom object
+                    lineEndElementTopSocket.get(0),
                     {
                         color: '#0075ff',
                         size: 4,
