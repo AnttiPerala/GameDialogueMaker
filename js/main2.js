@@ -67,7 +67,7 @@ function drawDialogueMakerProject(){
             console.log(`rigid y ${rigidY}`);
             if (currJ.dialogueType == "answer") {
                 rigidX = ((currJ.siblings - 1) * 320 * -1) + currJ.siblingNumber * 320; //NOTE: ONLY answernodes have a siblingNumber
-                rigidY = ((currJ.siblingNumber+1)*277) - currJ.siblingNumber * 277;
+                rigidY = ((currJ.siblingNumber+1)*277) - currJ.siblingNumber * 277; //so that answer "siblings" are created at same height
             }
 
 
