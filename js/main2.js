@@ -78,6 +78,13 @@ function drawDialogueMakerProject(){
                     drag: function (event, ui) {
                         //console.log('dragging');
                         updateLines(ui.helper); //called only when dragged
+                    },
+                    stop: function (event, ui) {
+                        var position = ui.position;
+                        console.log("Element stopped at: (" + position.left + ", " + position.top + ")");
+                        // Your code to update some other element or data
+                        updateElementPositionInObject(ui.helper); //update master object positions
+
                     }
                 })
             .css({ top: rigidY + 'px', left: rigidX + 'px', position: 'absolute' }); //absolute needs to be called AFTER draggable
@@ -133,6 +140,14 @@ function drawDialogueMakerProject(){
                 drag: function (event, ui) {
                     //console.log('dragging');
                     updateLines(ui.helper); //called only when dragged
+                    
+
+                },
+                stop: function (event, ui) {
+                    var position = ui.position;
+                    console.log("Element stopped at: (" + position.left + ", " + position.top + ")");
+                    // Your code to update some other element or data
+                    updateElementPositionInObject(ui.helper); //update master object positions
                 }
             })
         .css({ top: 10, left: 10 });

@@ -1,4 +1,19 @@
 
+$(document).ready(function(){
+
+    //GET THE STORED OBJECT FROM LOCAL STORAGE
+
+    window.addEventListener("load", () => {
+        const myObjectString = localStorage.getItem("gameDialogueMakerProject");
+        if (myObjectString !== null) {
+            gameDialogueMakerProject = JSON.parse(myObjectString);
+            console.log(gameDialogueMakerProject);
+        }
+    });
+
+
+});
+
 
 //CLICK ON THE MAIN PLUS BUTTON TO ADD A NEW CHARACTER 
 
@@ -64,6 +79,7 @@ $('.plus').on('click', function () {
             drag: function (event, ui) {
                 //console.log('dragging');
                 updateLines($(this).find('.block'));
+                updateElementPositionInObject();
             }
         })
         .css({ top: newBlockPosition, left: newBlockPosition })
@@ -220,6 +236,7 @@ $('body').on('click', '.blockPlusButton', function () {
                 drag: function (event, ui) {
                     //console.log('dragging');
                     updateLines($(this).find('.block'));
+                    updateElementPositionInObject();
                 }
             })
             .css({ top: newBlockPositionY + 'px', left: newBlockPositionX + 'px' })
@@ -568,3 +585,12 @@ $('#blocksize').on('change input', function(){
         //$('.block input').css("font-size", $(this).val()/8+10 +'px');
         
     })
+
+//DELETE SAVE FROM LOCAL STORAGE
+
+const deleteSaveButton = document.querySelector("#delete");
+
+deleteSaveButton.addEventListener("click", function () {
+    localStorage.removeItem("gameDialogueMakerProject");
+    alert("Save deleted!");
+});
