@@ -252,7 +252,7 @@ jQuery(document).on('change keyup', '.characterName', function () {
 //UPDATE THE MASTER OBJECT WHEN A TEXT FIELD IS CHANGED
 $(document).on('change keyup', 'textarea.dialogue', function () {
 
-    let valueTyped = $(this).val();
+
 
     let updatedText = $(this).val();
 
@@ -261,6 +261,28 @@ $(document).on('change keyup', 'textarea.dialogue', function () {
     nodeToUpdate.dialogueText = updatedText;
 
     
+
+})
+
+//UPDATE THE MASTER OBJECT WHEN A SELECT OPTION IS CHANGED
+$(document).on('change', '.selectBlockType', function () {
+
+    let updatedValue = $(this).val();
+
+    let nodeToUpdate = findDialogueNodeBasedOnPassedInHtmlElement(this);
+
+    nodeToUpdate.dialogueType = updatedValue;
+
+})
+
+//UPDATE THE MASTER OBJECT WHEN THE NUMBER OF ANSWERS IS CHANGED
+$(document).on('change', '.answerNumber', function () {
+
+    let updatedValue = $(this).val();
+
+    let nodeToUpdate = findDialogueNodeBasedOnPassedInHtmlElement(this);
+
+    nodeToUpdate.outgoingSockets = updatedValue;
 
 })
 

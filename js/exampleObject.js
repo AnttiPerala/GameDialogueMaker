@@ -4,8 +4,8 @@ let gameDialogueMakerProject = {
     characters:[{
         characterName: 'Mike',
         characterID: 1,
-        characterNodeX: 0,
-        characterNodeY: 0,
+        characterNodeX: 271,
+        characterNodeY: 85,
         nodeElement: $('<div class="blockWrap characterRoot"></div>'),
         outgoingLines: [
             {
@@ -28,8 +28,8 @@ let gameDialogueMakerProject = {
                 dialogueType: 'line',
                 dialogueText: 'Example dialogue, hello!',
                 nextNode: 2,
-                dialogueNodeX: 0,
-                dialogueNodeY: 20,
+                dialogueNodeX: 5,
+                dialogueNodeY: 128,
                 outgoingSockets: 1,
                 nodeElement: $('<div></div>'),
                 outgoingLines: [
@@ -54,7 +54,7 @@ let gameDialogueMakerProject = {
                 dialogueText: 'How are you today?',
                 nextNode: -1,
                 dialogueNodeX: 0,
-                dialogueNodeY: 20,
+                dialogueNodeY: 178,
                 outgoingSockets: 3,
                 nodeElement: $('<div></div>'),
                 outgoingLines: [
@@ -107,8 +107,8 @@ let gameDialogueMakerProject = {
                 siblingNumber: 1,
                 dialogueText: 'Fine thank you',
                 nextNode: 4,
-                dialogueNodeX: -100,
-                dialogueNodeY: 20,
+                dialogueNodeX: -280,
+                dialogueNodeY: 215,
                 outgoingSockets: 1,
                 nodeElement: $('<div></div>'),
                 outgoingLines: [
@@ -122,8 +122,8 @@ let gameDialogueMakerProject = {
                 siblingNumber: 2,
                 dialogueText: 'Not so great',
                 nextNode: 6,
-                dialogueNodeX: 250,
-                dialogueNodeY: -160,
+                dialogueNodeX: 27,
+                dialogueNodeY: 211,
                 outgoingSockets: 1,
                 nodeElement: $('<div></div>'),
                 outgoingLines: [
@@ -137,8 +137,8 @@ let gameDialogueMakerProject = {
                 siblingNumber: 3,
                 dialogueText: 'third',
                 nextNode: 6,
-                dialogueNodeX: 550,
-                dialogueNodeY: -360,
+                dialogueNodeX: 350,
+                dialogueNodeY: 208,
                 outgoingSockets: 1,
                 nodeElement: $('<div></div>'),
                 outgoingLines: [
