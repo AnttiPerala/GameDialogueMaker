@@ -86,7 +86,7 @@ function createDialogueNode(nodeElement, dialogueIDSent, dialogueType, dialogueT
     myLog(`dialogueIDSent: ${dialogueIDSent}`, 0, fileInfo = getFileInfo());
     nodeElement.get(0).id = `dialogue${dialogueIDSent}`;
     nodeElement.get(0).classList = "blockWrap";
-    nodeElement.append(`
+    nodeElement.html(`
 
                 <div class="contentWrap">
                 <div style="display: flex; align-items:center; justify-content: center;">

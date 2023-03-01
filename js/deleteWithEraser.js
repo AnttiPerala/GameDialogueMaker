@@ -41,10 +41,13 @@ $('body').on('mousedown', '.block, .line', function () {
         //figure out which lines were connected to the deleted node, because they should go too
         deleteLinesByToNode(idToBeErased);
 
-        myLog(`should erase now ${idToBeErased}`,3,fileInfo = getFileInfo())
+        myLog(`should erase now ${idToBeErased}`,0,fileInfo = getFileInfo())
         $('#mainArea').get(0).innerHTML = '';
         $('svg').remove();
-        //drawDialogueMakerProject();
+        setTimeout(() => {
+            drawDialogueMakerProject();
+        }, 100);
+        
 
 /* 
 
@@ -57,7 +60,7 @@ $('body').on('mousedown', '.block, .line', function () {
 
         //$(this).remove(); */
 
-    }
+    } //end if eraseMode
 }
 );
 

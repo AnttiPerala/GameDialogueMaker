@@ -2,7 +2,7 @@
 function drawDialogueMakerProject() {
 
     //store the previously create node after every node creation so right parents can be appended to. Don't change this for answer nodes, because they should all go inside the same parent (the question node)
-    let latestNode;
+    let latestNode = '';
     //store every node, including answers in this one for line appending:
 
     //loop through each character
@@ -12,13 +12,17 @@ function drawDialogueMakerProject() {
         let currI = gameDialogueMakerProject.characters[i];
         /* Creating the character roots here  */
 
+        //empty the existing element
+        //currI.nodeElement = '';
+
         //set some values for the stuff inside the characterNodeHTML
         characterNodeHTML.strictSelect('.blockid').val(`${currI.characterID}`);
         characterNodeHTML.strictSelect('.characterName').val(`${currI.characterName}`);
         currI.nodeElement.attr('id', `char${currI.characterID}`);
-        currI.nodeElement.append(characterNodeHTML);
+        currI.nodeElement.html(characterNodeHTML);
 
         latestNode = currI.nodeElement;
+        //myLog(`latestNode ${JSON.stringify(latestNode) }`,3,fileInfo = getFileInfo())
 
         //loop through all dialogue nodes of a character
         for (let j = 0; j < gameDialogueMakerProject.characters[i].dialogueNodes.length; j++) {

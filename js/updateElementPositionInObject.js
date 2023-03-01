@@ -35,7 +35,11 @@ function updateElementPositionInObject(element){
 
     }
 
-storeMasterObjectToLocalStorage();
+    if (!eraseMode) { //don't do any of this stuff is the eraser is being used because it might cause drawing twice
+
+      storeMasterObjectToLocalStorage();
+
+    }//end if eraseMode
 
 }
 

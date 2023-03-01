@@ -2,8 +2,7 @@ let myObjectTest;
 
 function storeMasterObjectToLocalStorage() {
 
-    if (!eraseMode){ //don't do any of this stuff is the eraser is being used because it might cause drawing twice
-
+    
         // remove HTML element references from the master object (these should then be recreated by redrawing the entire object)
         for (let character of gameDialogueMakerProject.characters) {
             character.nodeElement = '';
@@ -41,7 +40,7 @@ function storeMasterObjectToLocalStorage() {
         //redraw object
 
         drawDialogueMakerProject();
-    }//end if erasemode
+    
 
 
   

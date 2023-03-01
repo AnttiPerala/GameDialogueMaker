@@ -1,7 +1,7 @@
 //search for a specific character and then a specific node id
 function getDialogueNodeById(charID, id) {
 
-    myLog(`(inside getDialogueNodeById and characterID is ${charID}),1`, 1, fileInfo = getFileInfo());
+    myLog(`(inside getDialogueNodeById and characterID is ${charID})`,0, fileInfo = getFileInfo());
 
     const character = gameDialogueMakerProject.characters.find(char => char.characterID == charID);
     if (!character) {
