@@ -6,15 +6,16 @@ $(document).ready(function(){
     
         const myObjectString = localStorage.getItem("gameDialogueMakerProject");
         if (myObjectString !== null) {
-            console.log(` was not null when getting key from local storage`);
+            myLog(` was not null when getting key from local storage`,1);
             gameDialogueMakerProject = JSON.parse(myObjectString);
-            console.log(gameDialogueMakerProject);
+            myLog(gameDialogueMakerProject,1);
         } else {
-            console.log(` null it seems: ${myObjectString}`);
+            myLog(` null it seems: ${myObjectString}`,1);
         }
 
+       
 
-    console.log(`Inside document ready and local storage should be loaded now ${gameDialogueMakerProject}`);
+    myLog(`Inside document ready and local storage should be loaded now ${gameDialogueMakerProject}`, 1);
 
     //put some empty divs back in the object
     for (let character of gameDialogueMakerProject.characters) {

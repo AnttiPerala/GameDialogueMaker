@@ -35,7 +35,7 @@ function drawDialogueMakerProject() {
             let rigidX;
             let rigidY = 138 * (j + 1);
 
-            myLog(`rigid y ${rigidY}`, 1, fileInfo = getFileInfo())
+            myLog(`rigid y ${rigidY}`, 0, fileInfo = getFileInfo());
             if (currJ.dialogueType == "answer") {
                 rigidX = ((currJ.siblings - 1) * 320 * -1) + currJ.siblingNumber * 320; //NOTE: ONLY answernodes have a siblingNumber
                 rigidY = ((currJ.siblingNumber + 1) * 277) - currJ.siblingNumber * 277; //so that answer "siblings" are created at same height
@@ -77,7 +77,7 @@ function drawDialogueMakerProject() {
             //loop through the lines of a dialogue node
             for (let k = 0; k < gameDialogueMakerProject.characters[i].dialogueNodes[j].outgoingLines.length; k++) {
 
-                myLog(`line ${k} array length: ${gameDialogueMakerProject.characters[i].dialogueNodes[j].outgoingLines.length}`, 2, fileInfo = getFileInfo());
+                myLog(`line ${k} array length: ${gameDialogueMakerProject.characters[i].dialogueNodes[j].outgoingLines.length}`, 1, fileInfo = getFileInfo());
 
                 //NOTE! The lines are loop through again below, after the nodes are in dom
 
@@ -85,7 +85,7 @@ function drawDialogueMakerProject() {
 
         } //end j loop
 
-
+        //ADD THE CHARACTER TO THE DOM
 
         gameDialogueMakerProject.characters[i].nodeElement.prependTo('#mainArea')
             .draggable({
@@ -97,16 +97,18 @@ function drawDialogueMakerProject() {
                 },
                 stop: function (event, ui) {
                     var position = ui.position;
-                    console.log("Element stopped at: (" + position.left + ", " + position.top + ")");
+                    myLog(("Element stopped at: (" + position.left + ", " + position.top + ")"),3);
                     // Your code to update some other element or data
                     updateElementPositionInObject(ui.helper); //update master object positions
                 }
             })
-            .css({ top: 10, left: 10 });
+            .css({ left: gameDialogueMakerProject.characters[i].characterNodeX, top: gameDialogueMakerProject.characters[i].characterNodeY });
 
         addAutoResize();
 
         //loop through the object AGAIN to create the lines:
+
+        //FIRST THE CHARACTERS AND THEIR LINES
 
         for (let c = 0; c < gameDialogueMakerProject.characters[i].outgoingLines.length; c++) {
 
@@ -143,14 +145,11 @@ function drawDialogueMakerProject() {
         //loop through all dialogue nodes of a character
         for (let j = 0; j < gameDialogueMakerProject.characters[i].dialogueNodes.length; j++) {
 
-            
-
-
+     
             //loop through the lines of a dialogue node
             for (let k = 0; k < gameDialogueMakerProject.characters[i].dialogueNodes[j].outgoingLines.length; k++) {
 
                 let lineStartNode = gameDialogueMakerProject.characters[i].dialogueNodes[j].nodeElement; //node which we are handling currently
-
 
 
                 let currLine;

@@ -83,7 +83,7 @@ function createDialogueNode(nodeElement, dialogueIDSent, dialogueType, dialogueT
     }
 
 
-    myLog(`dialogueIDSent: ${dialogueIDSent}`, 1, fileInfo = getFileInfo());
+    myLog(`dialogueIDSent: ${dialogueIDSent}`, 0, fileInfo = getFileInfo());
     nodeElement.get(0).id = `dialogue${dialogueIDSent}`;
     nodeElement.get(0).classList = "blockWrap";
     nodeElement.append(`
