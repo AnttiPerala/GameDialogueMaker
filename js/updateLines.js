@@ -15,25 +15,52 @@ function updateAllLines() {
 
 function updateLines(element) { //element is the dragged node dom element
 
-    console.log('calling updateLines');
+    myLog('calling updateLines', 1, fileInfo = getFileInfo());
 
-    console.log('element id: ' + element.attr('id'));
+    myLog(('element id: ' + element.attr('id')), 1, fileInfo = getFileInfo());
 
-    let parent = element.parent();
+    //scoping
 
-    let character = $(element).closest('.characterRoot').attr('id').replace(/\D/g, '');//strip char from id
+    let parent;
 
-    let justTheIdNumber = element.attr('id').replace(/\D/g, ''); //strip "dialogue" from the id
+    let character;
 
-    let justTheIdNumberForParent = parent.attr('id').replace(/\D/g, ''); //strip "dialogue" from the id
+    let justTheIdNumber;
 
-    console.log('just the id number: ' + justTheIdNumber);
+    let justTheIdNumberForParent;
+
+    //check if the dragged element is a character root and handle line drawing a bit differently in that case
+
+    if (element.hasClass('characterRoot')) {
+        // Do something if the element has the class characterRoot
+        myLog(`characterRoot ${element}`,1);
+
+        character = element.attr('id').replace(/\D/g, '');//strip char from id
+
+    } else {
+        // Do something else if the element does not have the class
+        parent = element.parent(); //the previous node, not needed for a characterRoot node
+
+        character = $(element).closest('.characterRoot').attr('id').replace(/\D/g, '');//strip char from id
+
+        justTheIdNumber = element.attr('id').replace(/\D/g, ''); //strip "dialogue" from the id
+
+        justTheIdNumberForParent = parent.attr('id').replace(/\D/g, ''); //strip "dialogue" from the id
+
+        myLog(`just the id number: ${justTheIdNumber}`, 1, fileInfo = getFileInfo())
+
+    }
+
+   
+
+    
+
 
     let theNodeInTheMasterObject = getDialogueNodeById(character, justTheIdNumber);
 
     let theParentNodeInTheMasterObject = getDialogueNodeById(character, justTheIdNumberForParent);
 
-    console.log('theNodeInTheMasterObject: ' + theNodeInTheMasterObject);
+    myLog(('theNodeInTheMasterObject: ' + theNodeInTheMasterObject), 1, fileInfo = getFileInfo());
 
     //start looping from the parents lines and after that loop through each child also, but how? I think it's enough to get the relevant children by taking the nodes of a character with a bigger ID
     
@@ -62,7 +89,7 @@ function updateLines(element) { //element is the dragged node dom element
     if (theParentNodeInTheMasterObject) {
         for (let i = 0; i < theParentNodeInTheMasterObject.outgoingLines.length; i++) {
             let line = theParentNodeInTheMasterObject.outgoingLines[i];
-            console.log('should update linelem next, elem is: ' + line);
+            myLog(('should update linelem next, elem is: ' + line), 1, fileInfo = getFileInfo());
             line.lineElem.position();
         }
     }
@@ -77,7 +104,7 @@ function updateLines(element) { //element is the dragged node dom element
 
        
 
-        console.log('each lines, line number: ' + i)
+        myLog(('each lines, line number: ' + i), 3, fileInfo = getFileInfo())
 
         //createLine(x1Pos, y1Pos, x2Pos, y2Pos, block1.attr('id'), block2.attr('id'), plusButtonNumberConnectedTo, latestNodeForLines);
 
@@ -88,7 +115,7 @@ function updateLines(element) { //element is the dragged node dom element
 
 
 function getDialogueNodeById(charID, id) {
-    console.log(`inside getDialogueNodeById and characterID is ${charID}`);
+    myLog(`(inside getDialogueNodeById and characterID is ${charID}),1`, 1, fileInfo = getFileInfo());
     const character = gameDialogueMakerProject.characters.find(char => char.characterID == charID);
     if (!character) {
         return null; // character not found

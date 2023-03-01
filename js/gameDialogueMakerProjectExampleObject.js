@@ -7,6 +7,21 @@ let gameDialogueMakerProject = {
         characterNodeX: 0,
         characterNodeY: 0,
         nodeElement: $('<div class="blockWrap characterRoot"></div>'),
+        outgoingLines: [
+            {
+                fromNode: 1,
+                fromSocket: 0,
+                toNode: 1,
+                lineElem: '',
+                transitionConditions: [
+                    {
+                        variableName: 'myvar',
+                        comparisonOperator: '=',
+                        variableValue: 'false'
+                    }
+                ]
+            }
+        ],
         dialogueNodes: [
             {
                 dialogueID: 1,

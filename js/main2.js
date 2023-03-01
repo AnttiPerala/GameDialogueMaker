@@ -64,7 +64,8 @@ function drawDialogueMakerProject(){
 
             let rigidX;
             let rigidY = 138 * (j+1);
-            console.log(`rigid y ${rigidY}`);
+           
+            myLog(`rigid y ${rigidY}`, 1, fileInfo = getFileInfo())
             if (currJ.dialogueType == "answer") {
                 rigidX = ((currJ.siblings - 1) * 320 * -1) + currJ.siblingNumber * 320; //NOTE: ONLY answernodes have a siblingNumber
                 rigidY = ((currJ.siblingNumber+1)*277) - currJ.siblingNumber * 277; //so that answer "siblings" are created at same height
@@ -106,7 +107,7 @@ function drawDialogueMakerProject(){
             //loop through the lines of a dialogue node
             for (let k = 0; k < gameDialogueMakerProject.characters[i].dialogueNodes[j].outgoingLines.length; k++){
 
-                console.log(`line ${k} array length: ${gameDialogueMakerProject.characters[i].dialogueNodes[j].outgoingLines.length}`);
+                myLog(`line ${k} array length: ${gameDialogueMakerProject.characters[i].dialogueNodes[j].outgoingLines.length}`, 2, fileInfo = getFileInfo());
 
                 let lineStartNode = gameDialogueMakerProject.characters[i].dialogueNodes[j].nodeElement; //node which we are handling currently
 

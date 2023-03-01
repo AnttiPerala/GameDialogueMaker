@@ -44,17 +44,17 @@
         const parentRect = parentElement.getBoundingClientRect();
         const childRect = childElement.getBoundingClientRect();
 
-        console.log('parentRect', parentRect);
-        console.log('childRect', childRect);
+        //console.log('parentRect', parentRect);
+        //console.log('childRect', childRect);
 
         // Calculate the angle between the parent and child elements
         const dx = childRect.left - parentRect.left;
         const dy = childRect.top - parentRect.top;
         const angle = (Math.atan2(dy, dx) * 180) / Math.PI;
 
-        console.log('dx', dx);
-        console.log('dy', dy);
-        console.log('angle', angle);
+        //console.log('dx', dx);
+        //console.log('dy', dy);
+        //console.log('angle', angle);
 
         // Create a div element for the line and add it to the document
         const lineElement = document.createElement('div');
