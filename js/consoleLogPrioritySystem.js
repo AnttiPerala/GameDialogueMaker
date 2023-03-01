@@ -1,19 +1,28 @@
 let priority = 0;
 let lastLog;
 let logAtAll =true;
+let fileInformation ='';
 
 function myLog(message, logPriority, fileInfo) {
+    fileInformation = ''; //make sure it's empty in the beginning
     if (logPriority >= priority) {
         lastLog = message;
         priority = logPriority;
     }
     if (logAtAll){
-        console.log(lastLog);
+        if (priority > 0){ //don't log priority 0 messages at all
 
-        if (fileInfo) { //check that it's not undefined
-            console.log(`Current file: ${fileInfo.filename}, line number: ${fileInfo.lineNumber}`);
+            
+
+            if (fileInfo) { //check that it's not undefined
+                fileInformation = (`Current file: ${fileInfo.filename}, line number: ${fileInfo.lineNumber}`);
+
+            }
+
+            console.log(lastLog +' '+ fileInformation);
 
         }
+        
 
     }
  

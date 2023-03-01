@@ -77,7 +77,7 @@ function drawDialogueMakerProject() {
             //loop through the lines of a dialogue node
             for (let k = 0; k < gameDialogueMakerProject.characters[i].dialogueNodes[j].outgoingLines.length; k++) {
 
-                myLog(`line ${k} array length: ${gameDialogueMakerProject.characters[i].dialogueNodes[j].outgoingLines.length}`, 1, fileInfo = getFileInfo());
+                myLog(`line ${k} array length: ${gameDialogueMakerProject.characters[i].dialogueNodes[j].outgoingLines.length}`, 0, fileInfo = getFileInfo());
 
                 //NOTE! The lines are loop through again below, after the nodes are in dom
 

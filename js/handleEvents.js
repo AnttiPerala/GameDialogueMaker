@@ -547,3 +547,16 @@ deleteSaveButton.addEventListener("click", function () {
     localStorage.removeItem("gameDialogueMakerProject");
     alert("Save deleted!");
 });
+
+//ESC ENDS ALL SPECIAL MODES
+$(document).keydown(function (event) {
+    if (event.keyCode === 27) { // 27 is the keyCode for "Esc" key
+        eraseMode = false;
+        //when clone mode is on:
+        if (eraseMode) {
+            $('body').css('cursor', 'url(iconmonstr-eraser-1-48.png) 16 32, auto');
+        } else {
+            $('body').css('cursor', 'unset');
+        }
+    }
+});

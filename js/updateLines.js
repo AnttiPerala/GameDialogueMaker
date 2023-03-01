@@ -29,112 +29,109 @@ function updateAllLines() {
 
 function updateLines(element) { //element is the dragged node dom element
 
-    myLog('calling updateLines', 1, fileInfo = getFileInfo());
+    if (!eraseMode){
 
-    myLog(('element id: ' + element.attr('id')), 1, fileInfo = getFileInfo());
+        myLog('calling updateLines', 1, fileInfo = getFileInfo());
 
-    //scoping
+        myLog(('element id: ' + element.attr('id')), 1, fileInfo = getFileInfo());
 
-    let parent;
+        //scoping
 
-    let character;
+        let parent;
 
-    let justTheIdNumber;
+        let character;
 
-    let justTheIdNumberForParent;
+        let justTheIdNumber;
 
-    //check if the dragged element is a character root and handle line drawing a bit differently in that case
+        let justTheIdNumberForParent;
 
-    if (element.hasClass('characterRoot') || element.parent().hasClass('characterRoot')) { //just update everything if its the root or it's parent is the root
-        // Do something if the element has the class characterRoot
-        myLog(`characterRoot is dragged ${element}`,1);
+        //check if the dragged element is a character root and handle line drawing a bit differently in that case
 
-        character = element.attr('id').replace(/\D/g, '');//strip char from id
-        updateAllLines();
+        if (element.hasClass('characterRoot') || element.parent().hasClass('characterRoot')) { //just update everything if its the root or it's parent is the root
+            // Do something if the element has the class characterRoot
+            myLog(`characterRoot is dragged ${element}`, 1);
 
-    } else {
-        // Do something else if the element does not have the class
-        parent = element.parent(); //the previous node, not needed for a characterRoot node
+            character = element.attr('id').replace(/\D/g, '');//strip char from id
+            updateAllLines();
 
-        character = $(element).closest('.characterRoot').attr('id').replace(/\D/g, '');//strip char from id
+        } else {
+            // Do something else if the element does not have the class
+            parent = element.parent(); //the previous node, not needed for a characterRoot node
 
-        justTheIdNumber = element.attr('id').replace(/\D/g, ''); //strip "dialogue" from the id
+            character = $(element).closest('.characterRoot').attr('id').replace(/\D/g, '');//strip char from id
 
-        justTheIdNumberForParent = parent.attr('id').replace(/\D/g, ''); //strip "dialogue" from the id
+            justTheIdNumber = element.attr('id').replace(/\D/g, ''); //strip "dialogue" from the id
 
-        myLog(`just the id number: ${justTheIdNumber}`, 1, fileInfo = getFileInfo())
+            justTheIdNumberForParent = parent.attr('id').replace(/\D/g, ''); //strip "dialogue" from the id
 
-    }
+            myLog(`just the id number: ${justTheIdNumber}`, 1, fileInfo = getFileInfo())
 
-   
-
-    
+        }
 
 
-    let theNodeInTheMasterObject = getDialogueNodeById(character, justTheIdNumber);
 
-    let theParentNodeInTheMasterObject = getDialogueNodeById(character, justTheIdNumberForParent);
 
-    myLog(('theNodeInTheMasterObject: ' + theNodeInTheMasterObject), 1, fileInfo = getFileInfo());
 
-    //start looping from the parents lines and after that loop through each child also, but how? I think it's enough to get the relevant children by taking the nodes of a character with a bigger ID
-    
-    const characterToLoop = gameDialogueMakerProject.characters.find(char => char.characterID == character);
-    // Start iterating from dialogueID 2
-    let startIndex = characterToLoop.dialogueNodes.findIndex(d => d.dialogueID == justTheIdNumberForParent);
 
-    // Iterate until the last node
-    for (let i = startIndex; i < characterToLoop.dialogueNodes.length; i++) {
-        let node = characterToLoop.dialogueNodes[i];
-        // Do something with the node
-        //if not null, loop through each line
-        if (node) {
-            for (let i = 0; i < node.outgoingLines.length; i++) {
-                let line = node.outgoingLines[i];
-                //console.log('should update linelem next, elem is: ' + line);
+        let theNodeInTheMasterObject = getDialogueNodeById(character, justTheIdNumber);
+
+        let theParentNodeInTheMasterObject = getDialogueNodeById(character, justTheIdNumberForParent);
+
+        myLog(('theNodeInTheMasterObject: ' + theNodeInTheMasterObject), 1, fileInfo = getFileInfo());
+
+        //start looping from the parents lines and after that loop through each child also, but how? I think it's enough to get the relevant children by taking the nodes of a character with a bigger ID
+
+        const characterToLoop = gameDialogueMakerProject.characters.find(char => char.characterID == character);
+        // Start iterating from dialogueID 2
+        let startIndex = characterToLoop.dialogueNodes.findIndex(d => d.dialogueID == justTheIdNumberForParent);
+
+        // Iterate until the last node
+        for (let i = startIndex; i < characterToLoop.dialogueNodes.length; i++) {
+            let node = characterToLoop.dialogueNodes[i];
+            // Do something with the node
+            //if not null, loop through each line
+            if (node) {
+                for (let i = 0; i < node.outgoingLines.length; i++) {
+                    let line = node.outgoingLines[i];
+                    //console.log('should update linelem next, elem is: ' + line);
+                    line.lineElem.position();
+                }
+            }
+
+        }
+
+
+
+        //if not null, loop through each line for PARENT
+        if (theParentNodeInTheMasterObject) {
+            for (let i = 0; i < theParentNodeInTheMasterObject.outgoingLines.length; i++) {
+                let line = theParentNodeInTheMasterObject.outgoingLines[i];
+                myLog(('should update linelem next, elem is: ' + line), 1, fileInfo = getFileInfo());
                 line.lineElem.position();
             }
         }
-        
-    }
+
+
+
+        allConnectedLines = $(element).parent().find('.line');
+
+        myelems = allConnectedLines;
+
+        allConnectedLines.each(function (i, e) {
+
+
+
+            myLog(('each lines, line number: ' + i), 3, fileInfo = getFileInfo())
+
+            //createLine(x1Pos, y1Pos, x2Pos, y2Pos, block1.attr('id'), block2.attr('id'), plusButtonNumberConnectedTo, latestNodeForLines);
+
+            e.get(0).position();
+        })
+
+    }//end if erasemode
 
     
 
-    //if not null, loop through each line for PARENT
-    if (theParentNodeInTheMasterObject) {
-        for (let i = 0; i < theParentNodeInTheMasterObject.outgoingLines.length; i++) {
-            let line = theParentNodeInTheMasterObject.outgoingLines[i];
-            myLog(('should update linelem next, elem is: ' + line), 1, fileInfo = getFileInfo());
-            line.lineElem.position();
-        }
-    }
-
-
-
-    allConnectedLines = $(element).parent().find('.line');
-
-    myelems = allConnectedLines;
-
-    allConnectedLines.each(function (i, e) {
-
-       
-
-        myLog(('each lines, line number: ' + i), 3, fileInfo = getFileInfo())
-
-        //createLine(x1Pos, y1Pos, x2Pos, y2Pos, block1.attr('id'), block2.attr('id'), plusButtonNumberConnectedTo, latestNodeForLines);
-
-        e.get(0).position();
-    })
-
 }
 
 
-function getDialogueNodeById(charID, id) {
-    myLog(`(inside getDialogueNodeById and characterID is ${charID}),1`, 1, fileInfo = getFileInfo());
-    const character = gameDialogueMakerProject.characters.find(char => char.characterID == charID);
-    if (!character) {
-        return null; // character not found
-    }
-    const node = character.dialogueNodes.find(node => node.dialogueID == id);
-    return node || null; // return node if found, else null
-}

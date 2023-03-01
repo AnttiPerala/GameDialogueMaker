@@ -15,7 +15,7 @@ $(document).ready(function () {
 
 
 
-    myLog(`Inside document ready and local storage should be loaded now ${gameDialogueMakerProject}`, 1);
+    myLog(`Inside document ready and local storage should be loaded now ${gameDialogueMakerProject}`, 0);
 
     //put some empty divs back in the object
     for (let character of gameDialogueMakerProject.characters) {

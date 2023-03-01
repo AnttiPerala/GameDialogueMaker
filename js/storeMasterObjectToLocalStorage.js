@@ -2,41 +2,47 @@ let myObjectTest;
 
 function storeMasterObjectToLocalStorage() {
 
+    if (!eraseMode){ //don't do any of this stuff is the eraser is being used because it might cause drawing twice
 
-    // remove HTML element references from the master object (these should then be recreated by redrawing the entire object)
-    for (let character of gameDialogueMakerProject.characters) {
-        character.nodeElement='';
-        for (let dialogueNode of character.dialogueNodes) {
-            dialogueNode.nodeElement = '';
-            for (let outgoingLine of dialogueNode.outgoingLines) {
-                outgoingLine.lineElem = '';
+        // remove HTML element references from the master object (these should then be recreated by redrawing the entire object)
+        for (let character of gameDialogueMakerProject.characters) {
+            character.nodeElement = '';
+            for (let dialogueNode of character.dialogueNodes) {
+                dialogueNode.nodeElement = '';
+                for (let outgoingLine of dialogueNode.outgoingLines) {
+                    outgoingLine.lineElem = '';
+                }
             }
         }
-    }
 
-    myLog(`Should store object now: ${gameDialogueMakerProject}`, 1, fileInfo = getFileInfo());
+        myLog(`Should store object now: ${gameDialogueMakerProject}`, 1, fileInfo = getFileInfo());
 
-    localStorage.setItem("gameDialogueMakerProject", JSON.stringify(gameDialogueMakerProject));
-
-    //delete everything
-
-    document.querySelector('#mainArea').innerHTML = '';
-    $('svg').remove();
+        localStorage.setItem("gameDialogueMakerProject", JSON.stringify(gameDialogueMakerProject));
 
 
-    //put some empty divs back in the object
-    for (let character of gameDialogueMakerProject.characters) {
-        character.nodeElement = $('<div class="blockWrap characterRoot"></div>');
-        for (let dialogueNode of character.dialogueNodes) {
-            dialogueNode.nodeElement = $('<div></div>');
-            for (let outgoingLine of dialogueNode.outgoingLines) {
-                outgoingLine.lineElem = '';
+
+        //put some empty divs back in the object
+        for (let character of gameDialogueMakerProject.characters) {
+            character.nodeElement = $('<div class="blockWrap characterRoot"></div>');
+            for (let dialogueNode of character.dialogueNodes) {
+                dialogueNode.nodeElement = $('<div></div>');
+                for (let outgoingLine of dialogueNode.outgoingLines) {
+                    outgoingLine.lineElem = '';
+                }
             }
         }
-    }
+
+        //delete everything
+
+        document.querySelector('#mainArea').innerHTML = '';
+        $('svg').remove();
 
 
-    //redraw object
+        //redraw object
 
-    drawDialogueMakerProject();
+        drawDialogueMakerProject();
+    }//end if erasemode
+
+
+  
 }
