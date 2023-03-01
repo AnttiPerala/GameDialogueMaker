@@ -47,7 +47,7 @@ function updateLines(element) { //element is the dragged node dom element
 
     if (element.hasClass('characterRoot') || element.parent().hasClass('characterRoot')) { //just update everything if its the root or it's parent is the root
         // Do something if the element has the class characterRoot
-        myLog(`characterRoot is dragged ${element}`,3);
+        myLog(`characterRoot is dragged ${element}`,1);
 
         character = element.attr('id').replace(/\D/g, '');//strip char from id
         updateAllLines();

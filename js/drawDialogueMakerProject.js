@@ -125,7 +125,7 @@ function drawDialogueMakerProject() {
             //get the top socket
             let lineEndElementTopSocket = $(lineEndNodeElement).find('.topConnectionSocket');
 
-            
+    
             //draw lines from characterRoot (should be only one):
             let theLine = new LeaderLine(
                 plusButtonElem.get(0), //get(0) converts jQuery object to regular dom object

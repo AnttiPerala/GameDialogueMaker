@@ -13,9 +13,7 @@ draw a dotted line when the user connects a node to another node without the plu
 
 
 */
-let cloneMode = false;
-let eraseMode = false;
-let latestNodeForLines;
+
 
 //these make moving/dragging the canvas possible
 $("#mainArea").draggable({drag: function (event, ui) {

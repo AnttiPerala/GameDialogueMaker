@@ -295,22 +295,7 @@ $('body').on('click', '.blockPlusButton', function () {
 });
 
 
-//MOVE A DRAGGABLE BLOCK WITH LINES CONNECTED TO IT
 
-/* $('.blockWrap').draggable({
-    drag: function (event, ui) {
-        //console.log('dragging');
-        //updateLines($(this).find('.block'));
-        
-        let allSelectedBlocks = $(this).parents().find('.block');
-
-        allSelectedBlocks.each(function (index, elem) {
-            updateLines(elem);
-        });
-
-    }
-});
- */
 //MOUSE DOWN LOG FOR EASIER DEBUGGING
 $(document).mousedown(function () {
    //console.log("NEW MOUSEDOWN!!!!!!!");
@@ -465,24 +450,6 @@ jQuery(document).on('change', '.answerNumber', function () {
 )
 
 
-//CLICKING ON A BLOCK WITH ERASEMODE ON
-
-$('body').on('mousedown', '.block, .line', function () {
-    if (eraseMode) {
-        //console.log(`erase ${this}`);
-
-        //loop through the connected lines that should also be erased
-        let allConnectedLines = $('.line[data-block1="' + $(this).attr('id') + '"],.line[data-block2="' + $(this).attr('id') + '"]');
-
-        $(allConnectedLines).remove();
-
-        $(this).closest('.blockWrap').remove();
-
-        //$(this).remove();
-
-    }
-}
-);
 
 //TYPE IN THE CHARACTER NAME FIELD
 jQuery(document).on('change keyup', '.characterName', function () {
