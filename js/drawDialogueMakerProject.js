@@ -129,6 +129,7 @@ function drawDialogueMakerProject() {
             //get the top socket
             let lineEndElementTopSocket = $(lineEndNodeElement).find('.topConnectionSocket');
 
+            //TO DO: Implement this pointanchor thing to center the ends of the lines https://anseki.github.io/leader-line/#pointanchor
     
             //draw lines from characterRoot (should be only one):
             let theLine = new LeaderLine(
@@ -138,7 +139,10 @@ function drawDialogueMakerProject() {
                     color: '#0075ff',
                     size: 4,
                     dash: false,
-                    path: 'straight' //deafult is straight, arc, fluid, magnet, grid
+                    path: 'straight', //deafult is straight, arc, fluid, magnet, grid
+                    startSocket: 'bottom',
+                    endSocket: 'bottom',
+                    endPlug: 'disc'
                 }
             );
 
@@ -172,25 +176,34 @@ function drawDialogueMakerProject() {
 
                 let lineEndNode = currI.dialogueNodes.find(obj => obj.dialogueID == lineEndNodeId);
 
-                let lineEndNodeElement = lineEndNode.nodeElement;
+                if (lineEndNode){ //check that it's not undefined
 
-                //get the top socket
-                let lineEndElementTopSocket = $(lineEndNodeElement).find('.topConnectionSocket');
+                    let lineEndNodeElement = lineEndNode.nodeElement;
 
-                let theLine = new LeaderLine(
-                    plusButtonElem.get(0), //get(0) converts jQuery object to regular dom object
-                    lineEndElementTopSocket.get(0),
-                    {
-                        color: '#0075ff',
-                        size: 4,
-                        dash: false,
-                        path: 'straight' //deafult is straight, arc, fluid, magnet, grid
-                    }
-                );
+                    //get the top socket
+                    let lineEndElementTopSocket = $(lineEndNodeElement).find('.topConnectionSocket');
 
-                myline = theLine; //just a global tester
+                    let theLine = new LeaderLine(
+                        plusButtonElem.get(0), //get(0) converts jQuery object to regular dom object
+                        lineEndElementTopSocket.get(0),
+                        {
+                            color: '#0075ff',
+                            size: 4,
+                            dash: false,
+                            path: 'straight', //deafult is straight, arc, fluid, magnet, grid
+                            startSocket: 'bottom',
+                            endSocket: 'bottom',
+                            endPlug: 'disc'
+                        }
+                    );
 
-                currLine.lineElem = theLine;
+                    myline = theLine; //just a global tester
+
+                    currLine.lineElem = theLine;
+
+                }//end if lineEndNode
+
+                
 
                 //myLine.start is the native way of selecting the fromNode but only seems to work for the reference, not for dom
                 //myLine.end is the native way of selecting the toNode

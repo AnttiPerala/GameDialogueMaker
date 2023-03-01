@@ -41,12 +41,31 @@ $('body').on('mousedown', '.block, .line', function () {
         //figure out which lines were connected to the deleted node, because they should go too
         deleteLinesByToNode(idToBeErased);
 
+        //update all the ids that come after the deleted node to avoid leaving gaps in the numbering. Note that this should be done for all characters if the nodes will all have unique values. But do they need to have unique values? Because maybe it doesn't even make sense to be able to go from a node under character 1 to a node under character 2. What would that even mean? But we should be able to go to any node under the same character by changing the next value.
+
+        // Loop through the dialogueNodes and decrement the dialogueID of each node starting from the deleted index
+        for (let i = nodeIndex; i < gameDialogueMakerProject.characters[0].dialogueNodes.length; i++) {
+            gameDialogueMakerProject.characters[0].dialogueNodes[i].dialogueID--;
+        }
+
+        // Loop through the outgoingLines and update the fromNode and toNode values based on the new dialogueID of the nodes
+        // This might be more complicated than I thought, because the lineElems might also need to be changed...
+        /* gameDialogueMakerProject.characters.forEach(character => {
+            character.outgoingLines.forEach(line => {
+                if (line.fromNode > nodeIndex) {
+                    line.fromNode--;
+                }
+                if (line.toNode > nodeIndex) {
+                    line.toNode--;
+                }
+            });
+        }); */
+
         myLog(`should erase now ${idToBeErased}`,0,fileInfo = getFileInfo())
         $('#mainArea').get(0).innerHTML = '';
         $('svg').remove();
-        setTimeout(() => {
-            drawDialogueMakerProject();
-        }, 100);
+        drawDialogueMakerProject();
+
         
 
 /* 

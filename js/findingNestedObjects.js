@@ -21,3 +21,34 @@ function getCharacterById(id) {
     }
     return null; // if no character is found with the given id
 }
+
+
+function findDialogueNodeBasedOnPassedInHtmlElement(elem){
+
+    let dialogueID = $(elem).closest('.blockWrap').attr('id').replace(/\D/g, ''); //get just the number from the id
+
+    let characerID = $(elem).closest('.characterRoot').attr('id').replace(/\D/g, ''); //get just the number from the id
+
+    let dialogueNodeFromObject = getDialogueNodeById(characerID, dialogueID);
+
+    return dialogueNodeFromObject;
+
+}
+
+function findCharacterNodeBasedOnPassedInHtmlElement(elem) {
+
+    let characerID;
+
+    if ($(elem).hasClass('characterRoot')){ //if the element is already the characterRoot
+        characerID = elem.attr('id').replace(/\D/g, ''); //get just the number from the id
+    } else { //the element is not the characterRoot
+        characerID = $(elem).closest('.characterRoot').attr('id').replace(/\D/g, ''); //get just the number from the id
+
+    }
+
+
+    let characterNodeFromObject = getCharacterById(characerID);
+
+    return characterNodeFromObject;
+
+}
