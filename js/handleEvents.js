@@ -3,13 +3,31 @@ $(document).ready(function(){
 
     //GET THE STORED OBJECT FROM LOCAL STORAGE
 
-    window.addEventListener("load", () => {
+    
         const myObjectString = localStorage.getItem("gameDialogueMakerProject");
         if (myObjectString !== null) {
+            console.log(` was not null when getting key from local storage`);
             gameDialogueMakerProject = JSON.parse(myObjectString);
             console.log(gameDialogueMakerProject);
+        } else {
+            console.log(` null it seems: ${myObjectString}`);
         }
-    });
+
+
+    console.log(`Inside document ready and local storage should be loaded now ${gameDialogueMakerProject}`);
+
+    //put some empty divs back in the object
+    for (let character of gameDialogueMakerProject.characters) {
+        character.nodeElement = $('<div class="blockWrap characterRoot"></div>');
+        for (let dialogueNode of character.dialogueNodes) {
+            dialogueNode.nodeElement = $('<div></div>');
+            for (let outgoingLine of dialogueNode.outgoingLines) {
+                outgoingLine.lineElem = '';
+            }
+        }
+    }
+
+    drawDialogueMakerProject();
 
 
 });

@@ -70,6 +70,10 @@ function drawDialogueMakerProject(){
                 rigidY = ((currJ.siblingNumber+1)*277) - currJ.siblingNumber * 277; //so that answer "siblings" are created at same height
             }
 
+            //let me try overwriting those mathmatically calculated values from values inside the actual nodes instead
+            rigidX = currJ.dialogueNodeX;
+            rigidY = currJ.dialogueNodeY;
+
 
             //for y I think we can check how many non-answer nodes there are
 
@@ -216,7 +220,7 @@ function drawDialogueMakerProject(){
 
 } // end function drawDialogueMakerProject
 
-drawDialogueMakerProject();
+
 
 
 

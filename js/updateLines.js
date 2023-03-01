@@ -49,7 +49,7 @@ function updateLines(element) { //element is the dragged node dom element
         if (node) {
             for (let i = 0; i < node.outgoingLines.length; i++) {
                 let line = node.outgoingLines[i];
-                console.log('should update linelem next, elem is: ' + line);
+                //console.log('should update linelem next, elem is: ' + line);
                 line.lineElem.position();
             }
         }
