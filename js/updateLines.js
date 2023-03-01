@@ -45,7 +45,7 @@ function updateLines(element) { //element is the dragged node dom element
 
     //check if the dragged element is a character root and handle line drawing a bit differently in that case
 
-    if (element.hasClass('characterRoot')) {
+    if (element.hasClass('characterRoot') || element.parent().hasClass('characterRoot')) { //just update everything if its the root or it's parent is the root
         // Do something if the element has the class characterRoot
         myLog(`characterRoot is dragged ${element}`,3);
 
