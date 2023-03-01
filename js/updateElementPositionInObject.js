@@ -6,14 +6,12 @@ function updateElementPositionInObject(element){
 
         let character = $(element).closest('.characterRoot').attr('id').replace(/\D/g, ''); //characterID
         let theNodeObjectToChange = getCharacterById(character);
-        myLog(`character: ${character}`,1,fileInfo = getFileInfo())
+        myLog(`character: ${character}`,3,fileInfo = getFileInfo())
         const xPos = element.get(0).offsetLeft;
         const yPos = element.get(0).offsetTop;
 
         theNodeObjectToChange.characterNodeX = xPos;
         theNodeObjectToChange.characterNodeY = yPos;
-
- 
 
     } else {
         // Do something else if the element does not have the class
@@ -33,16 +31,11 @@ function updateElementPositionInObject(element){
         const yPos = element.get(0).offsetTop;
 
         theNodeObjectToChange.dialogueNodeX = xPos;
-        theNodeObjectToChange.dialogueNodeY = yPos;
-       
+        theNodeObjectToChange.dialogueNodeY = yPos;    
 
     }
 
-
-
-
 storeMasterObjectToLocalStorage();
-
 
 }
 
