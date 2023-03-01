@@ -7,7 +7,11 @@ function myLog(message, logPriority, fileInfo) {
         priority = logPriority;
     }
     console.log(lastLog);
-    console.log(`Current file: ${fileInfo.filename}, line number: ${fileInfo.lineNumber}`);
+
+    if (fileInfo){
+        console.log(`Current file: ${fileInfo.filename}, line number: ${fileInfo.lineNumber}`);
+
+    }
 
     
 
