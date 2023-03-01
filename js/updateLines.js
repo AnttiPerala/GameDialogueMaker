@@ -4,6 +4,20 @@ let allConnectedLines;
 //when the mainArea is dragged or an update for all lines is needed for some reason
 function updateAllLines() {
     gameDialogueMakerProject.characters.forEach((character) => {
+
+        //all lines of character nodes
+        character.outgoingLines.forEach((outgoingLine) => {
+            const lineElem = outgoingLine.lineElem;
+
+            // check if lineElem is an instance of LeaderLine
+            if (lineElem instanceof LeaderLine) {
+                lineElem.position(); // call the position function on the instance
+            } else {
+                console.error('lineElem is not an instance of LeaderLine');
+            }
+        });
+
+        //all lines of regular dialogue nodes
         character.dialogueNodes.forEach((dialogueNode) => {
             dialogueNode.outgoingLines.forEach((outgoingLine) => {
                 const lineElem = outgoingLine.lineElem;
@@ -33,9 +47,10 @@ function updateLines(element) { //element is the dragged node dom element
 
     if (element.hasClass('characterRoot')) {
         // Do something if the element has the class characterRoot
-        myLog(`characterRoot ${element}`,1);
+        myLog(`characterRoot is dragged ${element}`,3);
 
         character = element.attr('id').replace(/\D/g, '');//strip char from id
+        updateAllLines();
 
     } else {
         // Do something else if the element does not have the class

@@ -138,7 +138,7 @@ function drawDialogueMakerProject() {
                 }
             );
 
-            currI.lineElem = theLine;
+            currLine.lineElem = theLine; //stores a reference to the actual line into the object
             
         }
 
