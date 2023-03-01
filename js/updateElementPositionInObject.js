@@ -39,12 +39,3 @@ storeMasterObjectToLocalStorage();
 
 }
 
-//for finding a specific character
-function getCharacterById(id) {
-    for (let i = 0; i < gameDialogueMakerProject.characters.length; i++) {
-        if (gameDialogueMakerProject.characters[i].characterID == id) {
-            return gameDialogueMakerProject.characters[i];
-        }
-    }
-    return null; // if no character is found with the given id
-}

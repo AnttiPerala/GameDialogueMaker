@@ -20,6 +20,11 @@ $('body').on('mousedown', '.block, .line', function () {
     if (eraseMode) {
         //console.log(`erase ${this}`);
 
+        //delete the corresponding node from the object
+        let idToBeErased = $(this).closest('.blockWrap').attr('id').replace(/\D/g, '');
+
+        
+
         //loop through the connected lines that should also be erased
         let allConnectedLines = $('.line[data-block1="' + $(this).attr('id') + '"],.line[data-block2="' + $(this).attr('id') + '"]');
 

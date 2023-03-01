@@ -15,14 +15,7 @@ draw a dotted line when the user connects a node to another node without the plu
 */
 
 
-//these make moving/dragging the canvas possible
-$("#mainArea").draggable({drag: function (event, ui) {
-    //console.log('dragging');
-    updateAllLines(ui.helper); //called only when dragged
-}});
-$("#mainArea").draggable(
-    'enable'
-);
+
 
 
 
