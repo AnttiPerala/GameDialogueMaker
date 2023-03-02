@@ -281,6 +281,7 @@ function drawDialogueMakerProject() {
                     let theCircleinDOM = $('.conditionCircle[data-fromnode="' + currLine.fromNode + '"][data-tonode="' + currLine.toNode + '"]');
 
                     theCircleinDOM.addClass('withCondition');
+                    theCircleinDOM.attr("title", "Click to change the condition for the transition");
 
 
                     //how can we connect the transition condition to a line? Well we should have a reference to the line element already in the object

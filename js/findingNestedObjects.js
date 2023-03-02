@@ -92,3 +92,24 @@ function findLineThatConnectsElementToParent(dialogueID){
     }
     return targetLine;
 }
+
+//find a specific line based on its fromNode and toNode
+
+function getLineObjectFromMasterObjectUsingFromAndTo(fromNode, toNode) {
+
+    let foundLine = '';
+
+    for (let i = 0; i < gameDialogueMakerProject.characters[0].dialogueNodes.length; i++) {
+        let node = gameDialogueMakerProject.characters[0].dialogueNodes[i];
+        for (let j = 0; j < node.outgoingLines.length; j++) {
+            let line = node.outgoingLines[j];
+            if (line.fromNode == fromNode && line.toNode == toNode) {
+                console.log(line);
+                // Do something with the line object
+                foundLine = line;
+            }
+        }
+    }
+
+    return foundLine;
+}

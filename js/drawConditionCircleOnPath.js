@@ -16,6 +16,7 @@ function drawConditionCircle(path, fromNode, toNode) {
 
         div.setAttribute("data-fromnode", fromNode);
         div.setAttribute("data-tonode", toNode);
+        div.setAttribute("title", "Click to add a condition for the transition");
 
         // Add the div to the body
         document.body.appendChild(div);

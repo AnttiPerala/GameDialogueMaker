@@ -310,10 +310,32 @@ jQuery(document).on('click', '.conditionCircle', function () {
         console.log('The parent element already contains a child with the class ".conditionInputsWrap"');
     } else {
 
+        //find the line in the master object that corresponds with the clicked circle:
+
+        let fromNode = $(this).attr('data-fromnode');
+        let toNode = $(this).attr('data-tonode');
+
+        let lineObjectInMasterObject = getLineObjectFromMasterObjectUsingFromAndTo(fromNode, toNode);
+
+        //not that we only support one condition at the moment so we wont loop through conditions, just take the first one:
+        let currentTransitionCondition = lineObjectInMasterObject.transitionConditions[0];
+
+        //take the corresponding transition values from the master object:
+        let comparisonOperator = '';
+        let variableName = '';
+        let variableValue = '';
+
+        if (currentTransitionCondition){
+            comparisonOperator = currentTransitionCondition.comparisonOperator;
+            variableName = currentTransitionCondition.variableName;
+            variableValue = currentTransitionCondition.variableValue;
+        }
+        
+
         $(this).append(`
         <div class="conditionInputsWrap">
         <h3>Add a condition for the transition</h3>
-        <input type="text" class="variableName elementInfoField" placeholder="Variable name to check" value="">
+        <input type="text" class="variableName elementInfoField" placeholder="Variable name to check" value="${variableName}">
         <select class="comparisonOperator">
             <option value="&lt;">&lt;</option>
             <option value="&gt;">&gt;</option>
@@ -322,11 +344,20 @@ jQuery(document).on('click', '.conditionCircle', function () {
             <option value="&gt;=">&gt;=</option>
             <option value="&lt;=">&lt;=</option>
         </select>
-        <input type="text" class="variableValue elementInfoField" placeholder="Variable value" value="">
+        <input type="text" class="variableValue elementInfoField" placeholder="Variable value" value="${variableValue}">
         <button class="okTransition">ADD</button>
 
         </div>
         `);
+
+        myLog(`comparisonoperator: ${comparisonOperator}`,4,fileInfo = getFileInfo())
+
+        // loop through each <option> element and set the selected attribute
+        $(this).find('option').each(function () {
+            if ($(this).val() === comparisonOperator) {
+                $(this).prop('selected', true);
+            }
+        });
 
     } //end else
     

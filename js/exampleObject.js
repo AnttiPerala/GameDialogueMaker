@@ -40,9 +40,9 @@ let gameDialogueMakerProject = {
                         lineElem: '',
                         transitionConditions: [
                             {
-                                variableName: 'myvar',
-                                comparisonOperator: '=',
-                                variableValue: 'false'
+                                variableName: 'yourvar',
+                                comparisonOperator: '!=',
+                                variableValue: 'true'
                             }
                         ]
                     }
@@ -65,9 +65,9 @@ let gameDialogueMakerProject = {
                         lineElem: '',
                         transitionConditions: [
                             {
-                                variableName: 'myvar',
-                                comparisonOperator: '=',
-                                variableValue: 'false'
+                                variableName: 'somevar',
+                                comparisonOperator: '>',
+                                variableValue: '5'
                             }
                         ]
                     },
@@ -78,9 +78,9 @@ let gameDialogueMakerProject = {
                         lineElem: '',
                         transitionConditions: [
                             {
-                                variableName: 'myvar',
+                                variableName: 'yesvar',
                                 comparisonOperator: '=',
-                                variableValue: 'false'
+                                variableValue: 'no'
                             }
                         ]
                     },
