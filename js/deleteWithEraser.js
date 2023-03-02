@@ -64,6 +64,25 @@ $('body').on('mousedown', '.block, .line', function () {
         myLog(`should erase now ${idToBeErased}`,0,fileInfo = getFileInfo());
 
         clearCanvasBeforeReDraw();
+
+        //now we should shift the line numbers before the redraw since the node id's have also been shifted
+        //maybe it's enought to shift things inside the master object since dom elements will be redrawn anywas
+
+        
+        for (let i = 0; i < gameDialogueMakerProject.characters.length; i++) {
+            let character = gameDialogueMakerProject.characters[i];
+            for (let j = 0; j < character.dialogueNodes.length; j++) {
+                let node = character.dialogueNodes[j];
+                for (let k = 0; k < node.outgoingLines.length; k++) {
+                    let line = node.outgoingLines[k];
+                    if (line.toNode > idToBeErased) {
+                        line.toNode -= 1;
+                    }
+                }
+            }
+        }
+
+
         drawDialogueMakerProject();
 
         
@@ -94,6 +113,7 @@ function deleteLinesByToNode(toNodeId) {
                 const outgoingLine = dialogueNode.outgoingLines[i];
                 // if the toNode of the outgoing line matches the specified toNodeId, remove it from the array
                 if (outgoingLine.toNode == toNodeId) {
+                    console.log('a match with passed in toNode and lines toNode');
                     dialogueNode.outgoingLines.splice(i, 1);
                     i--; // decrement i since we just removed an element from the array
                 }
