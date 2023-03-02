@@ -252,14 +252,17 @@ function drawDialogueMakerProject() {
 
                     //how can we connect the transition condition to a line? Well we should have a reference to the line element already in the object
 
-                    //check that it's not undefined
-                    if (currLine.lineElem){
+                    let theSVGInDOM = $('svg[data-fromnode="' + currLine.fromNode + '"][data-tonode="' + currLine.toNode + '"]');
 
-                        let thePath = $(currLine.lineElem).find('path'); //If theLine is undefined, the expression will evaluate to undefined, so thePath will be undefined as well. If theLine is defined, the expression will proceed to execute theLine.find('path') and return its result.
+
+                    //check that it's not undefined
+                    if (theSVGInDOM){
+
+                        let thePath = $(theSVGInDOM).find('.leader-line-line-path'); //If theLine is undefined, the expression will evaluate to undefined, so thePath will be undefined as well. If theLine is defined, the expression will proceed to execute theLine.find('path') and return its result.
                         //Should we also save the SVG element in the object? I think the proble here is that we are trying to find the svg path from the object and not from DOM..
 
                         //const path = document.getElementById('leader-line-5-line-path');
-                        const midpoint = getMidpoint(thePath);
+                        const midpoint = getMidpoint(thePath.get(0));
 
                     } else {
                         myLog(`line was undefined: ${theLine}`,3,fileInfo = getFileInfo())
