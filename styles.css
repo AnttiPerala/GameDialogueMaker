@@ -254,7 +254,10 @@ textarea {
     margin: 0.3rem;
     text-align: center;
 
+}
 
+.no-clicks{
+    background-color: gray;
 }
 
 /* Tooltips */

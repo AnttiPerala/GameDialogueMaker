@@ -172,6 +172,7 @@ function drawDialogueMakerProject() {
                     endPlug: 'disc'
                 }
             );
+            plusButtonElem.attr('data-acceptclicks', false);
 
             currLine.lineElem = theLine; //stores a reference to the actual line into the object
             //set the id also of the svg for easier selection
@@ -284,6 +285,16 @@ function drawDialogueMakerProject() {
                         myLog(`line was undefined: ${theLine}`, 3, fileInfo = getFileInfo())
                     }
 
+                    //turn things that can't be clicked gray:
+                    // If data-acceptclicks is false, add the no-clicks class
+                    if (plusButtonElem.attr('data-acceptclicks') == 'false') {
+                        plusButtonElem.addClass('no-clicks');
+                    }
+
+                    // If data-acceptclicks is true, remove the no-clicks class
+                    if (plusButtonElem.attr('data-acceptclicks') == 'true') {
+                        plusButtonElem.removeClass('no-clicks');
+                    }
 
                 }//end if lineEndNode
 
@@ -320,7 +331,6 @@ function drawDialogueMakerProject() {
 
     //test path drawing
 
-    
    
 
 } // end function drawDialogueMakerProject
