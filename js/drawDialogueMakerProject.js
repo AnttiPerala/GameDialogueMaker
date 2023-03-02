@@ -185,6 +185,25 @@ function drawDialogueMakerProject() {
 
             //const path = document.getElementById('leader-line-5-line-path');
             const midpoint = drawConditionCircle(thePath.get(0), currLine.fromNode, currLine.toNode);
+
+            // Loop through the transition conditions of the current outgoing line and add a 'withCondition' class to the corresponding circles
+            for (let l = 0; l < currLine.transitionConditions.length; l++) {
+                let transitionCondition = currLine.transitionConditions[l];
+                // Do something with the transition condition, e.g. compare the variable value to the variable name using the comparison operator
+                myLog(` Transition found, it's number is ${l}`, 1, fileInfo = getFileInfo());
+
+                //select the matching circle from DOM
+                let theCircleinDOM = $('.conditionCircle[data-fromnode="' + currLine.fromNode + '"][data-tonode="' + currLine.toNode + '"]');
+
+                theCircleinDOM.addClass('withCondition');
+                theCircleinDOM.attr("title", "Click to change the condition for the transition");
+
+
+                //how can we connect the transition condition to a line? Well we should have a reference to the line element already in the object
+
+
+
+            }
             
         }
 

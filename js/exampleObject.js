@@ -64,11 +64,7 @@ let gameDialogueMakerProject = {
                         toNode: 3,
                         lineElem: '',
                         transitionConditions: [
-                            {
-                                variableName: 'somevar',
-                                comparisonOperator: '>',
-                                variableValue: '5'
-                            }
+                           
                         ]
                     },
                     {
