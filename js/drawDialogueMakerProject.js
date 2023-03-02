@@ -172,6 +172,11 @@ function drawDialogueMakerProject() {
             );
 
             currLine.lineElem = theLine; //stores a reference to the actual line into the object
+            //set the id also of the svg for easier selection
+            const all_svgs = document.querySelectorAll("svg");
+            const this_svg = all_svgs[all_svgs.length - 1];
+            this_svg.setAttribute("data-fromnode", currLine.fromNode);
+            this_svg.setAttribute("data-tonode", currLine.toNode);
             
         }
 
@@ -226,14 +231,42 @@ function drawDialogueMakerProject() {
 
                     currLine.lineElem = theLine;
 
+                    //set the id also of the svg for easier selection
+                    const all_svgs = document.querySelectorAll("svg");
+                    const this_svg = all_svgs[all_svgs.length - 1];
+                    this_svg.setAttribute("data-fromnode", currLine.fromNode);
+                    this_svg.setAttribute("data-tonode", currLine.toNode);
+
                 }//end if lineEndNode
 
-                
 
                 //myLine.start is the native way of selecting the fromNode but only seems to work for the reference, not for dom
                 //myLine.end is the native way of selecting the toNode
-
                 //maybe store the line reference in the master object and then select from there?
+
+                // Loop through the transition conditions of the current outgoing line
+                for (let l = 0; l < currLine.transitionConditions.length; l++) {
+                    let transitionCondition = currLine.transitionConditions[l];
+                    // Do something with the transition condition, e.g. compare the variable value to the variable name using the comparison operator
+                    myLog(` Transition found, it's number is ${l}`,1,fileInfo = getFileInfo());
+
+                    //how can we connect the transition condition to a line? Well we should have a reference to the line element already in the object
+
+                    //check that it's not undefined
+                    if (currLine.lineElem){
+
+                        let thePath = $(currLine.lineElem).find('path'); //If theLine is undefined, the expression will evaluate to undefined, so thePath will be undefined as well. If theLine is defined, the expression will proceed to execute theLine.find('path') and return its result.
+                        //Should we also save the SVG element in the object? I think the proble here is that we are trying to find the svg path from the object and not from DOM..
+
+                        //const path = document.getElementById('leader-line-5-line-path');
+                        const midpoint = getMidpoint(thePath);
+
+                    } else {
+                        myLog(`line was undefined: ${theLine}`,3,fileInfo = getFileInfo())
+                    }
+
+                    
+                }
 
 
             }//end k loop
@@ -244,8 +277,7 @@ function drawDialogueMakerProject() {
 
     //test path drawing
 
-    const path = document.getElementById('leader-line-5-line-path');
-    const midpoint = getMidpoint(path);
-    alert('midpoint');
+    
+   
 
 } // end function drawDialogueMakerProject

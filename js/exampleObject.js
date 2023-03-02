@@ -9,7 +9,7 @@ let gameDialogueMakerProject = {
         nodeElement: $('<div class="blockWrap characterRoot"></div>'),
         outgoingLines: [
             {
-                fromNode: 1,
+                fromNode: 0,
                 fromSocket: 0,
                 toNode: 1,
                 lineElem: '',

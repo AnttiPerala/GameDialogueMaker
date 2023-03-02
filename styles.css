@@ -213,6 +213,46 @@ body {
 
 }
 
+textarea {
+    box-sizing: border-box;
+    resize: none;
+    display: block;
+}
+
+.elementInfoField {
+    display: block;
+}
+
+.conditionCircle {
+    min-height: 1rem;
+    min-width: 1rem;
+    background-color: #FF007F;
+    border-radius: 50%;
+    position: absolute;
+    transform: translate(-50%, -50%);
+
+}
+
+.conditionInputsWrap {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    margin: 1rem;
+
+
+}
+
+.conditionInputsWrap input,
+.conditionInputsWrap select {
+
+    margin: 0.3rem;
+    text-align: center;
+
+
+}
+
 /* Tooltips */
 
 .ui-tooltip {
@@ -231,43 +271,7 @@ body {
 
 }
 
-textarea {
-    box-sizing: border-box;
-    resize: none;
-    display: block;
-}
 
-.elementInfoField {
-    display: block;
-}
-
-.conditionCircle{
-    min-height: 1rem;
-    min-width: 1rem;
-    background-color: #FF007F;
-    border-radius: 50%;
-    position: absolute;
- 
-}
-
-.conditionInputsWrap{
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-direction: column;
-    margin: 1rem;
-
-
-}
-
-.conditionInputsWrap input, .conditionInputsWrap select {
-
-    margin: 0.3rem;
-    text-align: center;
-
-
-}
 
 
 /* End tooltips */
