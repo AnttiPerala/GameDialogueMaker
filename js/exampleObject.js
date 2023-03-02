@@ -15,9 +15,9 @@ let gameDialogueMakerProject = {
                 lineElem: '',
                 transitionConditions: [
                     {
-                        variableName: 'myvar',
+                        variableName: 'characterTransitionExample',
                         comparisonOperator: '=',
-                        variableValue: 'false'
+                        variableValue: 'truuu'
                     }
                 ]
             }

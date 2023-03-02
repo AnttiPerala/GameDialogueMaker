@@ -315,10 +315,16 @@ jQuery(document).on('click', '.conditionCircle', function () {
         let fromNode = $(this).attr('data-fromnode');
         let toNode = $(this).attr('data-tonode');
 
+        //does this support characterRoot yet?
         let lineObjectInMasterObject = getLineObjectFromMasterObjectUsingFromAndTo(fromNode, toNode);
 
+        let currentTransitionCondition;
         //not that we only support one condition at the moment so we wont loop through conditions, just take the first one:
-        let currentTransitionCondition = lineObjectInMasterObject.transitionConditions[0];
+        if (lineObjectInMasterObject.transitionConditions){
+            currentTransitionCondition = lineObjectInMasterObject.transitionConditions[0];
+        }
+
+        
 
         //take the corresponding transition values from the master object:
         let comparisonOperator = '';
