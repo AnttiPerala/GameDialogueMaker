@@ -389,7 +389,8 @@ console.log('OK');
     //select the line object from the master object:
     let theLine = getLineObjectFromMasterObjectUsingFromAndTo(fromNode, toNode);
 
-    //check if a transition already exists and if so, remove itm then push a new one to the master object in it's place
+    //empty possible previous conditions:
+    theLine.transitionConditions = [];
 
     //if no transition condition existed, just push a new one to the master object
 
@@ -405,14 +406,16 @@ console.log('OK');
 
     }
 
+    theLine.transitionConditions.push(myElem);
+
     //NOTE! What we set with .data() will NOT be visible in the HTML! It's only in memory. .attr() makes visible also in html
     //let's give this multiple data attributes at the same time:
-    $(conditionCircle).data({
+    /* $(conditionCircle).data({
         'variableName': variableNameFromInput,
         'comparisonOperator': comparisonOperatorFromInput,
         'variableValue': variableValueFromInput
     
-    });//end data
+    });//end data */
 
     //delete the inputs
     conditionCircle.find('.conditionInputsWrap').remove();
