@@ -68,20 +68,7 @@ $('body').on('mousedown', '.block, .line', function () {
         //now we should shift the line numbers before the redraw since the node id's have also been shifted
         //maybe it's enought to shift things inside the master object since dom elements will be redrawn anywas
 
-        
-        for (let i = 0; i < gameDialogueMakerProject.characters.length; i++) {
-            let character = gameDialogueMakerProject.characters[i];
-            for (let j = 0; j < character.dialogueNodes.length; j++) {
-                let node = character.dialogueNodes[j];
-                for (let k = 0; k < node.outgoingLines.length; k++) {
-                    let line = node.outgoingLines[k];
-                    if (line.toNode > idToBeErased) {
-                        line.toNode -= 1;
-                    }
-                }
-            }
-        }
-
+        shiftObjecElementsThatAreGreaterThanDeletedIDDownByOne(idToBeErased);
 
         drawDialogueMakerProject();
 
@@ -129,3 +116,38 @@ function clearCanvasBeforeReDraw() {
     $('.conditionCircle').remove();
 
 }
+
+//shift elements down
+function shiftObjecElementsThatAreGreaterThanDeletedIDDownByOne(erasedID) {
+
+    //loop through based on toNode value
+    for (let i = 0; i < gameDialogueMakerProject.characters.length; i++) {
+        let character = gameDialogueMakerProject.characters[i];
+        for (let j = 0; j < character.dialogueNodes.length; j++) {
+            let node = character.dialogueNodes[j];
+            for (let k = 0; k < node.outgoingLines.length; k++) {
+                let line = node.outgoingLines[k];
+                if (line.toNode > erasedID) {
+                    line.toNode -= 1;
+                }
+            }//end for k
+        }//end for j
+    }//end for i
+
+    //we should also shift fromNode values that were greater than the deleted element down by one
+    //loop through based on fromNode value
+    for (let i = 0; i < gameDialogueMakerProject.characters.length; i++) {
+        let character = gameDialogueMakerProject.characters[i];
+        for (let j = 0; j < character.dialogueNodes.length; j++) {
+            let node = character.dialogueNodes[j];
+            for (let k = 0; k < node.outgoingLines.length; k++) {
+                let line = node.outgoingLines[k];
+                if (line.fromNode > erasedID) {
+                    line.fromNode -= 1;
+                }
+            }//end for k
+        }//end for j
+    }//end for i
+
+
+} // end function
