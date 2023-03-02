@@ -372,20 +372,33 @@ jQuery(document).on('click', '.conditionCircle', function () {
 
 /* CLICK ON THE CONDITION CIRCLE OK BUTTON TO ACCEPT THE CONDITION */
 
-jQuery(document).on('click', '.conditionCircle .okTransition', function () {
+jQuery(document).on('click', '.conditionCircle .okTransition', function (event) {
+
+    event.stopPropagation(); //so that the circle itself doesn'r register a click
 
 console.log('OK');
 
-    let parentLine = $(this).closest('.line'); //grab the line the circle belongs to
+    //let parentLine = $(this).closest('.line'); //grab the line the circle belongs to
     let conditionCircle = $(this).closest('.conditionCircle');
+
+    let fromNode = $(conditionCircle).attr('data-fromnode');
+    let toNode = $(conditionCircle).attr('data-tonode');
+
+    
+
+    //select the line object from the master object:
+    let theLine = getLineObjectFromMasterObjectUsingFromAndTo(fromNode, toNode);
+
+    //check if a transition already exists and if so, remove itm then push a new one to the master object in it's place
+
+    //if no transition condition existed, just push a new one to the master object
 
     let variableNameFromInput = $(conditionCircle).find('.variableName').val();
     let comparisonOperatorFromInput = $(conditionCircle).find('.comparisonOperator').val();
     let variableValueFromInput = $(conditionCircle).find('.variableValue').val();
 
     myElem = {
-        'block1': parentLine.data('block1'),
-        'block2': parentLine.data('block2'),
+
         'variableName': variableNameFromInput,
         'comparisonOperator': comparisonOperatorFromInput,
         'variableValue': variableValueFromInput,
@@ -395,13 +408,20 @@ console.log('OK');
     //NOTE! What we set with .data() will NOT be visible in the HTML! It's only in memory. .attr() makes visible also in html
     //let's give this multiple data attributes at the same time:
     $(conditionCircle).data({
-        'block1': parentLine.data('block1'),
-        'block2': parentLine.data('block2'),
         'variableName': variableNameFromInput,
         'comparisonOperator': comparisonOperatorFromInput,
         'variableValue': variableValueFromInput
     
     });//end data
+
+    //delete the inputs
+    conditionCircle.find('.conditionInputsWrap').remove();
+
+    //animate closed
+    $(conditionCircle).animate({
+        width: '1rem',
+        height: '1rem'
+    }, 800);
 
 
 }) //end click
@@ -448,5 +468,19 @@ $(document).keydown(function (event) {
         } else {
             $('body').css('cursor', 'unset');
         }
+
+        //close all conditionCircles on esc
+
+            jQuery('.conditionCircle').each(function () {
+                if (parseInt(jQuery(this).css('width')) > 32) { // 32 is equivalent to 2 rem when using pixels
+                    jQuery(this).animate({
+                        width: '1rem',
+                        height: '1rem'
+                    }, 800);
+                }
+                $(this).find('.conditionInputsWrap').remove(); //remove also the inputs
+            });
+        
+
     }
 });
