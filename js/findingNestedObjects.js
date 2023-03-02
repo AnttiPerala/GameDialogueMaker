@@ -52,3 +52,43 @@ function findCharacterNodeBasedOnPassedInHtmlElement(elem) {
     return characterNodeFromObject;
 
 }
+
+//find the connecting line based on the 'toNode' values of lines
+
+function findLineThatConnectsElementToParent(dialogueID){
+
+    let targetNode = dialogueID;
+    let targetLine = null;
+
+    for (let i = 0; i < gameDialogueMakerProject.characters.length; i++) {
+        let character = gameDialogueMakerProject.characters[i];
+
+        for (let j = 0; j < character.dialogueNodes.length; j++) {
+            let dialogueNode = character.dialogueNodes[j];
+
+            for (let k = 0; k < dialogueNode.outgoingLines.length; k++) {
+                let line = dialogueNode.outgoingLines[k];
+
+                if (line.toNode == targetNode) {
+                    targetLine = line;
+                    break;
+                }
+            }
+
+            if (targetLine) {
+                break;
+            }
+        }
+
+        if (targetLine) {
+            break;
+        }
+    }
+
+    if (targetLine) {
+        console.log("Found line with toNode value of " + targetNode + ": ", targetLine);
+    } else {
+        console.log("Could not find line with toNode value of " + targetNode);
+    }
+    return targetLine;
+}

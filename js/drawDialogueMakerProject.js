@@ -21,7 +21,8 @@ function drawDialogueMakerProject() {
         currI.nodeElement.attr('id', `char${currI.characterID}`);
         currI.nodeElement.html(characterNodeHTML);
 
-        latestNode = currI.nodeElement;
+        latestNode = currI.nodeElement; //for appending to the correct parent. To be deprecated by connection lines based system?
+
         //myLog(`latestNode ${JSON.stringify(latestNode) }`,3,fileInfo = getFileInfo())
 
         //loop through all dialogue nodes of a character
@@ -32,6 +33,23 @@ function drawDialogueMakerProject() {
             let currJ = gameDialogueMakerProject.characters[i].dialogueNodes[j];
 
             let dialogueNode = createDialogueNode(currJ.nodeElement, currJ.dialogueID, currJ.dialogueType, currJ.dialogueText, currJ.nextNode, currJ.dialogueNodeX, currJ.dialogueNodeY, currJ.outgoingSockets, currJ.outgoingLines); // nodeElement, dialogueID,dialogueType,
+
+            //Question: How do we know which node we should append to. The answer can't be based on the looping order, because elements can be pushed in many ways. The only thing really telling that seems to be the line. So what if we select the line that has its 'toNode' value same as the node that we are creating and the choose the parent from the lines 'fromNode'. The only pitfall might be that what if the html element for the 'fromNode' hasn't been created yet at this point? Can we create it right then in that case?
+
+            let theConnectingLineFromParentToNewNode = findLineThatConnectsElementToParent(currJ.dialogueID); //passing in the node id we are creating
+
+            let theParentHtmlElement;
+
+            if (theConnectingLineFromParentToNewNode){
+                let theParentId = theConnectingLineFromParentToNewNode.fromNode;
+
+                //select the actual html element based on the parent id:
+                let theParentNode = getDialogueNodeById(gameDialogueMakerProject.characters[i].characterID, theParentId);
+
+                theParentHtmlElement = theParentNode.nodeElement;
+            }
+
+            
 
             //calculate rigid dialogue block position:
             //for x we need to know for answer nodes if the node has siblings (nodes connecting to the same parent node). 
@@ -49,10 +67,17 @@ function drawDialogueMakerProject() {
             rigidX = currJ.dialogueNodeX;
             rigidY = currJ.dialogueNodeY;
 
+            //if parentHtmlElement is null (could be for example because it's tha characterRoot) the use latest element instead
+
+            if (theParentHtmlElement){
+                //do nothing
+            } else {
+                theParentHtmlElement = latestNode; //fall back to latestNode system
+            }
 
             //for y I think we can check how many non-answer nodes there are
 
-            dialogueNode.appendTo(latestNode) //latestnode is set below after append
+            dialogueNode.appendTo(theParentHtmlElement) //latestnode is set below after append
                 .draggable({
                     drag: function (event, ui) {
                         //console.log('dragging');
