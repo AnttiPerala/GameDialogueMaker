@@ -508,6 +508,15 @@ jQuery(document).on('click', '#mainArea', function (event) {
             }
             $(this).find('.conditionInputsWrap').remove(); //remove also the inputs
         });
+        //exit eraseMode when clicking on empty spot
+        if (eraseMode){
+            
+            $('body').css('cursor', 'unset');
+            
+            eraseMode = false;
+
+        }
+       
     } else {
         // The user clicked on a child element inside #mainArea
     }
