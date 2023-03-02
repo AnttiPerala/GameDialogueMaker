@@ -61,9 +61,9 @@ $('body').on('mousedown', '.block, .line', function () {
             });
         }); */
 
-        myLog(`should erase now ${idToBeErased}`,0,fileInfo = getFileInfo())
-        $('#mainArea').get(0).innerHTML = '';
-        $('svg').remove();
+        myLog(`should erase now ${idToBeErased}`,0,fileInfo = getFileInfo());
+
+        clearCanvasBeforeReDraw();
         drawDialogueMakerProject();
 
         
@@ -100,4 +100,12 @@ function deleteLinesByToNode(toNodeId) {
             }
         });
     });
+}
+
+function clearCanvasBeforeReDraw() {
+
+    document.querySelector('#mainArea').innerHTML = '';
+    $('svg').remove();
+    $('.conditionCircle').remove();
+
 }

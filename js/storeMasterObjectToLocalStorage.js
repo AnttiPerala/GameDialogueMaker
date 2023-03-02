@@ -33,9 +33,15 @@ function storeMasterObjectToLocalStorage() {
 
         //delete everything
 
-        document.querySelector('#mainArea').innerHTML = '';
-        $('svg').remove();
+        function clearCanvasBeforeReDraw(){
 
+            document.querySelector('#mainArea').innerHTML = '';
+            $('svg').remove();
+            $('.conditionCircle').remove();
+
+        }
+
+    clearCanvasBeforeReDraw();
 
         //redraw object
 

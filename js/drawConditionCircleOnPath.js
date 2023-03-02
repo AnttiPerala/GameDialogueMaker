@@ -1,4 +1,4 @@
-function getMidpoint(path) {
+function drawConditionCircle(path, fromNode, toNode) {
 
     if (path){
         // Get the starting and ending coordinates of the line
@@ -13,6 +13,9 @@ function getMidpoint(path) {
         div.style.top = midpoint.y + "px";
         div.style.borderRadius = "50%";
         div.classList.add('conditionCircle');
+
+        div.setAttribute("data-fromnode", fromNode);
+        div.setAttribute("data-tonode", toNode);
 
         // Add the div to the body
         document.body.appendChild(div);

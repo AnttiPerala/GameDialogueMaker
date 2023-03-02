@@ -226,11 +226,15 @@ textarea {
 .conditionCircle {
     min-height: 1rem;
     min-width: 1rem;
-    background-color: #FF007F;
+    background-color: #0075ff;
     border-radius: 50%;
     position: absolute;
     transform: translate(-50%, -50%);
 
+}
+
+.conditionCircle.withCondition{
+    background-color: #ff3f34;
 }
 
 .conditionInputsWrap {

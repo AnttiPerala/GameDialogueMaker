@@ -177,6 +177,14 @@ function drawDialogueMakerProject() {
             const this_svg = all_svgs[all_svgs.length - 1];
             this_svg.setAttribute("data-fromnode", currLine.fromNode);
             this_svg.setAttribute("data-tonode", currLine.toNode);
+
+            let theSVGInDOM = $('svg[data-fromnode="' + currLine.fromNode + '"][data-tonode="' + currLine.toNode + '"]');
+
+            let thePath = $(theSVGInDOM).find('.leader-line-line-path'); //If theLine is undefined, the expression will evaluate to undefined, so thePath will be undefined as well. If theLine is defined, the expression will proceed to execute theLine.find('path') and return its result.
+            //Should we also save the SVG element in the object? I think the proble here is that we are trying to find the svg path from the object and not from DOM..
+
+            //const path = document.getElementById('leader-line-5-line-path');
+            const midpoint = drawConditionCircle(thePath.get(0), currLine.fromNode, currLine.toNode);
             
         }
 
@@ -237,6 +245,25 @@ function drawDialogueMakerProject() {
                     this_svg.setAttribute("data-fromnode", currLine.fromNode);
                     this_svg.setAttribute("data-tonode", currLine.toNode);
 
+                    //every line should get at least an empty condition circle:
+                    //svgInDom is already define once when giving the circle to the line from the characterRoot
+                    theSVGInDOM = $('svg[data-fromnode="' + currLine.fromNode + '"][data-tonode="' + currLine.toNode + '"]');
+
+
+                    //check that it's not undefined
+                    if (theSVGInDOM) {
+
+                        let thePath = $(theSVGInDOM).find('.leader-line-line-path'); //If theLine is undefined, the expression will evaluate to undefined, so thePath will be undefined as well. If theLine is defined, the expression will proceed to execute theLine.find('path') and return its result.
+                        //Should we also save the SVG element in the object? I think the proble here is that we are trying to find the svg path from the object and not from DOM..
+
+                        //const path = document.getElementById('leader-line-5-line-path');
+                        const midpoint = drawConditionCircle(thePath.get(0), currLine.fromNode, currLine.toNode);
+
+                    } else {
+                        myLog(`line was undefined: ${theLine}`, 3, fileInfo = getFileInfo())
+                    }
+
+
                 }//end if lineEndNode
 
 
@@ -244,7 +271,7 @@ function drawDialogueMakerProject() {
                 //myLine.end is the native way of selecting the toNode
                 //maybe store the line reference in the master object and then select from there?
 
-                // Loop through the transition conditions of the current outgoing line
+                // Loop through the transition conditions of the current outgoing line and add a 'withCondition' class to the corresponding circles
                 for (let l = 0; l < currLine.transitionConditions.length; l++) {
                     let transitionCondition = currLine.transitionConditions[l];
                     // Do something with the transition condition, e.g. compare the variable value to the variable name using the comparison operator
@@ -252,22 +279,7 @@ function drawDialogueMakerProject() {
 
                     //how can we connect the transition condition to a line? Well we should have a reference to the line element already in the object
 
-                    let theSVGInDOM = $('svg[data-fromnode="' + currLine.fromNode + '"][data-tonode="' + currLine.toNode + '"]');
-
-
-                    //check that it's not undefined
-                    if (theSVGInDOM){
-
-                        let thePath = $(theSVGInDOM).find('.leader-line-line-path'); //If theLine is undefined, the expression will evaluate to undefined, so thePath will be undefined as well. If theLine is defined, the expression will proceed to execute theLine.find('path') and return its result.
-                        //Should we also save the SVG element in the object? I think the proble here is that we are trying to find the svg path from the object and not from DOM..
-
-                        //const path = document.getElementById('leader-line-5-line-path');
-                        const midpoint = getMidpoint(thePath.get(0));
-
-                    } else {
-                        myLog(`line was undefined: ${theLine}`,3,fileInfo = getFileInfo())
-                    }
-
+                    
                     
                 }
 
