@@ -28,11 +28,15 @@ function updateAllLines() {
             });
         });
     }//end if eraseMode
+    
+
 }
 
 function updateLines(element) { //element is the dragged node dom element
 
     if (!eraseMode){
+
+        $(".conditionCircle").hide();
 
         myLog('calling updateLines', 1, fileInfo = getFileInfo());
 

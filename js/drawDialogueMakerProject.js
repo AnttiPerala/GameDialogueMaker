@@ -88,6 +88,7 @@ function drawDialogueMakerProject() {
                         console.log("Element stopped at: (" + position.left + ", " + position.top + ")");
                         // Your code to update some other element or data
                         updateElementPositionInObject(ui.helper); //update master object positions
+                        $(".conditionCircle").show();//bring the circle visibility back up
 
                     }
                 })
@@ -129,6 +130,7 @@ function drawDialogueMakerProject() {
                     myLog(("Element stopped at: (" + position.left + ", " + position.top + ")"),3);
                     // Your code to update some other element or data
                     updateElementPositionInObject(ui.helper); //update master object positions
+                    $(".conditionCircle").show();//bring the circle visibility back up
                 }
             })
             .css({ left: gameDialogueMakerProject.characters[i].characterNodeX, top: gameDialogueMakerProject.characters[i].characterNodeY });

@@ -464,7 +464,11 @@ const deleteSaveButton = document.querySelector("#delete");
 
 deleteSaveButton.addEventListener("click", function () {
     localStorage.removeItem("gameDialogueMakerProject");
-    alert("Save deleted!");
+
+    var message = "Save deleted! Click OK to reload";
+    if (window.confirm(message)) {
+        window.location.href = "index.html";
+    }
 });
 
 //ESC ENDS ALL SPECIAL MODES
