@@ -260,6 +260,29 @@ textarea {
     background-color: gray;
 }
 
+
+.dialogue-box {
+    position: fixed;
+    width: 300px;
+    background-color: #4b4b4b;
+    color: white;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-size: 1rem;
+    border: 2px solid black;
+    padding: 20px;
+    text-align: center;
+    z-index: 9999;
+    opacity: 1;
+    transition: opacity 1s ease-in-out;
+    border-radius: 1rem;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
+}
+
+.dialogue-box-fade-out {
+    opacity: 0;
+}
+
+
 /* Tooltips */
 
 .ui-tooltip {

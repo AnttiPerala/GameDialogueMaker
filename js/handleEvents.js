@@ -525,3 +525,10 @@ jQuery(document).on('click', '#mainArea', function (event) {
         // The user clicked on a child element inside #mainArea
     }
 });
+
+//WARN THE USER THAT A PLUS BUTTON CAN ONLY HAVE ONE NODE CONNECTED
+
+$(document).on('click', '.blockPlusButton[data-acceptclicks="false"]', function () {
+    // Do something when the user clicks on the button
+    drawDialogueBox('A plus button can only have one node connected. If you want to use it, delete the currently connected node first with the eraser.')
+});
