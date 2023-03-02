@@ -277,6 +277,12 @@ function drawDialogueMakerProject() {
                     // Do something with the transition condition, e.g. compare the variable value to the variable name using the comparison operator
                     myLog(` Transition found, it's number is ${l}`,1,fileInfo = getFileInfo());
 
+                    //select the matching circle from DOM
+                    let theCircleinDOM = $('.conditionCircle[data-fromnode="' + currLine.fromNode + '"][data-tonode="' + currLine.toNode + '"]');
+
+                    theCircleinDOM.addClass('withCondition');
+
+
                     //how can we connect the transition condition to a line? Well we should have a reference to the line element already in the object
 
                     
