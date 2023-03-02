@@ -242,4 +242,10 @@ function drawDialogueMakerProject() {
 
     } // end i loop
 
+    //test path drawing
+
+    const path = document.getElementById('leader-line-5-line-path');
+    const midpoint = getMidpoint(path);
+    alert('midpoint');
+
 } // end function drawDialogueMakerProject
