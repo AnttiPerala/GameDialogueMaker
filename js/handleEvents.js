@@ -487,3 +487,22 @@ $(document).keydown(function (event) {
 
     }
 });
+
+//CLOSE CONDITION CIRCLES WHEN CLICKING ON AN EMPTY SPOT IN #mainArea
+jQuery(document).on('click', '#mainArea', function (event) {
+    if (event.target === this) {
+        // The user clicked on an empty spot inside #mainArea
+        //close all conditionCircles
+        jQuery('.conditionCircle').each(function () {
+            if (parseInt(jQuery(this).css('width')) > 32) { // 32 is equivalent to 2 rem when using pixels
+                jQuery(this).animate({
+                    width: '1rem',
+                    height: '1rem'
+                }, 800);
+            }
+            $(this).find('.conditionInputsWrap').remove(); //remove also the inputs
+        });
+    } else {
+        // The user clicked on a child element inside #mainArea
+    }
+});
