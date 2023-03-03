@@ -286,6 +286,17 @@ $(document).on('change', '.answerNumber', function () {
 
 })
 
+//REACT TO CHANGE IN THE NEXT FIELD
+$(document).on('change', '.next', function () {
+
+    let updatedValue = $(this).val();
+
+    let nodeToUpdate = findDialogueNodeBasedOnPassedInHtmlElement(this);
+
+    nodeToUpdate.nextNode = updatedValue;
+
+})
+
 
 //CLICKED ON THE EXPORT JSON BUTTON (code handled in separate exportJson.js file)
 jQuery(document).on('click', '#export', function () {

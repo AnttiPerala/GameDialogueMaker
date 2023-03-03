@@ -174,6 +174,9 @@ function drawDialogueMakerProject() {
             );
 
             currLine.lineElem = theLine; //stores a reference to the actual line into the object
+
+
+
             //set the id also of the svg for easier selection
             const all_svgs = document.querySelectorAll("svg");
             const this_svg = all_svgs[all_svgs.length - 1];
@@ -182,7 +185,7 @@ function drawDialogueMakerProject() {
 
             let theSVGInDOM = $('svg[data-fromnode="' + currLine.fromNode + '"][data-tonode="' + currLine.toNode + '"]');
 
-            let thePath = $(theSVGInDOM).find('.leader-line-line-path'); //If theLine is undefined, the expression will evaluate to undefined, so thePath will be undefined as well. If theLine is defined, the expression will proceed to execute theLine.find('path') and return its result.
+            let thePath = $(theSVGInDOM).find('.leader-line-line-path'); 
             //Should we also save the SVG element in the object? I think the proble here is that we are trying to find the svg path from the object and not from DOM..
 
             //const path = document.getElementById('leader-line-5-line-path');
@@ -209,8 +212,50 @@ function drawDialogueMakerProject() {
             
         }
 
+        //NOW LOOP THROUGH DIALOGUE NODES AND THEIR LINES
+
         //loop through all dialogue nodes of a character
         for (let j = 0; j < gameDialogueMakerProject.characters[i].dialogueNodes.length; j++) {
+
+            let currentDialogueNode = gameDialogueMakerProject.characters[i].dialogueNodes[j];
+
+            //check if the dialogueNode object in the master has a positive next value
+            let nextNodeValue = currentDialogueNode.nextNode;
+
+            if (nextNodeValue > 0){
+
+                //get the from node
+                let lineStart = currentDialogueNode.nodeElement;
+
+                //get the next target node
+                let lineEndNode = getDialogueNodeById(gameDialogueMakerProject.characters[i].characterID, nextNodeValue);
+
+                let lineEndNodeElem = lineEndNode.nodeElement;
+
+                let lineEndElementTopSocket = lineEndNodeElem.find('.topConnectionSocket');
+
+
+
+                //draw dotted lines from nodes with a positive next value
+
+                let theLine = new LeaderLine(
+                    lineStart.get(0), //get(0) converts jQuery object to regular dom object
+                    lineEndElementTopSocket.get(0),
+                    {
+                        color: 'gray',
+                        size: 4,
+                        dash: true,
+                        path: 'arc', //deafult is straight, arc, fluid, magnet, grid
+                        startSocket: 'right',
+                        endSocket: 'bottom',
+                        endPlug: 'disc'
+                    }
+                );
+
+            }
+            
+            
+
 
      
             //loop through the lines of a dialogue node

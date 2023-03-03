@@ -1,4 +1,10 @@
 function createDialogueNode(nodeElement, dialogueIDSent, dialogueType, dialogueText, nextNode, dialogueNodeX, dialogueNodeY, outgoingSockets, outgoingLines) {
+    let activeNextNode = '';
+
+    if (nextNode > 0){ //only display the number if it's greater than zero
+        activeNextNode = nextNode;
+    }
+
     //answers should have read-only selects
     let selectElementContentBasedOnParentBlockType = ``;
     let storyIdToAssignBasedOnBlockType;
@@ -7,7 +13,7 @@ function createDialogueNode(nodeElement, dialogueIDSent, dialogueType, dialogueT
     let blockOptionsOption1 = "";
     let blockOptionsOption2 = "";
     let blockOptionsOption3 = `<span style=" text-align: right;">Next:</span><input class="next"
-    style="display:inline-block;" type="number">`;
+    style="display:inline-block;" type="number" value="${activeNextNode}">`;
     let singlePlusButton = '<div class="blockPlusButton" data-buttonindex=0 data-acceptclicks=true>+</div>';
     let plusButtons = singlePlusButton;
 
