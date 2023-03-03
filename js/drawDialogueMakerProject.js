@@ -172,7 +172,6 @@ function drawDialogueMakerProject() {
                     endPlug: 'disc'
                 }
             );
-            plusButtonElem.attr('data-acceptclicks', false);
 
             currLine.lineElem = theLine; //stores a reference to the actual line into the object
             //set the id also of the svg for easier selection
@@ -232,6 +231,11 @@ function drawDialogueMakerProject() {
 
                 let plusButtonElem = $(lineStartNode).find('.blockPlusButton[data-buttonindex="' + plusButtonToConnectTo + '"]');
 
+                
+
+
+                
+
                 let lineEndNodeId = currLine.toNode;
 
                 let lineEndNode = currI.dialogueNodes.find(obj => obj.dialogueID == lineEndNodeId);
@@ -275,7 +279,8 @@ function drawDialogueMakerProject() {
                     //check that it's not undefined
                     if (theSVGInDOM) {
 
-                        let thePath = $(theSVGInDOM).find('.leader-line-line-path'); //If theLine is undefined, the expression will evaluate to undefined, so thePath will be undefined as well. If theLine is defined, the expression will proceed to execute theLine.find('path') and return its result.
+                        let thePath = $(theSVGInDOM).find('.leader-line-line-path'); 
+
                         //Should we also save the SVG element in the object? I think the proble here is that we are trying to find the svg path from the object and not from DOM..
 
                         //const path = document.getElementById('leader-line-5-line-path');
@@ -285,16 +290,7 @@ function drawDialogueMakerProject() {
                         myLog(`line was undefined: ${theLine}`, 3, fileInfo = getFileInfo())
                     }
 
-                    //turn things that can't be clicked gray:
-                    // If data-acceptclicks is false, add the no-clicks class
-                    if (plusButtonElem.attr('data-acceptclicks') == 'false') {
-                        plusButtonElem.addClass('no-clicks');
-                    }
-
-                    // If data-acceptclicks is true, remove the no-clicks class
-                    if (plusButtonElem.attr('data-acceptclicks') == 'true') {
-                        plusButtonElem.removeClass('no-clicks');
-                    }
+                   
 
                 }//end if lineEndNode
 
@@ -331,6 +327,49 @@ function drawDialogueMakerProject() {
 
     //test path drawing
 
+    //let loop through the lines once again and look at fromNode and the fromSocket of the line. then select the blockWrap dom element with the id matching fromNode id and loop through it's buttons. If there is a match with the fromSocket and the button's data-buttonindex then the button has a line 
+
+    //or we just loop through all plus buttons, get their closest blockWrap, check it's id, then search up that object in the master object, loop throught it's lines, check if the line has same fromSocket as the button's data-buttonindex and if so, set accept clicks to false
+
+   
+
+    //turn things that can't be clicked gray:
+    // If data-acceptclicks is false, add the no-clicks class
+
+    $('.blockPlusButton').each(function(){
+     let theDialogueIdToGet = $(this).closest('.blockWrap').attr('id').replace(/\D/g, '');//strip char from id
+     let theCharacterIdToGet = $(this).closest('.characterRoot').attr('id').replace(/\D/g, '');//strip char from id
+     let plusButtonIndex = $(this).attr('data-buttonindex');
+
+
+    let dialogueNodeInMaster = getDialogueNodeById(theCharacterIdToGet, theDialogueIdToGet);
+
+    //loop through all the lines of this dialogueNode
+ 
+                    dialogueNodeInMaster.outgoingLines.forEach(outgoingLine => {
+                        // Do something with the outgoingLine
+                        console.log(outgoingLine);
+                        if (outgoingLine.fromSocket == plusButtonIndex){
+                            //we have an outgoing line
+                            $(this).attr('data-acceptclicks', false);
+
+                        }
+                    });
+      
+
+
+        if ($(this).attr('data-acceptclicks') == 'false') {
+            $(this).addClass('no-clicks');
+        }
+
+        // If data-acceptclicks is true, remove the no-clicks class
+        if ($(this).attr('data-acceptclicks') == 'true') {
+            $(this).removeClass('no-clicks');
+        }
+
+    })
+
+  
    
 
 } // end function drawDialogueMakerProject
