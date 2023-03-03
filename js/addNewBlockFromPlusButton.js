@@ -99,8 +99,7 @@ $('body').on('click', '.blockPlusButton', function () {
 
         }
 
-        $('#mainArea').get(0).innerHTML = '';
-        $('svg').remove();
+        clearCanvasBeforeReDraw();
         drawDialogueMakerProject();
 
   

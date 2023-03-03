@@ -295,6 +295,9 @@ $(document).on('change', '.next', function () {
 
     nodeToUpdate.nextNode = updatedValue;
 
+    clearCanvasBeforeReDraw();
+    drawDialogueMakerProject();
+
 })
 
 
