@@ -144,5 +144,6 @@ let gameDialogueMakerProject = {
 
         ]//end dialoguenodes
 
-    }]
+    }
+]//end characters
 }

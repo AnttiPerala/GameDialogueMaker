@@ -151,29 +151,41 @@ function drawDialogueMakerProject() {
 
             let lineEndNode = currI.dialogueNodes.find(obj => obj.dialogueID == lineEndNodeId);
 
-            let lineEndNodeElement = lineEndNode.nodeElement;
+            let lineEndNodeElement='';
+
+            if (lineEndNode){
+                lineEndNodeElement = lineEndNode.nodeElement;
+            }
+
+           
 
             //get the top socket
             let lineEndElementTopSocket = $(lineEndNodeElement).find('.topConnectionSocket');
 
             //TO DO: Implement this pointanchor thing to center the ends of the lines https://anseki.github.io/leader-line/#pointanchor
     
-            //draw lines from characterRoot (should be only one):
-            let theLine = new LeaderLine(
-                plusButtonElem.get(0), //get(0) converts jQuery object to regular dom object
-                lineEndElementTopSocket.get(0),
-                {
-                    color: '#0075ff',
-                    size: 4,
-                    dash: false,
-                    path: 'straight', //deafult is straight, arc, fluid, magnet, grid
-                    startSocket: 'bottom',
-                    endSocket: 'bottom',
-                    endPlug: 'disc'
-                }
-            );
+            //draw lines from characterRoot (should be only zero or one):
 
-            currLine.lineElem = theLine; //stores a reference to the actual line into the object
+            if (gameDialogueMakerProject.characters[i].outgoingLines.length > 0){
+
+                let theLine = new LeaderLine(
+                    plusButtonElem.get(0), //get(0) converts jQuery object to regular dom object
+                    lineEndElementTopSocket.get(0),
+                    {
+                        color: '#0075ff',
+                        size: 4,
+                        dash: false,
+                        path: 'straight', //deafult is straight, arc, fluid, magnet, grid
+                        startSocket: 'bottom',
+                        endSocket: 'bottom',
+                        endPlug: 'disc'
+                    }
+                );
+
+                currLine.lineElem = theLine; //stores a reference to the actual line into the object
+            }
+
+            
 
 
 
@@ -215,158 +227,165 @@ function drawDialogueMakerProject() {
         //NOW LOOP THROUGH DIALOGUE NODES AND THEIR LINES
 
         //loop through all dialogue nodes of a character
-        for (let j = 0; j < gameDialogueMakerProject.characters[i].dialogueNodes.length; j++) {
 
-            let currentDialogueNode = gameDialogueMakerProject.characters[i].dialogueNodes[j];
+        if (gameDialogueMakerProject.characters[i].dialogueNodes) {
 
-            //check if the dialogueNode object in the master has a positive next value
-            let nextNodeValue = currentDialogueNode.nextNode;
+            for (let j = 0; j < gameDialogueMakerProject.characters[i].dialogueNodes.length; j++) {
 
-            if (nextNodeValue > 0){
+                let currentDialogueNode = gameDialogueMakerProject.characters[i].dialogueNodes[j];
 
-                //get the from node
-                let lineStart = currentDialogueNode.nodeElement;
+                //check if the dialogueNode object in the master has a positive next value
+                let nextNodeValue = currentDialogueNode.nextNode;
 
-                //get the next target node
-                let lineEndNode = getDialogueNodeById(gameDialogueMakerProject.characters[i].characterID, nextNodeValue);
+                if (nextNodeValue > 0) {
 
-                let lineEndNodeElem = lineEndNode.nodeElement;
+                    //get the from node
+                    let lineStart = currentDialogueNode.nodeElement;
 
-                let lineEndElementTopSocket = lineEndNodeElem.find('.topConnectionSocket');
+                    //get the next target node
+                    let lineEndNode = getDialogueNodeById(gameDialogueMakerProject.characters[i].characterID, nextNodeValue);
 
+                    let lineEndNodeElem = lineEndNode.nodeElement;
 
-
-                //draw dotted lines from nodes with a positive next value
-
-                let theLine = new LeaderLine(
-                    lineStart.get(0), //get(0) converts jQuery object to regular dom object
-                    lineEndElementTopSocket.get(0),
-                    {
-                        color: 'gray',
-                        size: 4,
-                        dash: true,
-                        path: 'arc', //deafult is straight, arc, fluid, magnet, grid
-                        startSocket: 'right',
-                        endSocket: 'bottom',
-                        endPlug: 'disc'
-                    }
-                );
-
-            }
-            
-            
+                    let lineEndElementTopSocket = lineEndNodeElem.find('.topConnectionSocket');
 
 
-     
-            //loop through the lines of a dialogue node
-            for (let k = 0; k < gameDialogueMakerProject.characters[i].dialogueNodes[j].outgoingLines.length; k++) {
 
-                let lineStartNode = gameDialogueMakerProject.characters[i].dialogueNodes[j].nodeElement; //node which we are handling currently
-
-
-                let currLine;
-
-                //check that there are lines
-                if (gameDialogueMakerProject.characters[i].dialogueNodes[j].outgoingLines.length != 0) {
-                    currLine = gameDialogueMakerProject.characters[i].dialogueNodes[j].outgoingLines[k]; //line we are handling currently
-                }
-
-                //select the correct plus button to draw the line from
-                let plusButtonToConnectTo = currLine.fromSocket;
-
-                let plusButtonElem = $(lineStartNode).find('.blockPlusButton[data-buttonindex="' + plusButtonToConnectTo + '"]');
-
-                
-
-
-                
-
-                let lineEndNodeId = currLine.toNode;
-
-                let lineEndNode = currI.dialogueNodes.find(obj => obj.dialogueID == lineEndNodeId);
-
-                if (lineEndNode){ //check that it's not undefined
-
-                    let lineEndNodeElement = lineEndNode.nodeElement;
-
-                    //get the top socket
-                    let lineEndElementTopSocket = $(lineEndNodeElement).find('.topConnectionSocket');
+                    //draw dotted lines from nodes with a positive next value
 
                     let theLine = new LeaderLine(
-                        plusButtonElem.get(0), //get(0) converts jQuery object to regular dom object
+                        lineStart.get(0), //get(0) converts jQuery object to regular dom object
                         lineEndElementTopSocket.get(0),
                         {
-                            color: '#0075ff',
+                            color: 'gray',
                             size: 4,
-                            dash: false,
-                            path: 'straight', //deafult is straight, arc, fluid, magnet, grid
-                            startSocket: 'bottom',
+                            dash: true,
+                            path: 'arc', //deafult is straight, arc, fluid, magnet, grid
+                            startSocket: 'right',
                             endSocket: 'bottom',
                             endPlug: 'disc'
                         }
                     );
 
-                    myline = theLine; //just a global tester
-
-                    currLine.lineElem = theLine;
-
-                    //set the id also of the svg for easier selection
-                    const all_svgs = document.querySelectorAll("svg");
-                    const this_svg = all_svgs[all_svgs.length - 1];
-                    this_svg.setAttribute("data-fromnode", currLine.fromNode);
-                    this_svg.setAttribute("data-tonode", currLine.toNode);
-
-                    //every line should get at least an empty condition circle:
-                    //svgInDom is already define once when giving the circle to the line from the characterRoot
-                    theSVGInDOM = $('svg[data-fromnode="' + currLine.fromNode + '"][data-tonode="' + currLine.toNode + '"]');
-
-
-                    //check that it's not undefined
-                    if (theSVGInDOM) {
-
-                        let thePath = $(theSVGInDOM).find('.leader-line-line-path'); 
-
-                        //Should we also save the SVG element in the object? I think the proble here is that we are trying to find the svg path from the object and not from DOM..
-
-                        //const path = document.getElementById('leader-line-5-line-path');
-                        const midpoint = drawConditionCircle(thePath.get(0), currLine.fromNode, currLine.toNode);
-
-                    } else {
-                        myLog(`line was undefined: ${theLine}`, 3, fileInfo = getFileInfo())
-                    }
-
-                   
-
-                }//end if lineEndNode
-
-
-                //myLine.start is the native way of selecting the fromNode but only seems to work for the reference, not for dom
-                //myLine.end is the native way of selecting the toNode
-                //maybe store the line reference in the master object and then select from there?
-
-                // Loop through the transition conditions of the current outgoing line and add a 'withCondition' class to the corresponding circles
-                for (let l = 0; l < currLine.transitionConditions.length; l++) {
-                    let transitionCondition = currLine.transitionConditions[l];
-                    // Do something with the transition condition, e.g. compare the variable value to the variable name using the comparison operator
-                    myLog(` Transition found, it's number is ${l}`,1,fileInfo = getFileInfo());
-
-                    //select the matching circle from DOM
-                    let theCircleinDOM = $('.conditionCircle[data-fromnode="' + currLine.fromNode + '"][data-tonode="' + currLine.toNode + '"]');
-
-                    theCircleinDOM.addClass('withCondition');
-                    theCircleinDOM.attr("title", "Click to change the condition for the transition");
-
-
-                    //how can we connect the transition condition to a line? Well we should have a reference to the line element already in the object
-
-                    
-                    
                 }
 
 
-            }//end k loop
 
-        } //end j loop
+
+
+                //loop through the lines of a dialogue node
+                for (let k = 0; k < gameDialogueMakerProject.characters[i].dialogueNodes[j].outgoingLines.length; k++) {
+
+                    let lineStartNode = gameDialogueMakerProject.characters[i].dialogueNodes[j].nodeElement; //node which we are handling currently
+
+
+                    let currLine;
+
+                    //check that there are lines
+                    if (gameDialogueMakerProject.characters[i].dialogueNodes[j].outgoingLines.length != 0) {
+                        currLine = gameDialogueMakerProject.characters[i].dialogueNodes[j].outgoingLines[k]; //line we are handling currently
+                    }
+
+                    //select the correct plus button to draw the line from
+                    let plusButtonToConnectTo = currLine.fromSocket;
+
+                    let plusButtonElem = $(lineStartNode).find('.blockPlusButton[data-buttonindex="' + plusButtonToConnectTo + '"]');
+
+
+
+
+
+
+                    let lineEndNodeId = currLine.toNode;
+
+                    let lineEndNode = currI.dialogueNodes.find(obj => obj.dialogueID == lineEndNodeId);
+
+                    if (lineEndNode) { //check that it's not undefined
+
+                        let lineEndNodeElement = lineEndNode.nodeElement;
+
+                        //get the top socket
+                        let lineEndElementTopSocket = $(lineEndNodeElement).find('.topConnectionSocket');
+
+                        let theLine = new LeaderLine(
+                            plusButtonElem.get(0), //get(0) converts jQuery object to regular dom object
+                            lineEndElementTopSocket.get(0),
+                            {
+                                color: '#0075ff',
+                                size: 4,
+                                dash: false,
+                                path: 'straight', //deafult is straight, arc, fluid, magnet, grid
+                                startSocket: 'bottom',
+                                endSocket: 'bottom',
+                                endPlug: 'disc'
+                            }
+                        );
+
+                        myline = theLine; //just a global tester
+
+                        currLine.lineElem = theLine;
+
+                        //set the id also of the svg for easier selection
+                        const all_svgs = document.querySelectorAll("svg");
+                        const this_svg = all_svgs[all_svgs.length - 1];
+                        this_svg.setAttribute("data-fromnode", currLine.fromNode);
+                        this_svg.setAttribute("data-tonode", currLine.toNode);
+
+                        //every line should get at least an empty condition circle:
+                        //svgInDom is already define once when giving the circle to the line from the characterRoot
+                        theSVGInDOM = $('svg[data-fromnode="' + currLine.fromNode + '"][data-tonode="' + currLine.toNode + '"]');
+
+
+                        //check that it's not undefined
+                        if (theSVGInDOM) {
+
+                            let thePath = $(theSVGInDOM).find('.leader-line-line-path');
+
+                            //Should we also save the SVG element in the object? I think the proble here is that we are trying to find the svg path from the object and not from DOM..
+
+                            //const path = document.getElementById('leader-line-5-line-path');
+                            const midpoint = drawConditionCircle(thePath.get(0), currLine.fromNode, currLine.toNode);
+
+                        } else {
+                            myLog(`line was undefined: ${theLine}`, 3, fileInfo = getFileInfo())
+                        }
+
+
+
+                    }//end if lineEndNode
+
+
+                    //myLine.start is the native way of selecting the fromNode but only seems to work for the reference, not for dom
+                    //myLine.end is the native way of selecting the toNode
+                    //maybe store the line reference in the master object and then select from there?
+
+                    // Loop through the transition conditions of the current outgoing line and add a 'withCondition' class to the corresponding circles
+                    for (let l = 0; l < currLine.transitionConditions.length; l++) {
+                        let transitionCondition = currLine.transitionConditions[l];
+                        // Do something with the transition condition, e.g. compare the variable value to the variable name using the comparison operator
+                        myLog(` Transition found, it's number is ${l}`, 1, fileInfo = getFileInfo());
+
+                        //select the matching circle from DOM
+                        let theCircleinDOM = $('.conditionCircle[data-fromnode="' + currLine.fromNode + '"][data-tonode="' + currLine.toNode + '"]');
+
+                        theCircleinDOM.addClass('withCondition');
+                        theCircleinDOM.attr("title", "Click to change the condition for the transition");
+
+
+                        //how can we connect the transition condition to a line? Well we should have a reference to the line element already in the object
+
+
+
+                    }
+
+
+                }//end k loop
+
+            } //end j loop
+
+        } //end if there are dialogueNodes
+        
+
 
     } // end i loop
 
@@ -390,6 +409,10 @@ function drawDialogueMakerProject() {
     let dialogueNodeInMaster = getDialogueNodeById(theCharacterIdToGet, theDialogueIdToGet);
 
     //loop through all the lines of this dialogueNode
+
+        if (dialogueNodeInMaster){
+
+        if (dialogueNodeInMaster.outgoingLines) {
  
                     dialogueNodeInMaster.outgoingLines.forEach(outgoingLine => {
                         // Do something with the outgoingLine
@@ -400,6 +423,10 @@ function drawDialogueMakerProject() {
 
                         }
                     });
+
+            } //end if dialogueNodeInMaster.outgoingLines
+
+        } //end if dialogueNodeInMaster
       
 
 
@@ -413,6 +440,8 @@ function drawDialogueMakerProject() {
         }
 
     })
+
+
 
   
    

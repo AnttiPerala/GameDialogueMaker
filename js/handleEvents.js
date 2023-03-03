@@ -5,79 +5,24 @@
 
 $('.plus').on('click', function () {
 
-    //calculate where to place the item
+    let charactersSoFar = gameDialogueMakerProject.characters.length;
 
-    let newBlockPosition = 0;
-    if (newBlockId < 20) {
+    let newCharacterNode = {
+        characterName: 'Name the character',
+        characterID: charactersSoFar+1,
+        characterNodeX: 271,
+        characterNodeY: 85,
+        nodeElement: $('<div class="blockWrap characterRoot"></div>'),
+        outgoingLines: [
+           
+        ],
+        dialogueNodes: []
+    };
 
-        newBlockPosition = newBlockId * 5;
+    gameDialogueMakerProject.characters.push(newCharacterNode);
 
-    } else {
-
-        newBlockPosition = 20;
-
-    }
-
-    storyId++;
-
-    $(`
-             <div class="blockWrap characterRoot">
-            <div class="contentWrap">
-                <div style="display: flex; align-items:center; justify-content: center;">
-                    <div class="topConnectionSocket">o</div>
-                </div>
-                    <div id="id${newBlockId}" class="block">
-                        <div style="text-align: left;">
-                            <span style="width: 15%; display:inline-block; text-align: right;">ID:</span><input class="blockid"
-                                style="width: 15%; display:inline-block;" readonly type="number" value="${storyId}">
-                        </div>
-                        <input type="text" class="characterName elementInfoField" placeholder="character name">
-                        <select name="blockType" class="selectBlockType">
-                            <option value="line">Line</option>
-                            <option value="question">Question</option>
-                            <option value="fight">Fight</option>
-
-                        </select>
-                        <textarea class="dialogue" placeholder="Dialogue" data-autoresize></textarea>
-                        <div>
-                        <div class="optionsUnderDialogue" style="text-align: right;">
-                            <div class="option1"></div>
-                            <div class="option2"></div>
-                            <div class="option3">
-                                <span style=" text-align: right;">Next:</span><input class="next"
-                                style="display:inline-block;" type="number">
-                            </div>
-                        </div>
-                        </div>
-
-
-                    </div>
-                    <div class="plusButtonContainer" style="display: flex; align-items: end; justify-content: center;">
-                        <div class="blockPlusButton" data-buttonindex=0 data-acceptclicks=true>+</div>
-                    </div>
-                </div>
-
-            </div>
-
-                        `)
-        .prependTo('#mainArea')
-        .draggable({
-            drag: function (event, ui) {
-                //console.log('dragging');
-                updateLines($(this).find('.block'));
-                updateElementPositionInObject();
-            }
-        })
-        .css({ top: newBlockPosition, left: newBlockPosition })
-        .find('.block')
-        .attr('id', 'id' + newBlockId)
-        ;
-        
-
-    addAutoResize();
-
-    newBlockId++;
-    //storyId++;
+    clearCanvasBeforeReDraw();
+    drawDialogueMakerProject();
 
 });
 
