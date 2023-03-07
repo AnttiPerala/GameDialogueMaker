@@ -25,6 +25,8 @@ $('body').on('mousedown', '.block, .line', function () {
         //find the right characterRoot
         let characterToEraseFrom = $(this).closest('.characterRoot').attr('id').replace(/\D/g, '');
 
+        let characterObjectToEraseFrom = getCharacterById(characterToEraseFrom);
+
         //find the node ID
         let idToBeErased = $(this).closest('.blockWrap').attr('id').replace(/\D/g, '');
 
@@ -39,13 +41,13 @@ $('body').on('mousedown', '.block, .line', function () {
         character.dialogueNodes.splice(nodeIndex, 1);
 
         //figure out which lines were connected to the deleted node, because they should go too
-        deleteLinesByToNode(idToBeErased);
+        deleteLinesByToNode(characterObjectToEraseFrom, idToBeErased);
 
         //update all the ids that come after the deleted node to avoid leaving gaps in the numbering. Note that this should be done for all characters if the nodes will all have unique values. But do they need to have unique values? Because maybe it doesn't even make sense to be able to go from a node under character 1 to a node under character 2. What would that even mean? But we should be able to go to any node under the same character by changing the next value.
 
         // Loop through the dialogueNodes and decrement the dialogueID of each node starting from the deleted index
-        for (let i = nodeIndex; i < gameDialogueMakerProject.characters[0].dialogueNodes.length; i++) {
-            gameDialogueMakerProject.characters[0].dialogueNodes[i].dialogueID--;
+        for (let i = nodeIndex; i < characterObjectToEraseFrom.dialogueNodes.length; i++) {
+            characterObjectToEraseFrom.dialogueNodes[i].dialogueID--;
         }
 
         // Loop through the outgoingLines and update the fromNode and toNode values based on the new dialogueID of the nodes
@@ -68,7 +70,7 @@ $('body').on('mousedown', '.block, .line', function () {
         //now we should shift the line numbers before the redraw since the node id's have also been shifted
         //maybe it's enought to shift things inside the master object since dom elements will be redrawn anywas
 
-        shiftObjecElementsThatAreGreaterThanDeletedIDDownByOne(idToBeErased);
+        shiftObjecElementsThatAreGreaterThanDeletedIDDownByOne(characterObjectToEraseFrom, idToBeErased); //the passed in character is the actual object here
 
         drawDialogueMakerProject();
 
@@ -90,11 +92,11 @@ $('body').on('mousedown', '.block, .line', function () {
 );
 
 
-function deleteLinesByToNode(toNodeId) {
+function deleteLinesByToNode(characterObjectToEraseFrom,toNodeId) {
     // loop through each character
-    gameDialogueMakerProject.characters.forEach((character) => {
+    
         // loop through each dialogue node of the character
-        character.dialogueNodes.forEach((dialogueNode) => {
+    characterObjectToEraseFrom.dialogueNodes.forEach((dialogueNode) => {
             // loop through each outgoing line of the dialogue node
             for (let i = 0; i < dialogueNode.outgoingLines.length; i++) {
                 const outgoingLine = dialogueNode.outgoingLines[i];
@@ -106,7 +108,7 @@ function deleteLinesByToNode(toNodeId) {
                 }
             }
         });
-    });
+    
 }
 
 function clearCanvasBeforeReDraw() {
@@ -118,13 +120,15 @@ function clearCanvasBeforeReDraw() {
 }
 
 //shift elements down
-function shiftObjecElementsThatAreGreaterThanDeletedIDDownByOne(erasedID) {
+function shiftObjecElementsThatAreGreaterThanDeletedIDDownByOne(characterObjectToEraseFrom, erasedID) {
 
     //loop through based on toNode value
-    for (let i = 0; i < gameDialogueMakerProject.characters.length; i++) {
-        let character = gameDialogueMakerProject.characters[i];
-        for (let j = 0; j < character.dialogueNodes.length; j++) {
-            let node = character.dialogueNodes[j];
+    //but only for current character!!
+
+
+
+    for (let j = 0; j < characterObjectToEraseFrom.dialogueNodes.length; j++) {
+        let node = characterObjectToEraseFrom.dialogueNodes[j];
             for (let k = 0; k < node.outgoingLines.length; k++) {
                 let line = node.outgoingLines[k];
                 if (line.toNode > erasedID) {
@@ -132,14 +136,15 @@ function shiftObjecElementsThatAreGreaterThanDeletedIDDownByOne(erasedID) {
                 }
             }//end for k
         }//end for j
-    }//end for i
+
 
     //we should also shift fromNode values that were greater than the deleted element down by one
     //loop through based on fromNode value
-    for (let i = 0; i < gameDialogueMakerProject.characters.length; i++) {
-        let character = gameDialogueMakerProject.characters[i];
-        for (let j = 0; j < character.dialogueNodes.length; j++) {
-            let node = character.dialogueNodes[j];
+    //but only for current character!!
+
+
+    for (let j = 0; j < characterObjectToEraseFrom.dialogueNodes.length; j++) {
+        let node = characterObjectToEraseFrom.dialogueNodes[j];
             for (let k = 0; k < node.outgoingLines.length; k++) {
                 let line = node.outgoingLines[k];
                 if (line.fromNode > erasedID) {
@@ -147,7 +152,7 @@ function shiftObjecElementsThatAreGreaterThanDeletedIDDownByOne(erasedID) {
                 }
             }//end for k
         }//end for j
-    }//end for i
+
 
 
 } // end function

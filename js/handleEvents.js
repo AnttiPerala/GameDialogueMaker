@@ -10,7 +10,7 @@ $('.plus').on('click', function () {
     let newCharacterNode = {
         characterName: 'Name the character',
         characterID: charactersSoFar+1,
-        characterNodeX: 271,
+        characterNodeX: 271 * (charactersSoFar + 1),
         characterNodeY: 85,
         nodeElement: $('<div class="blockWrap characterRoot"></div>'),
         outgoingLines: [
