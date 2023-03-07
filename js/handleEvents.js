@@ -198,7 +198,6 @@ jQuery(document).on('change keyup', '.characterName', function () {
 $(document).on('change keyup', 'textarea.dialogue', function () {
 
 
-
     let updatedText = $(this).val();
 
     let nodeToUpdate = findDialogueNodeBasedOnPassedInHtmlElement(this);
