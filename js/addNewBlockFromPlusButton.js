@@ -33,71 +33,120 @@ $('body').on('click', '.blockPlusButton', function () {
 
         let biggestDialogueID = 0;
 
-        characterObject.dialogueNodes.forEach(function (node) {
-            if (node.dialogueID > biggestDialogueID) {
-                biggestDialogueID = node.dialogueID;
-            }
-        });
+        //check if it's a characterRoot node:
 
-        //add a line from the previous node to the new node:
-        previousDialogueNodeInMasterObject.outgoingLines.push(
-            {
-                fromNode: previousDialogueNodeInMasterObject.dialogueID,
-                fromSocket: clickedPlusButtonButtonIndex,
-                toNode: biggestDialogueID+1,
-                lineElem: '',
-                transitionConditions: [
-                    {
-                        variableName: 'myvar',
-                        comparisonOperator: '=',
-                        variableValue: 'false'
-                    }
-                ]
-            }
-        )
+        if ($(topMostParent).hasClass('characterRoot')){
+            console.log('rooooot');
+            console.log('characterObject: ' + characterObject.characterName);
+            //add a line from the previous node to the new node:
+            characterObject.outgoingLines.push(
+                {
+                    fromNode: 0,
+                    fromSocket: clickedPlusButtonButtonIndex,
+                    toNode: biggestDialogueID + 1,
+                    lineElem: '',
+                    transitionConditions: [
+                        {
+                            variableName: 'myvar',
+                            comparisonOperator: '=',
+                            variableValue: 'false'
+                        }
+                    ]
+                }
+            );
 
-
-        if (parentBlockType == "line" || parentBlockType == "answer") {
-
-  
             let newDialogueNode = {
-                dialogueID: biggestDialogueID+1,
+                dialogueID: biggestDialogueID + 1,
                 dialogueType: 'line',
                 dialogueText: 'This is a new dialogue node!',
                 nextNode: -1,
-                dialogueNodeX: previousDialogueNodeInMasterObject.dialogueNodeX + 200,
-                dialogueNodeY: previousDialogueNodeInMasterObject.dialogueNodeY + 200,
+                dialogueNodeX: characterObject.characterNodeX -150,
+                dialogueNodeY: characterObject.characterNodeY + 150,
                 outgoingSockets: 1,
                 nodeElement: $('<div></div>'),
                 outgoingLines: [
-                   
+
                 ]
             };
 
-            gameDialogueMakerProject.characters[0].dialogueNodes.push(newDialogueNode);
+            characterObject.dialogueNodes.push(newDialogueNode);
 
-        } else if (parentBlockType == "question") { //parent is question so this should be an answer
+        } else {
 
 
-            let newDialogueNode = {
-                dialogueID: biggestDialogueID+1,
-                dialogueType: 'answer',
-                siblings: 3,
-                siblingNumber: 1,
-                dialogueText: 'Fine thank you',
-                nextNode: -1,
-                dialogueNodeX: previousDialogueNodeInMasterObject.dialogueNodeX + 200,
-                dialogueNodeY: previousDialogueNodeInMasterObject.dialogueNodeX + 200,
-                outgoingSockets: 1,
-                nodeElement: $('<div></div>'),
-                outgoingLines: [
 
-                ] //end lines
-            };
+           
 
-            gameDialogueMakerProject.characters[0].dialogueNodes.push(newDialogueNode);
+            characterObject.dialogueNodes.forEach(function (node) {
+                if (node.dialogueID > biggestDialogueID) {
+                    biggestDialogueID = node.dialogueID;
+                }
+            });
 
-        }
+            //add a line from the previous node to the new node:
+            previousDialogueNodeInMasterObject.outgoingLines.push(
+                {
+                    fromNode: previousDialogueNodeInMasterObject.dialogueID,
+                    fromSocket: clickedPlusButtonButtonIndex,
+                    toNode: biggestDialogueID + 1,
+                    lineElem: '',
+                    transitionConditions: [
+                        {
+                            variableName: 'myvar',
+                            comparisonOperator: '=',
+                            variableValue: 'false'
+                        }
+                    ]
+                }
+            )
+
+
+            if (parentBlockType == "line" || parentBlockType == "answer") {
+
+
+                let newDialogueNode = {
+                    dialogueID: biggestDialogueID + 1,
+                    dialogueType: 'line',
+                    dialogueText: 'This is a new dialogue node!',
+                    nextNode: -1,
+                    dialogueNodeX: previousDialogueNodeInMasterObject.dialogueNodeX - 200,
+                    dialogueNodeY: previousDialogueNodeInMasterObject.dialogueNodeY + 200,
+                    outgoingSockets: 1,
+                    nodeElement: $('<div></div>'),
+                    outgoingLines: [
+
+                    ]
+                };
+
+                characterObject.dialogueNodes.push(newDialogueNode);
+
+            } else if (parentBlockType == "question") { //parent is question so this should be an answer
+
+
+                let newDialogueNode = {
+                    dialogueID: biggestDialogueID + 1,
+                    dialogueType: 'answer',
+                    siblings: 3,
+                    siblingNumber: 1,
+                    dialogueText: 'Fine thank you',
+                    nextNode: -1,
+                    dialogueNodeX: previousDialogueNodeInMasterObject.dialogueNodeX + 200,
+                    dialogueNodeY: previousDialogueNodeInMasterObject.dialogueNodeX + 200,
+                    outgoingSockets: 1,
+                    nodeElement: $('<div></div>'),
+                    outgoingLines: [
+
+                    ] //end lines
+                };
+
+                characterObject.dialogueNodes.push(newDialogueNode);
+
+            }
+
+        } //end else (not hasClass characterRoot)
+
+
+
 
         clearCanvasBeforeReDraw();
         drawDialogueMakerProject();
