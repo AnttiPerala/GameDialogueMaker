@@ -3,13 +3,17 @@
 
 TO DO:
 
+coloring of nodes
+
+The second character doesn't get transition conditions for some reason
+
+Zoom not working (lines would need to be appended to #mainArea)
+
 Memento pattern undo
 
 Command pattern undo would be more efficient but harder to code
 
-turn relevant (connected) plus buttons gray when user changes the number of answers to a question
 
-draw a dotted line when the user connects a node to another node without the plus button (by manually setting the "next" value)
 
 
 */
