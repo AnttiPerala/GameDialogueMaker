@@ -100,9 +100,9 @@ jQuery(document).on('change', '.selectBlockType', function () {
         let theQuestionBlockNextValue = jQuery(this).closest('.blockWrap').find('.next').first().val();
         let childNodeIdValue = jQuery(this).closest('.blockWrap').find('.blockWrap').first().find('.blockid').val();
 
-        console.log('theQuestionBlockNextValue' + theQuestionBlockNextValue + 'childNodeIdValue' + childNodeIdValue);
+        //console.log('theQuestionBlockNextValue' + theQuestionBlockNextValue + 'childNodeIdValue' + childNodeIdValue);
         if (theQuestionBlockNextValue == childNodeIdValue){
-            console.log('match');
+            //console.log('match');
             jQuery(this).closest('.blockWrap').children('.blockWrap').find('.selectBlockType').html(`
             <select name="blockType" class="selectBlockType">
                 <option value="answer0">answer</option>
@@ -126,7 +126,7 @@ jQuery(document).on('change', '.selectBlockType', function () {
         jQuery(this).closest('.blockWrap').find('textarea').attr("placeholder", "Type the line");
 
     }
-})
+}) // end selectBlockType change
 
 
 //SET THE NUMBER OF ANSWERS

@@ -356,12 +356,13 @@ function drawDialogueMakerProject() {
                         //set the id also of the svg for easier selection
                         const all_svgs = document.querySelectorAll("svg");
                         const this_svg = all_svgs[all_svgs.length - 1];
+                        this_svg.setAttribute("data-character", gameDialogueMakerProject.characters[i].characterID);
                         this_svg.setAttribute("data-fromnode", currLine.fromNode);
                         this_svg.setAttribute("data-tonode", currLine.toNode);
 
                         //every line should get at least an empty condition circle:
                         //svgInDom is already define once when giving the circle to the line from the characterRoot
-                        theSVGInDOM = $('svg[data-fromnode="' + currLine.fromNode + '"][data-tonode="' + currLine.toNode + '"]');
+                        theSVGInDOM = $('svg[data-fromnode="' + currLine.fromNode + '"][data-tonode="' + currLine.toNode + '"][data-character="' + gameDialogueMakerProject.characters[i].characterID + '"]');
 
 
                         //check that it's not undefined

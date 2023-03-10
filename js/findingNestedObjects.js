@@ -86,9 +86,9 @@ function findLineThatConnectsElementToParent(dialogueID){
     }
 
     if (targetLine) {
-        console.log("Found line with toNode value of " + targetNode + ": ", targetLine);
+        //console.log("Found line with toNode value of " + targetNode + ": ", targetLine);
     } else {
-        console.log("Could not find line with toNode value of " + targetNode);
+        //console.log("Could not find line with toNode value of " + targetNode);
     }
     return targetLine;
 }
@@ -110,7 +110,7 @@ function getLineObjectFromMasterObjectUsingFromAndTo(fromNode, toNode) {
 
                 // Check if the line matches the specified from and to nodes
                 if (line.fromNode == fromNode && line.toNode == toNode) {
-                    console.log(line);
+                    //console.log(line);
                     // Do something with the line object
                     foundLine = line;
                 }
@@ -123,7 +123,7 @@ function getLineObjectFromMasterObjectUsingFromAndTo(fromNode, toNode) {
 
             // Check if the line matches the specified from and to nodes
             if (line.fromNode == fromNode && line.toNode == toNode) {
-                console.log(line);
+                //console.log(line);
                 // Do something with the line object
                 foundLine = line;
             }

@@ -126,7 +126,7 @@ body {
 .optionsUnderDialogue{
     display: grid;
     max-width: 100%;
-    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-columns: 2fr 1fr 2fr;
 }
 
 .block input {
@@ -286,6 +286,10 @@ textarea {
 
 .dialogue-box-fade-out {
     opacity: 0;
+}
+
+.answerNumber{
+    display: inline-block;
 }
 
 
