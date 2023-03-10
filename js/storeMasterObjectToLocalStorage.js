@@ -39,7 +39,7 @@ function storeMasterObjectToLocalStorage() {
 
         drawDialogueMakerProject();
     
-
+    //$('svg').css({ 'zoom': zoomValue + '%' }); //also change the lines zoom
 
   
 }

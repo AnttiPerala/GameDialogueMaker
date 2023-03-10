@@ -410,8 +410,9 @@ $('#blocksize').on('change input', function(){
     $('#zoomAmount').on('change input', function () {
        //console.log(`change zoom to ${$(this).val()} %`);
         //$('.selected').css("width", $(this).val());
-        let zoomValue = $(this).val();
+        zoomValue = $(this).val();
         $('#mainArea').css({ 'zoom': zoomValue + '%' });
+        //$('svg').css({ 'zoom': zoomValue + '%' }); //also change the lines zoom
         //$('.block input').css("font-size", $(this).val()/8+10 +'px');
         
     })

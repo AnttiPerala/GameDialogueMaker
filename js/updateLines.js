@@ -5,6 +5,7 @@ let allConnectedLines;
 function updateAllLines() {
 
     if (!eraseMode) {
+        
         gameDialogueMakerProject.characters.forEach((character) => {
 
             //all lines of character nodes
@@ -27,6 +28,8 @@ function updateAllLines() {
                 });
             });
         });
+        //$('svg').css({ 'zoom': zoomValue + '%' }); //also change the lines zoom
+        
     }//end if eraseMode
     
 
@@ -134,6 +137,8 @@ function updateLines(element) { //element is the dragged node dom element
 
             e.get(0).position();
         })
+
+        //$('svg').css({ 'zoom': zoomValue + '%' }); //also change the lines zoom
 
     }//end if erasemode
 
