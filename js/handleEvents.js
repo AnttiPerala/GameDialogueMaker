@@ -81,30 +81,39 @@ $('body').on('mousedown', '.line', function () {
 $('#blockColor').on('change input', function () {
     console.log(`change ${$(this).val()}`);
     let selectedDomObject = $('.selected');
-    selectedDomObject.css("background-color", $(this).val());
-    selectedColor = $(this).val(); //for cloning
+    //if nothing got selected (so no node is active)
+    if (selectedDomObject.length === 0){
+        drawDialogueBox('Select a node first');
+    } else {
 
-    let characterToChange = '';
-    let characterID ='';
-    //check if already root
-    if ($(selectedDomObject).hasClass('characterRoot')) { //if the element is already the characterRoot
+        selectedDomObject.css("background-color", $(this).val());
+        selectedColor = $(this).val(); //for cloning
 
-        characterID = $(selectedDomObject).attr('id').replace(/\D/g, ''); //get the if of character
-        let characterObjectToChange = getCharacterById(characterID); //send the ID number to the find function
-        characterObjectToChange.bgColor = $(this).val();
+        let characterToChange = '';
+        let characterID = '';
+        //check if already root
+        if ($(selectedDomObject).hasClass('characterRoot')) { //if the element is already the characterRoot
+
+            characterID = $(selectedDomObject).attr('id').replace(/\D/g, ''); //get the if of character
+            let characterObjectToChange = getCharacterById(characterID); //send the ID number to the find function
+            characterObjectToChange.bgColor = $(this).val();
 
 
-    } else { //the element is not the characterRoot
- 
-        characterID = $(selectedDomObject).closest('.characterRoot').attr('id').replace(/\D/g, ''); //get just the number from the id
-        let nodeId = selectedDomObject.attr('id').replace(/\D/g, '');
-        
-        //store the color also to the object
-        let objectToChange = getDialogueNodeById(characterID, nodeId); //send the ID number to the find function
-        objectToChange.bgColor = $(this).val();
+        } else { //the element is not the characterRoot
 
-    }
+            characterID = $(selectedDomObject).closest('.characterRoot').attr('id').replace(/\D/g, ''); //get just the number from the id
+            let nodeId = $(selectedDomObject).attr('id').replace(/\D/g, '');
 
+            //store the color also to the object
+            let objectToChange = getDialogueNodeById(characterID, nodeId); //send the ID number to the find function
+            objectToChange.bgColor = $(this).val();
+
+        }
+
+
+    } // end else if selectedDomObject.length !== 0
+
+    
     
 
     
