@@ -83,6 +83,13 @@ jQuery(document).on('change', '.selectBlockType', function () {
 
     const selectedValue = $(this).val();
 
+        let nodeToUpdate = findDialogueNodeBasedOnPassedInHtmlElement(this);
+
+    nodeToUpdate.dialogueType = selectedValue;
+    nodeToUpdate.outgoingSockets = 3; //when changing the block type to question, set default answer amount to three also in the aobject
+
+   
+
     if(selectedValue == "question"){
        //console.log('question');
 
@@ -208,16 +215,7 @@ $(document).on('change keyup', 'textarea.dialogue', function () {
 
 })
 
-//UPDATE THE MASTER OBJECT WHEN A SELECT OPTION IS CHANGED
-$(document).on('change', '.selectBlockType', function () {
 
-    let updatedValue = $(this).val();
-
-    let nodeToUpdate = findDialogueNodeBasedOnPassedInHtmlElement(this);
-
-    nodeToUpdate.dialogueType = updatedValue;
-
-})
 
 //UPDATE THE MASTER OBJECT WHEN THE NUMBER OF ANSWERS IS CHANGED
 $(document).on('change', '.answerNumber', function () {
