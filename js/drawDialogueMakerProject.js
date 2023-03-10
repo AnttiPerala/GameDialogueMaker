@@ -108,6 +108,7 @@ function drawDialogueMakerProject() {
                     drag: function (event, ui) {
                         //console.log('dragging');
                         updateLines(ui.helper); //called only when dragged
+                        
                     },
                     stop: function (event, ui) {
                         var position = ui.position;
@@ -116,13 +117,15 @@ function drawDialogueMakerProject() {
                         updateElementPositionInObject(ui.helper); //update master object positions
                         $(".conditionCircle").show();//bring the circle visibility back up
 
-                    }
+                    },
+                    cancel: cloneMode ? "*" : null //dont allow dragging in cloneMode
+
                 })
                 .css({ top: rigidY + 'px', left: rigidX + 'px', position: 'absolute'}); //absolute needs to be called AFTER draggable
 
             $(dialogueNode).find('.block').css({backgroundColor: currJ.bgColor});
 
-            console.log('dialogueNode.bgColor: ' + currJ.bgColor);
+            //console.log('dialogueNode.bgColor: ' + currJ.bgColor);
 
 
             //set the appended node to be the new lastestNode (except for answers)
@@ -160,7 +163,8 @@ function drawDialogueMakerProject() {
                     // Your code to update some other element or data
                     updateElementPositionInObject(ui.helper); //update master object positions
                     $(".conditionCircle").show();//bring the circle visibility back up
-                }
+                },
+                cancel: cloneMode ? "*" : null //dont allow dragging in cloneMode
             })
             .css({ left: gameDialogueMakerProject.characters[i].characterNodeX, top: gameDialogueMakerProject.characters[i].characterNodeY });
 

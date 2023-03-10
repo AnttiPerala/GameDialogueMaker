@@ -73,6 +73,37 @@
         // Position the line at the center of the parent element
         lineElement.style.left = `${parentCenterX}px`;
         lineElement.style.top = `${parentCenterY}px`;
+
+       let day = 5;
+        let dayName;
+        switch (day) {
+            case 0:
+                dayName = "Sunday";
+                break;
+            case 1:
+                dayName = "Monday";
+                break;
+            case 2:
+                dayName = "Tuesday";
+                break;
+            case 3:
+                dayName = "Wednesday";
+                break;
+            case 4:
+                dayName = "Thursday";
+                break;
+            case 5:
+                dayName = "Friday";
+                break;
+            case 6:
+                dayName = "Saturday";
+                break;
+            default:
+                dayName = "Invalid day";
+                break;
+        }
+        console.log("Today is " + dayName);
+
     </script>
 </body>
 

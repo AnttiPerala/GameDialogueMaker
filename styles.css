@@ -171,7 +171,7 @@ body {
 
 .selected {
 
-    border: 3px solid #0075ff;
+    border: 5px dashed #000000;
 
 }
 

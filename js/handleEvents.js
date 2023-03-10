@@ -41,7 +41,7 @@ $(document).mousedown(function () {
 
 $('body').on('mousedown', '.block', function () {
 
-    if (!event.shiftKey && !cloneMode) { //not holding shift and the clonebrush is not active
+    if (!eraseMode && !cloneMode) { //not erasing and the clonebrush is not active
 
         $('.block').removeClass('selected');
         $(this).addClass('selected');
@@ -113,11 +113,53 @@ $('#blockColor').on('change input', function () {
 
     } // end else if selectedDomObject.length !== 0
 
-    
-    
 
     
+}) //END COLOR PICKER
+
+
+//COPY FORMATTING BRUSH FEATURE
+
+//enable or disable clone brush
+$('#stylebrush').on('click', function () {
+    cloneMode = !cloneMode; //toggle boolean
+
+    //when clone mode is on:
+    if (cloneMode) {
+        $('body').css('cursor', 'url(iconmonstr-paintbrush-3-64.png) 16 32, auto'); //16 32 are the interaction point coordinates of the cursor #0075ff
+    } else {
+        $('body').css('cursor', 'unset');
+    }
+
 })
+
+
+//CLICKING ON A CIRCLE WITH CLONEMODE ON
+
+$('body').on('mousedown', '.blockWrap', function () {
+    if (cloneMode) {
+        //console.log(`set values now, selectedColor is ${selectedColor}`);
+
+        let selectedNode = $('.selected');
+
+        //if no node was selected
+        if (selectedNode.length === 0){
+            drawDialogueBox('Select the source node for the cloning first.')
+        } else {
+
+            let colorOfSelectedNode = selectedNode.css('backgroundColor');
+            console.log('colorOfSelectedNode: ' + colorOfSelectedNode);
+                /* $(this).css('transform', 'scale(' + selectedSize + ')'); */
+            $(this).children().children('.block').css('background-color', colorOfSelectedNode);
+        /* $(this).children('input').css('font-size', selectedFontSize); */
+
+        }//end else
+
+       
+    }
+}
+);
+
 
 
 //SET THE BLOCK TYPE TO QUESTION
@@ -439,8 +481,6 @@ jQuery(document).on('click', '.conditionCircle .okTransition', function (event) 
     }, 800);
 
 
-    
-
 
 }) //end add click
 
@@ -527,6 +567,14 @@ $(document).keydown(function (event) {
             $('body').css('cursor', 'unset');
         }
 
+        cloneMode = false;
+        //when clone mode is on:
+        if (cloneMode) {
+            $('body').css('cursor', 'url(iconmonstr-eraser-1-48.png) 16 32, auto');
+        } else {
+            $('body').css('cursor', 'unset');
+        }
+
         //close all conditionCircles on esc
 
             jQuery('.conditionCircle').each(function () {
@@ -565,7 +613,13 @@ jQuery(document).on('click', '#mainArea', function (event) {
             eraseMode = false;
 
         }
-       
+        if (cloneMode) {
+
+            $('body').css('cursor', 'unset');
+
+            cloneMode = false;
+
+        }
     } else {
         // The user clicked on a child element inside #mainArea
     }
