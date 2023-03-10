@@ -29,6 +29,8 @@ $('body').on('click', '.blockPlusButton', function () {
 
         let previousDialogueNodeInMasterObject = findDialogueNodeBasedOnPassedInHtmlElement(this);
 
+        let earlierObjectBGColor = previousDialogueNodeInMasterObject.bgColor;
+
         //get the biggest dialogueID so far in the character
 
         let biggestDialogueID = 0;
@@ -36,8 +38,8 @@ $('body').on('click', '.blockPlusButton', function () {
         //check if it's a characterRoot node:
 
         if ($(topMostParent).hasClass('characterRoot')){
-            console.log('rooooot');
-            console.log('characterObject: ' + characterObject.characterName);
+            //console.log('rooooot');
+            //console.log('characterObject: ' + characterObject.characterName);
             //add a line from the previous node to the new node:
             characterObject.outgoingLines.push(
                 {
@@ -59,6 +61,7 @@ $('body').on('click', '.blockPlusButton', function () {
                 dialogueNodeX: characterObject.characterNodeX -150,
                 dialogueNodeY: characterObject.characterNodeY + 150,
                 outgoingSockets: 1,
+                bgColor: earlierObjectBGColor,
                 nodeElement: $('<div></div>'),
                 outgoingLines: [
 
@@ -104,6 +107,7 @@ $('body').on('click', '.blockPlusButton', function () {
                     dialogueNodeX: previousDialogueNodeInMasterObject.dialogueNodeX - 200,
                     dialogueNodeY: previousDialogueNodeInMasterObject.dialogueNodeY + 200,
                     outgoingSockets: 1,
+                    bgColor: earlierObjectBGColor,
                     nodeElement: $('<div></div>'),
                     outgoingLines: [
 
@@ -125,6 +129,7 @@ $('body').on('click', '.blockPlusButton', function () {
                     dialogueNodeX: previousDialogueNodeInMasterObject.dialogueNodeX + 200,
                     dialogueNodeY: previousDialogueNodeInMasterObject.dialogueNodeX + 200,
                     outgoingSockets: 1,
+                    bgColor: earlierObjectBGColor,
                     nodeElement: $('<div></div>'),
                     outgoingLines: [
 
