@@ -18,7 +18,8 @@ body {
     position: fixed;
     min-height: 200px;
     width: 100vw;
-    transform: translateZ(0);
+    transform: translateZ(0); /* to reduce flickering when zooming */
+    will-change: transform; /* to reduce flickering when zooming */
 }
 
 
