@@ -407,15 +407,16 @@ $('#blocksize').on('change input', function(){
 
 //CHANGE ZOOM WHEN RANGE SLIDER IS MOVED
 
-    $('#zoomAmount').on('change input', function () {
-       //console.log(`change zoom to ${$(this).val()} %`);
-        //$('.selected').css("width", $(this).val());
-        zoomValue = $(this).val();
-        $('#mainArea').css({ 'zoom': zoomValue + '%' });
-        //$('svg').css({ 'zoom': zoomValue + '%' }); //also change the lines zoom
-        //$('.block input').css("font-size", $(this).val()/8+10 +'px');
-        
-    })
+var zoomTimeout;
+
+$('#zoomAmount').on('input', function () {
+    clearTimeout(zoomTimeout);
+    zoomTimeout = setTimeout(function () {
+        var zoomValue = $('#zoomAmount').val();
+        $('body').css('zoom', zoomValue + '%');
+        $('#header').css('zoom', 1 / (zoomValue / 100));
+    }, 50); // debounce time in milliseconds
+});
 
 //DELETE SAVE FROM LOCAL STORAGE
 

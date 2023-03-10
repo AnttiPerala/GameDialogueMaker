@@ -18,7 +18,10 @@ body {
     position: fixed;
     min-height: 200px;
     width: 100vw;
+    transform: translateZ(0);
 }
+
+
 
 #siteTitle {
 
@@ -175,6 +178,8 @@ body {
     align-items: center;
     justify-content: center;
 }
+
+
 #tutorial a {
     text-decoration: none;
     color: #0075ff;
