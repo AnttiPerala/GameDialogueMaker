@@ -118,8 +118,11 @@ function drawDialogueMakerProject() {
 
                     }
                 })
-                .css({ top: rigidY + 'px', left: rigidX + 'px', position: 'absolute' }); //absolute needs to be called AFTER draggable
+                .css({ top: rigidY + 'px', left: rigidX + 'px', position: 'absolute'}); //absolute needs to be called AFTER draggable
 
+            $(dialogueNode).find('.block').css({backgroundColor: currJ.bgColor});
+
+            console.log('dialogueNode.bgColor: ' + currJ.bgColor);
 
 
             //set the appended node to be the new lastestNode (except for answers)
@@ -160,6 +163,8 @@ function drawDialogueMakerProject() {
                 }
             })
             .css({ left: gameDialogueMakerProject.characters[i].characterNodeX, top: gameDialogueMakerProject.characters[i].characterNodeY });
+
+        $(gameDialogueMakerProject.characters[i].nodeElement).children().children('.block').css({ backgroundColor: gameDialogueMakerProject.characters[i].bgColor });
 
         addAutoResize();
 

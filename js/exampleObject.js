@@ -6,6 +6,7 @@ let gameDialogueMakerProject = {
         characterID: 1,
         characterNodeX: 271,
         characterNodeY: 85,
+        bgColor: '#4b4b4b',
         nodeElement: $('<div class="blockWrap characterRoot"></div>'),
         outgoingLines: [
             {
@@ -31,6 +32,7 @@ let gameDialogueMakerProject = {
                 dialogueNodeX: 5,
                 dialogueNodeY: 128,
                 outgoingSockets: 1,
+                bgColor: '#4b4b4b',
                 nodeElement: $('<div></div>'),
                 outgoingLines: [
                     {
@@ -56,6 +58,7 @@ let gameDialogueMakerProject = {
                 dialogueNodeX: 0,
                 dialogueNodeY: 178,
                 outgoingSockets: 3,
+                bgColor: '#4b4b4b',
                 nodeElement: $('<div></div>'),
                 outgoingLines: [
                     {
@@ -106,6 +109,7 @@ let gameDialogueMakerProject = {
                 dialogueNodeX: -280,
                 dialogueNodeY: 215,
                 outgoingSockets: 1,
+                bgColor: '#4b4b4b',
                 nodeElement: $('<div></div>'),
                 outgoingLines: [
                     
@@ -121,6 +125,7 @@ let gameDialogueMakerProject = {
                 dialogueNodeX: 27,
                 dialogueNodeY: 211,
                 outgoingSockets: 1,
+                bgColor: '#4b4b4b',
                 nodeElement: $('<div></div>'),
                 outgoingLines: [
                   
@@ -136,6 +141,7 @@ let gameDialogueMakerProject = {
                 dialogueNodeX: 350,
                 dialogueNodeY: 208,
                 outgoingSockets: 1,
+                bgColor: '#4b4b4b',
                 nodeElement: $('<div></div>'),
                 outgoingLines: [
 

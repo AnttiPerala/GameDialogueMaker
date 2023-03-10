@@ -76,6 +76,40 @@ $('body').on('mousedown', '.line', function () {
 
 })
 
+//COLOR PICKER
+
+$('#blockColor').on('change input', function () {
+    console.log(`change ${$(this).val()}`);
+    let selectedDomObject = $('.selected');
+    selectedDomObject.css("background-color", $(this).val());
+    selectedColor = $(this).val(); //for cloning
+
+    let characterToChange = '';
+    let characterID ='';
+    //check if already root
+    if ($(selectedDomObject).hasClass('characterRoot')) { //if the element is already the characterRoot
+
+        characterID = $(selectedDomObject).attr('id').replace(/\D/g, ''); //get the if of character
+        let characterObjectToChange = getCharacterById(characterID); //send the ID number to the find function
+        characterObjectToChange.bgColor = $(this).val();
+
+
+    } else { //the element is not the characterRoot
+ 
+        characterID = $(selectedDomObject).closest('.characterRoot').attr('id').replace(/\D/g, ''); //get just the number from the id
+        let nodeId = selectedDomObject.attr('id').replace(/\D/g, '');
+        
+        //store the color also to the object
+        let objectToChange = getDialogueNodeById(characterID, nodeId); //send the ID number to the find function
+        objectToChange.bgColor = $(this).val();
+
+    }
+
+    
+
+    
+})
+
 
 //SET THE BLOCK TYPE TO QUESTION
 
