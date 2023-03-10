@@ -139,6 +139,10 @@ body {
     
 }
 
+.conditionInputsWrap h3 {
+    max-width: 50%;
+}
+
 .characterRoot>.contentWrap>.block>.characterName {
     font-weight: bolder;
     font-size: 1.5rem;

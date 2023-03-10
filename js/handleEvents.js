@@ -292,6 +292,12 @@ jQuery(document).on('click', '.conditionCircle', function () {
             variableName = currentTransitionCondition.variableName;
             variableValue = currentTransitionCondition.variableValue;
         }
+
+        //create a delete button only if there is a variableName (so not an empty condition)
+        let deleteButton = '';
+        if (variableName){
+            deleteButton = '<button class="deleteTransition">DELETE</button>';
+        }
         
 
         $(this).append(`
@@ -308,7 +314,7 @@ jQuery(document).on('click', '.conditionCircle', function () {
         </select>
         <input type="text" class="variableValue elementInfoField" placeholder="Variable value" value="${variableValue}">
         <button class="okTransition">ADD</button>
-
+        ${deleteButton}
         </div>
         `);
 
@@ -338,7 +344,7 @@ jQuery(document).on('click', '.conditionCircle .okTransition', function (event) 
 
     event.stopPropagation(); //so that the circle itself doesn'r register a click
 
-console.log('OK');
+
 
     //let parentLine = $(this).closest('.line'); //grab the line the circle belongs to
     let conditionCircle = $(this).closest('.conditionCircle');
@@ -385,9 +391,47 @@ console.log('OK');
     //animate closed
     $(conditionCircle).animate({
         width: '1rem',
-        height: '1rem'
+        height: '1rem',
+        backgroundColor: '#ff3f34'
     }, 800);
 
+
+    
+
+
+}) //end add click
+
+/* CLICK ON THE CONDITION CIRCLE DELETE BUTTON TO DELETE THE CONDITION */
+
+jQuery(document).on('click', '.conditionCircle .deleteTransition', function (event) {
+
+    event.stopPropagation(); //so that the circle itself doesn'r register a click
+
+
+    //let parentLine = $(this).closest('.line'); //grab the line the circle belongs to
+    let conditionCircle = $(this).closest('.conditionCircle');
+
+    let fromNode = $(conditionCircle).attr('data-fromnode');
+    let toNode = $(conditionCircle).attr('data-tonode');
+
+
+    //select the line object from the master object:
+    let theLine = getLineObjectFromMasterObjectUsingFromAndTo(fromNode, toNode);
+
+    //empty possible previous conditions:
+    theLine.transitionConditions = [];
+
+    //delete the inputs
+    conditionCircle.find('.conditionInputsWrap').remove();
+
+    //animate closed
+    $(conditionCircle).animate({
+        width: '1rem',
+        height: '1rem',
+        backgroundColor: '#0075ff'
+    }, 800);
+
+   
 
 }) //end click
 
