@@ -34,11 +34,12 @@ $('body').on('mousedown', '.block, .line', function () {
         let nodeTOErase = getDialogueNodeById(characterToEraseFrom, idToBeErased);
 
         const characterIndex = gameDialogueMakerProject.characters.findIndex(char => char.characterID == characterToEraseFrom);
-        const nodeIndex = gameDialogueMakerProject.characters[characterIndex].dialogueNodes.findIndex(node => node.dialogueID == idToBeErased);
+        //let character = gameDialogueMakerProject.characters[characterIndex];
+        const nodeIndex = characterObjectToEraseFrom.dialogueNodes.findIndex(node => node.dialogueID == idToBeErased);
 
-        let character = gameDialogueMakerProject.characters[characterIndex];
+        
         //remove the clicked node from the dialogueNodes array
-        character.dialogueNodes.splice(nodeIndex, 1);
+        characterObjectToEraseFrom.dialogueNodes.splice(nodeIndex, 1);
 
         //figure out which lines were connected to the deleted node, because they should go too
         deleteLinesByToNode(characterObjectToEraseFrom, idToBeErased);
@@ -94,6 +95,14 @@ $('body').on('mousedown', '.block, .line', function () {
 
 function deleteLinesByToNode(characterObjectToEraseFrom,toNodeId) {
     // loop through each character
+
+    //check the characterRoot separately
+    characterObjectToEraseFrom.outgoingLines.forEach((line, index) =>{
+        if (line.toNode == toNodeId) {
+            characterObjectToEraseFrom.outgoingLines.splice(index, 1);
+            //index--; // decrement i since we just removed an element from the array
+        }
+    })
     
         // loop through each dialogue node of the character
     characterObjectToEraseFrom.dialogueNodes.forEach((dialogueNode) => {

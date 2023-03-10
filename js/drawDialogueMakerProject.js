@@ -218,10 +218,12 @@ function drawDialogueMakerProject() {
             //set the id also of the svg for easier selection
             const all_svgs = document.querySelectorAll("svg");
             const this_svg = all_svgs[all_svgs.length - 1];
+            this_svg.setAttribute("data-character", gameDialogueMakerProject.characters[i].characterID);
             this_svg.setAttribute("data-fromnode", currLine.fromNode);
             this_svg.setAttribute("data-tonode", currLine.toNode);
 
-            let theSVGInDOM = $('svg[data-fromnode="' + currLine.fromNode + '"][data-tonode="' + currLine.toNode + '"]');
+
+            let theSVGInDOM = $('svg[data-fromnode="' + currLine.fromNode + '"][data-tonode="' + currLine.toNode + '"][data-character="' + gameDialogueMakerProject.characters[i].characterID + '"]');
 
             let thePath = $(theSVGInDOM).find('.leader-line-line-path'); 
             //Should we also save the SVG element in the object? I think the proble here is that we are trying to find the svg path from the object and not from DOM..
