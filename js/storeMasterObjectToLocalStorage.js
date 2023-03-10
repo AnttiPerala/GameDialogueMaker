@@ -14,7 +14,7 @@ function storeMasterObjectToLocalStorage() {
             }
         }
 
-        myLog(`Should store object now: ${gameDialogueMakerProject}`, 1, fileInfo = getFileInfo());
+        //myLog(`Should store object now: ${gameDialogueMakerProject}`, 1, fileInfo = getFileInfo());
 
         localStorage.setItem("gameDialogueMakerProject", JSON.stringify(gameDialogueMakerProject));
 

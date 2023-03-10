@@ -314,7 +314,7 @@ jQuery(document).on('click', '.conditionCircle', function () {
         </div>
         `);
 
-        myLog(`comparisonoperator: ${comparisonOperator}`,4,fileInfo = getFileInfo())
+        //myLog(`comparisonoperator: ${comparisonOperator}`,4,fileInfo = getFileInfo())
 
         // loop through each <option> element and set the selected attribute
         $(this).find('option').each(function () {

@@ -41,9 +41,9 @@ function updateLines(element) { //element is the dragged node dom element
 
         $(".conditionCircle").hide();
 
-        myLog('calling updateLines', 1, fileInfo = getFileInfo());
+        //myLog('calling updateLines', 1, fileInfo = getFileInfo());
 
-        myLog(('element id: ' + element.attr('id')), 1, fileInfo = getFileInfo());
+        //myLog(('element id: ' + element.attr('id')), 1, fileInfo = getFileInfo());
 
         //scoping
 
@@ -59,7 +59,7 @@ function updateLines(element) { //element is the dragged node dom element
 
         if (element.hasClass('characterRoot') || element.parent().hasClass('characterRoot')) { //just update everything if its the root or it's parent is the root
             // Do something if the element has the class characterRoot
-            myLog(`characterRoot is dragged ${element}`, 1);
+            //myLog(`characterRoot is dragged ${element}`, 1);
 
             character = element.attr('id').replace(/\D/g, '');//strip char from id
             updateAllLines();
@@ -74,7 +74,7 @@ function updateLines(element) { //element is the dragged node dom element
 
             justTheIdNumberForParent = parent.attr('id').replace(/\D/g, ''); //strip "dialogue" from the id
 
-            myLog(`just the id number: ${justTheIdNumber}`, 1, fileInfo = getFileInfo())
+            //myLog(`just the id number: ${justTheIdNumber}`, 1, fileInfo = getFileInfo())
 
         }
 
@@ -87,7 +87,7 @@ function updateLines(element) { //element is the dragged node dom element
 
         let theParentNodeInTheMasterObject = getDialogueNodeById(character, justTheIdNumberForParent);
 
-        myLog(('theNodeInTheMasterObject: ' + theNodeInTheMasterObject), 1, fileInfo = getFileInfo());
+        //myLog(('theNodeInTheMasterObject: ' + theNodeInTheMasterObject), 1, fileInfo = getFileInfo());
 
         //start looping from the parents lines and after that loop through each child also, but how? I think it's enough to get the relevant children by taking the nodes of a character with a bigger ID
 
@@ -116,7 +116,7 @@ function updateLines(element) { //element is the dragged node dom element
         if (theParentNodeInTheMasterObject) {
             for (let i = 0; i < theParentNodeInTheMasterObject.outgoingLines.length; i++) {
                 let line = theParentNodeInTheMasterObject.outgoingLines[i];
-                myLog(('should update linelem next, elem is: ' + line), 1, fileInfo = getFileInfo());
+                //myLog(('should update linelem next, elem is: ' + line), 1, fileInfo = getFileInfo());
                 line.lineElem.position();
             }
         }
@@ -131,7 +131,7 @@ function updateLines(element) { //element is the dragged node dom element
 
 
 
-            myLog(('each lines, line number: ' + i), 3, fileInfo = getFileInfo())
+            //myLog(('each lines, line number: ' + i), 3, fileInfo = getFileInfo())
 
             //createLine(x1Pos, y1Pos, x2Pos, y2Pos, block1.attr('id'), block2.attr('id'), plusButtonNumberConnectedTo, latestNodeForLines);
 

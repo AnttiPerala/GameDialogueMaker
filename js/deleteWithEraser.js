@@ -64,7 +64,7 @@ $('body').on('mousedown', '.block, .line', function () {
             });
         }); */
 
-        myLog(`should erase now ${idToBeErased}`,0,fileInfo = getFileInfo());
+        //myLog(`should erase now ${idToBeErased}`,0,fileInfo = getFileInfo());
 
         clearCanvasBeforeReDraw();
 

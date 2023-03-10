@@ -83,7 +83,7 @@ function drawDialogueMakerProject() {
             let rigidX;
             let rigidY = 138 * (j + 1);
 
-            myLog(`rigid y ${rigidY}`, 0, fileInfo = getFileInfo());
+            //myLog(`rigid y ${rigidY}`, 0, fileInfo = getFileInfo());
             if (currJ.dialogueType == "answer") {
                 rigidX = ((currJ.siblings - 1) * 320 * -1) + currJ.siblingNumber * 320; //NOTE: ONLY answernodes have a siblingNumber
                 rigidY = ((currJ.siblingNumber + 1) * 277) - currJ.siblingNumber * 277; //so that answer "siblings" are created at same height
@@ -111,7 +111,7 @@ function drawDialogueMakerProject() {
                     },
                     stop: function (event, ui) {
                         var position = ui.position;
-                        console.log("Element stopped at: (" + position.left + ", " + position.top + ")");
+                        //console.log("Element stopped at: (" + position.left + ", " + position.top + ")");
                         // Your code to update some other element or data
                         updateElementPositionInObject(ui.helper); //update master object positions
                         $(".conditionCircle").show();//bring the circle visibility back up
@@ -133,7 +133,7 @@ function drawDialogueMakerProject() {
             //loop through the lines of a dialogue node
             for (let k = 0; k < gameDialogueMakerProject.characters[i].dialogueNodes[j].outgoingLines.length; k++) {
 
-                myLog(`line ${k} array length: ${gameDialogueMakerProject.characters[i].dialogueNodes[j].outgoingLines.length}`, 0, fileInfo = getFileInfo());
+                //myLog(`line ${k} array length: ${gameDialogueMakerProject.characters[i].dialogueNodes[j].outgoingLines.length}`, 0, fileInfo = getFileInfo());
 
                 //NOTE! The lines are loop through again below, after the nodes are in dom
 
@@ -153,7 +153,7 @@ function drawDialogueMakerProject() {
                 },
                 stop: function (event, ui) {
                     var position = ui.position;
-                    myLog(("Element stopped at: (" + position.left + ", " + position.top + ")"),3);
+                    //myLog(("Element stopped at: (" + position.left + ", " + position.top + ")"),3);
                     // Your code to update some other element or data
                     updateElementPositionInObject(ui.helper); //update master object positions
                     $(".conditionCircle").show();//bring the circle visibility back up
@@ -235,7 +235,7 @@ function drawDialogueMakerProject() {
             for (let l = 0; l < currLine.transitionConditions.length; l++) {
                 let transitionCondition = currLine.transitionConditions[l];
                 // Do something with the transition condition, e.g. compare the variable value to the variable name using the comparison operator
-                myLog(` Transition found, it's number is ${l}`, 1, fileInfo = getFileInfo());
+                //myLog(` Transition found, it's number is ${l}`, 1, fileInfo = getFileInfo());
 
                 //select the matching circle from DOM
                 let theCircleinDOM = $('.conditionCircle[data-fromnode="' + currLine.fromNode + '"][data-tonode="' + currLine.toNode + '"]');
@@ -375,7 +375,7 @@ function drawDialogueMakerProject() {
                             const midpoint = drawConditionCircle(thePath.get(0), currLine.fromNode, currLine.toNode);
 
                         } else {
-                            myLog(`line was undefined: ${theLine}`, 3, fileInfo = getFileInfo())
+                            //myLog(`line was undefined: ${theLine}`, 3, fileInfo = getFileInfo())
                         }
 
 
@@ -391,7 +391,7 @@ function drawDialogueMakerProject() {
                     for (let l = 0; l < currLine.transitionConditions.length; l++) {
                         let transitionCondition = currLine.transitionConditions[l];
                         // Do something with the transition condition, e.g. compare the variable value to the variable name using the comparison operator
-                        myLog(` Transition found, it's number is ${l}`, 1, fileInfo = getFileInfo());
+                        //myLog(` Transition found, it's number is ${l}`, 1, fileInfo = getFileInfo());
 
                         //select the matching circle from DOM
                         let theCircleinDOM = $('.conditionCircle[data-fromnode="' + currLine.fromNode + '"][data-tonode="' + currLine.toNode + '"]');
@@ -444,7 +444,7 @@ function drawDialogueMakerProject() {
  
                     dialogueNodeInMaster.outgoingLines.forEach(outgoingLine => {
                         // Do something with the outgoingLine
-                        console.log(outgoingLine);
+                        //console.log(outgoingLine);
                         if (outgoingLine.fromSocket == plusButtonIndex){
                             //we have an outgoing line
                             $(this).attr('data-acceptclicks', false);

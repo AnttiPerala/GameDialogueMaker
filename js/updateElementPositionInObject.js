@@ -6,7 +6,7 @@ function updateElementPositionInObject(element){
 
         let character = $(element).closest('.characterRoot').attr('id').replace(/\D/g, ''); //characterID
         let theNodeObjectToChange = getCharacterById(character);
-        myLog(`character: ${character}`,1,fileInfo = getFileInfo())
+        //myLog(`character: ${character}`,1,fileInfo = getFileInfo())
         const xPos = element.get(0).offsetLeft;
         const yPos = element.get(0).offsetTop;
 
@@ -16,14 +16,14 @@ function updateElementPositionInObject(element){
     } else {
         // Do something else if the element does not have the class
         //update object
-        myLog(`dragging ${element.attr('id')}`, 1);
+        //myLog(`dragging ${element.attr('id')}`, 1);
 
         let character = $(element).closest('.characterRoot').attr('id').replace(/\D/g, '');//strip char from id
 
 
         theNodeObjectToChange = getDialogueNodeById(character, element.attr('id').replace(/\D/g, ''));
 
-        console.log(` character: ${character} and node id: ${element.attr('id').replace(/\D/g, '')}`);
+        //console.log(` character: ${character} and node id: ${element.attr('id').replace(/\D/g, '')}`);
 
         //const rect = element.getBoundingClientRect();
         //const xPos = rect.left + window.scrollX;

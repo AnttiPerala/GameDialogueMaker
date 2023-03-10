@@ -22,7 +22,7 @@ function drawConditionCircle(path, fromNode, toNode) {
         document.body.appendChild(div);
         return [midpoint.x, midpoint.y];
     } else {
-        myLog(`no path provided`,3,fileInfo = getFileInfo())
+        //myLog(`no path provided`,3,fileInfo = getFileInfo())
     }
     
 
