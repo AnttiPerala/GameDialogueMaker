@@ -1,6 +1,6 @@
 
 
-//CLICK ON THE BLOCK PLUS BUTTON TO ADD A NEW NODE
+//CLICK ON THE BLOCK PLUS BUTTON TO ADD A NEW DIALOGUE NODE
 
 
 $('body').on('click', '.blockPlusButton', function () {
@@ -46,11 +46,7 @@ $('body').on('click', '.blockPlusButton', function () {
                     toNode: biggestDialogueID + 1,
                     lineElem: '',
                     transitionConditions: [
-                        {
-                            variableName: 'myvar',
-                            comparisonOperator: '=',
-                            variableValue: 'false'
-                        }
+                        
                     ]
                 }
             );
@@ -91,11 +87,7 @@ $('body').on('click', '.blockPlusButton', function () {
                     toNode: biggestDialogueID + 1,
                     lineElem: '',
                     transitionConditions: [
-                        {
-                            variableName: 'myvar',
-                            comparisonOperator: '=',
-                            variableValue: 'false'
-                        }
+                        
                     ]
                 }
             )
