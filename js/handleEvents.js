@@ -89,20 +89,20 @@ $('#blockColor').on('change input', function () {
         selectedDomObject.css("background-color", $(this).val());
         selectedColor = $(this).val(); //for cloning
 
-        let characterToChange = '';
+        let characterObjectToChange = '';
         let characterID = '';
         //check if already root
-        if ($(selectedDomObject).hasClass('characterRoot')) { //if the element is already the characterRoot
+        if ($(selectedDomObject).closest('.blockWrap').hasClass('characterRoot')) { //if the element is already the characterRoot
 
-            characterID = $(selectedDomObject).attr('id').replace(/\D/g, ''); //get the if of character
-            let characterObjectToChange = getCharacterById(characterID); //send the ID number to the find function
+            characterID = $(selectedDomObject).closest('.blockWrap').attr('id').replace(/\D/g, ''); //get the if of character
+            characterObjectToChange = getCharacterById(characterID); //send the ID number to the find function
             characterObjectToChange.bgColor = $(this).val();
 
 
         } else { //the element is not the characterRoot
 
             characterID = $(selectedDomObject).closest('.characterRoot').attr('id').replace(/\D/g, ''); //get just the number from the id
-            let nodeId = $(selectedDomObject).attr('id').replace(/\D/g, '');
+            let nodeId = $(selectedDomObject).closest('.blockWrap').attr('id').replace(/\D/g, '');
 
             //store the color also to the object
             let objectToChange = getDialogueNodeById(characterID, nodeId); //send the ID number to the find function
