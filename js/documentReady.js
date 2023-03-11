@@ -34,8 +34,21 @@ $(document).ready(function () {
     $("#mainArea").draggable({
         drag: function (event, ui) {
             //console.log('dragging');
+            $(".conditionCircle").hide();//bring the circle visibility back up
             updateAllLines(ui.helper); //called only when dragged
+        },
+        
+        stop: function (event, ui) {
+            var position = ui.position;
+            //console.log("Element stopped at: (" + position.left + ", " + position.top + ")");
+            // Your code to update some other element or data
+            //updateElementPositionInObject(ui.helper); //update master object positions
+            clearCanvasBeforeReDraw();
+            drawDialogueMakerProject();
+            $(".conditionCircle").show();//bring the circle visibility back up
         }
+
+
     });
     $("#mainArea").draggable(
         'enable'

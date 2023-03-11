@@ -3,15 +3,15 @@
 
 TO DO:
 
-coloring of nodes
+still a bug with a previosuly connected node doesnt become an answer node when parent is changed to question
 
-The second character doesn't get transition conditions for some reason
-
-Zoom not working (lines would need to be appended to #mainArea)
+hiding children nodes
 
 Memento pattern undo
 
 Command pattern undo would be more efficient but harder to code
+
+
 
 
 
