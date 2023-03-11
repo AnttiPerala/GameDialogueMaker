@@ -3,6 +3,8 @@
 
 TO DO:
 
+LatestNode is still causing problems with other characters than character 1 when adding questions and answers
+
 Regarding the positioning, it seems like the elements should have position absolute and it is relative to their parent node
 
 cloning the color of the character root is still buggy

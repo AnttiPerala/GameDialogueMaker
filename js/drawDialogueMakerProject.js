@@ -62,7 +62,9 @@ function drawDialogueMakerProject() {
 
             //Question: How do we know which node we should append to. The answer can't be based on the looping order, because elements can be pushed in many ways. The only thing really telling that seems to be the line. So what if we select the line that has its 'toNode' value same as the node that we are creating and the choose the parent from the lines 'fromNode'. The only pitfall might be that what if the html element for the 'fromNode' hasn't been created yet at this point? Can we create it right then in that case?
 
-            let theConnectingLineFromParentToNewNode = findLineThatConnectsElementToParent(currJ.dialogueID); //passing in the node id we are creating
+           
+
+            let theConnectingLineFromParentToNewNode = findLineThatConnectsElementToParent(currI, currJ.dialogueID); //passing in the node id we are creating
 
             let theParentHtmlElement;
 

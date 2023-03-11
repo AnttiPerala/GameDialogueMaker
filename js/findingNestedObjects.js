@@ -83,20 +83,27 @@ function findCharacterNodeBasedOnPassedInHtmlElement(elem) {
 
 //find the connecting line based on the 'toNode' values of lines
 
-function findLineThatConnectsElementToParent(dialogueID){
+//returns line object from master array (not DOM line)
+
+function findLineThatConnectsElementToParent(characterObject, dialogueID){
 
     let targetNode = dialogueID;
     let targetLine = null;
 
-    for (let i = 0; i < gameDialogueMakerProject.characters.length; i++) {
-        let character = gameDialogueMakerProject.characters[i];
 
-        for (let j = 0; j < character.dialogueNodes.length; j++) {
-            let dialogueNode = character.dialogueNodes[j];
+        //maybe no need to handle the characterRoot separately, since this should be only needed with dialogues
 
+        //hmm but shouldnt we also check here that the line is from the correct character?
+
+        //loop through all dialogue nodes of a character
+    for (let j = 0; j < characterObject.dialogueNodes.length; j++) {
+        let dialogueNode = characterObject.dialogueNodes[j];
+
+            //loop through all outgoingLines of a dialogue
             for (let k = 0; k < dialogueNode.outgoingLines.length; k++) {
                 let line = dialogueNode.outgoingLines[k];
 
+                //if the toNode of the line matches the passed in dialogueID
                 if (line.toNode == targetNode) {
                     targetLine = line;
                     break;
@@ -108,15 +115,11 @@ function findLineThatConnectsElementToParent(dialogueID){
             }
         }
 
-        if (targetLine) {
-            break;
-        }
-    }
 
     if (targetLine) {
-        //console.log("Found line with toNode value of " + targetNode + ": ", targetLine);
+        console.log("Found line with toNode value of " + targetNode + ": ", targetLine);
     } else {
-        //console.log("Could not find line with toNode value of " + targetNode);
+        console.log("Could not find line with toNode value of " + targetNode);
     }
     return targetLine;
 }

@@ -29,82 +29,93 @@
 </head>
 
 <body>
-    <script>
-        // Define the nested elements you want to draw lines between
-        const parentElement = document.createElement('div');
-        parentElement.classList.add('parent');
-        parentElement.style.left = '50px';
-        parentElement.style.top = '50px';
+ <div id="wrapper">
 
-        const childElement = document.createElement('div');
-        childElement.classList.add('child');
-        childElement.style.left = '200px';
-        childElement.style.top = '300px';
+    <input type="text" id="enterPassword" placeholder="Paste your URL here">
 
-        // Append the elements to the document
-        document.body.appendChild(parentElement);
-        document.body.appendChild(childElement);
+    <p id="result"></p>
 
-        // Calculate the positions of the elements relative to the viewport
-        const parentRect = parentElement.getBoundingClientRect();
-        const childRect = childElement.getBoundingClientRect();
+</div>
 
-        // Calculate the center positions of the parent and child elements
-        const parentCenterX = parentRect.left + parentRect.width / 2;
-        const parentCenterY = parentRect.top + parentRect.height / 2;
-        const childCenterX = childRect.left + childRect.width / 2;
-        const childCenterY = childRect.top + childRect.height / 2;
+<script src="https://code.jquery.com/jquery-3.5.1.min.js"
+    integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=" crossorigin="anonymous"></script>
 
-        // Calculate the angle between the parent and child elements
-        const dx = childCenterX - parentCenterX;
-        const dy = childCenterY - parentCenterY;
-        const angle = (Math.atan2(dy, dx) * 180) / Math.PI;
+<script>
 
-        // Calculate the length of the line using the Pythagorean theorem
-        const distance = Math.sqrt(dx * dx + dy * dy);
+    $('#enterPassword').on("change keyup paste click", function () {
 
-        // Create a div element for the line and add it to the parent element
-        const lineElement = document.createElement('div');
-        lineElement.classList.add('line');
-        lineElement.style.width = `${distance}px`;
-        lineElement.style.transform = `translate(-50%, -50%) rotate(${angle}deg)`;
-        parentElement.appendChild(lineElement);
 
-        // Position the line at the center of the parent element
-        lineElement.style.left = `${parentCenterX}px`;
-        lineElement.style.top = `${parentCenterY}px`;
+        const theUrl = this.value;
 
-       let day = 5;
-        let dayName;
-        switch (day) {
-            case 0:
-                dayName = "Sunday";
-                break;
-            case 1:
-                dayName = "Monday";
-                break;
-            case 2:
-                dayName = "Tuesday";
-                break;
-            case 3:
-                dayName = "Wednesday";
-                break;
-            case 4:
-                dayName = "Thursday";
-                break;
-            case 5:
-                dayName = "Friday";
-                break;
-            case 6:
-                dayName = "Saturday";
-                break;
-            default:
-                dayName = "Invalid day";
-                break;
-        }
-        console.log("Today is " + dayName);
+        const theUrlWithoutHttpStuff = theUrl.replace(/(^\w+:|^)\/\//, '');
 
-    </script>
+        const urlParts = theUrlWithoutHttpStuff.split('.');
+
+        let urlMiddle = urlParts[urlParts.length - 2];
+
+        const urlEnd = urlParts[urlParts.length - 1];
+
+
+
+        let generatedPassword = '';
+
+        const scrambler = 'Pq!zUrXm!BHxs';
+
+        if (urlMiddle) {
+
+            if (urlMiddle.length < 5) {
+
+                urlMiddle += 'FG529rq'; //make sure the middle part of the url is at least 9 characters long
+
+
+            }
+
+            for (let i = 0; i < urlMiddle.length; i++) {
+
+                switch (i) {
+                    case 0:
+                        generatedPassword += urlMiddle.charAt(i) + scrambler.charAt(i) + urlEnd.charAt(0); //start adding characters to the generated password from the middle part of the url and mix in a scrabler character.
+                        break;
+                    case 1:
+                        generatedPassword += urlMiddle.charAt(i) + scrambler.charAt(i) + urlMiddle.charAt(i);
+                        break;
+                    case 6:
+                        generatedPassword += scrambler.charAt(i) + urlEnd.charAt(1);
+                        break;
+                    default:
+                        generatedPassword += urlMiddle.charAt(i) + scrambler.charAt(i);
+                }
+
+            } //for loop end
+
+            generatedPassword = generatedPassword.replace(/a/g, 'e');
+
+            generatedPassword = generatedPassword.replace(/s/g, '3');
+
+            generatedPassword = generatedPassword.split("").reverse();
+
+            generatedPassword[3] = generatedPassword[3].toUpperCase();
+
+            generatedPassword[8] = generatedPassword[8].toUpperCase();
+
+            generatedPassword = generatedPassword.join("");
+
+            generatedPassword = generatedPassword.slice(0, 14);
+
+        } //if (urlMiddle) is defined
+
+
+
+        $('#result').html(generatedPassword);
+
+
+    })
+
+    let str = "42";
+    let num = Number(str);
+    console.log(num); // Output: 42
+
+</script>
 </body>
 
 </html>

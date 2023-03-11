@@ -127,7 +127,7 @@ $('body').on('click', '.blockPlusButton', function () {
                     dialogueID: biggestDialogueID + 1,
                     dialogueType: 'answer',
                     siblings: 3,
-                    siblingNumber: clickedPlusButtonButtonIndex+1,
+                    siblingNumber: Number(clickedPlusButtonButtonIndex)+1,
                     dialogueText: 'Fine thank you',
                     nextNode: -1,
                     dialogueNodeX: (previousDialogueNodeInMasterObject.dialogueNodeX - 382) + (clickedPlusButtonButtonIndex *(382)),
