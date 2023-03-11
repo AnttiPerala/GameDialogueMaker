@@ -134,24 +134,56 @@ $('#stylebrush').on('click', function () {
 })
 
 
-//CLICKING ON A CIRCLE WITH CLONEMODE ON
+//CLICKING ON A BLOCK WITH CLONEMODE ON
 
 $('body').on('mousedown', '.blockWrap', function () {
+
+    let blockWrapToBeColored = this;
+
     if (cloneMode) {
-        //console.log(`set values now, selectedColor is ${selectedColor}`);
 
         let selectedNode = $('.selected');
+        let colorOfSelectedNode = selectedNode.css('backgroundColor');
 
-        //if no node was selected
-        if (selectedNode.length === 0){
-            drawDialogueBox('Select the source node for the cloning first.')
-        } else {
+        //check if already root
+        if ($(blockWrapToBeColored).hasClass('characterRoot')) { //if the element is already the characterRoot
+            //console.log(` root`);
 
-            let colorOfSelectedNode = selectedNode.css('backgroundColor');
-            console.log('colorOfSelectedNode: ' + colorOfSelectedNode);
+            characterID = $(blockWrapToBeColored).attr('id').replace(/\D/g, ''); //get the if of character
+            characterObjectToChange = getCharacterById(characterID); //send the ID number to the find function
+            characterObjectToChange.bgColor = colorOfSelectedNode;
+
+
+        } else { //the element is not the characterRoot
+
+
+            //if no node was selected
+            if (selectedNode.length === 0) {
+                drawDialogueBox('Select the source node for the cloning first.')
+            } else {
+
+                
+                //console.log('colorOfSelectedNode: ' + colorOfSelectedNode);
                 /* $(this).css('transform', 'scale(' + selectedSize + ')'); */
-            $(this).children().children('.block').css('background-color', colorOfSelectedNode);
-        /* $(this).children('input').css('font-size', selectedFontSize); */
+
+
+
+                let blockWrapToBeColoredCharacterID = $(blockWrapToBeColored).closest('.characterRoot').attr('id').replace(/\D/g, ''); //get just the number from the id
+
+                let blockWrapToBeColoredNodeID = $(blockWrapToBeColored).attr('id').replace(/\D/g, '');
+
+                let objectToBeColored = getDialogueNodeById(blockWrapToBeColoredCharacterID, blockWrapToBeColoredNodeID);
+
+                objectToBeColored.bgColor = colorOfSelectedNode; //set the color in the object
+
+                $(blockWrapToBeColored).children().children('.block').css('background-color', colorOfSelectedNode);
+
+
+            /* $(this).children('input').css('font-size', selectedFontSize); */
+
+        }
+
+
 
         }//end else
 
