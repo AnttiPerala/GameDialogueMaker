@@ -93,8 +93,6 @@ function findLineThatConnectsElementToParent(characterObject, dialogueID){
 
         //maybe no need to handle the characterRoot separately, since this should be only needed with dialogues
 
-        //hmm but shouldnt we also check here that the line is from the correct character?
-
         //loop through all dialogue nodes of a character
     for (let j = 0; j < characterObject.dialogueNodes.length; j++) {
         let dialogueNode = characterObject.dialogueNodes[j];

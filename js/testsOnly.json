@@ -1,58 +1,259 @@
 {
-    "scene": [
+    "settings": {},
+    "characters": [
         {
-            "id": "1",
-            "dialogs": [
+            "characterName": "Mike",
+            "characterID": 1,
+            "characterNodeX": 244,
+            "characterNodeY": 138,
+            "bgColor": "rgb(179, 0, 36)",
+            "defaultDialogue": 1,
+            "nodeElement": "",
+            "outgoingLines": [
                 {
-                    "char": "koo",
-                    "type": "line",
-                    "line": "fgf"
+                    "fromNode": 0,
+                    "fromSocket": 0,
+                    "toNode": 1,
+                    "lineElem": {},
+                    "transitionConditions": [
+                        {
+                            "variableName": "characterTransitionExample",
+                            "comparisonOperator": "=",
+                            "variableValue": "truuu"
+                        }
+                    ]
+                }
+            ],
+            "dialogueNodes": [
+                {
+                    "dialogueID": 1,
+                    "dialogueType": "line",
+                    "dialogueText": "Example dialogue, hello!",
+                    "nextNode": -1,
+                    "dialogueNodeX": 5,
+                    "dialogueNodeY": 128,
+                    "outgoingSockets": 1,
+                    "bgColor": "rgb(179, 0, 36)",
+                    "nodeElement": "",
+                    "outgoingLines": [
+                        {
+                            "fromNode": 1,
+                            "fromSocket": 0,
+                            "toNode": 2,
+                            "lineElem": "",
+                            "transitionConditions": [
+                                {
+                                    "variableName": "yourvar",
+                                    "comparisonOperator": "!=",
+                                    "variableValue": "true"
+                                }
+                            ]
+                        }
+                    ]
                 },
                 {
-                    "type": "end"
+                    "dialogueID": 2,
+                    "dialogueType": "question",
+                    "dialogueText": "How are you today?",
+                    "nextNode": -1,
+                    "dialogueNodeX": 36,
+                    "dialogueNodeY": 237,
+                    "outgoingSockets": 3,
+                    "bgColor": "rgb(179, 0, 36)",
+                    "nodeElement": "",
+                    "outgoingLines": [
+                        {
+                            "fromNode": 2,
+                            "fromSocket": 0,
+                            "toNode": 3,
+                            "lineElem": "",
+                            "transitionConditions": []
+                        },
+                        {
+                            "fromNode": 2,
+                            "fromSocket": 1,
+                            "toNode": 4,
+                            "lineElem": "",
+                            "transitionConditions": [
+                                {
+                                    "variableName": "yesvar",
+                                    "comparisonOperator": "=",
+                                    "variableValue": "no"
+                                }
+                            ]
+                        },
+                        {
+                            "fromNode": 2,
+                            "fromSocket": 2,
+                            "toNode": 5,
+                            "lineElem": "",
+                            "transitionConditions": [
+                                {
+                                    "variableName": "myvar",
+                                    "comparisonOperator": "=",
+                                    "variableValue": "false"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "dialogueID": 3,
+                    "dialogueType": "answer",
+                    "siblings": 3,
+                    "siblingNumber": 1,
+                    "dialogueText": "Fine thank you",
+                    "nextNode": -1,
+                    "dialogueNodeX": -312,
+                    "dialogueNodeY": 370,
+                    "outgoingSockets": 1,
+                    "bgColor": "rgb(179, 0, 36)",
+                    "nodeElement": "",
+                    "outgoingLines": []
+                },
+                {
+                    "dialogueID": 4,
+                    "dialogueType": "answer",
+                    "siblings": 3,
+                    "siblingNumber": 2,
+                    "dialogueText": "Not so great",
+                    "nextNode": -1,
+                    "dialogueNodeX": 71,
+                    "dialogueNodeY": 331,
+                    "outgoingSockets": 1,
+                    "bgColor": "rgb(179, 0, 36)",
+                    "nodeElement": "",
+                    "outgoingLines": []
+                },
+                {
+                    "dialogueID": 5,
+                    "dialogueType": "answer",
+                    "siblings": 3,
+                    "siblingNumber": 3,
+                    "dialogueText": "third",
+                    "nextNode": -1,
+                    "dialogueNodeX": 447,
+                    "dialogueNodeY": 317,
+                    "outgoingSockets": 1,
+                    "bgColor": "rgb(179, 0, 36)",
+                    "nodeElement": "",
+                    "outgoingLines": []
                 }
             ]
         },
         {
-            "id": "5",
-            "dialogs": [
+            "characterName": "Susan",
+            "characterID": 2,
+            "characterNodeX": 1074,
+            "characterNodeY": 16,
+            "bgColor": "rgb(179, 0, 36)",
+            "defaultDialogue": 1,
+            "nodeElement": "",
+            "outgoingLines": [
                 {
-                    "char": "koo",
-                    "type": "line",
-                    "line": "ff"
-                },
-                {
-                    "type": "end",
-                    "answer1": "hhh",
-                    "nextscene1": "4"
+                    "fromNode": 0,
+                    "fromSocket": "0",
+                    "toNode": 1,
+                    "lineElem": {},
+                    "transitionConditions": []
                 }
-            ]
-        },
-        {
-            "id": "4",
-            "dialogs": [
+            ],
+            "dialogueNodes": [
                 {
-                    "char": "koo",
-                    "type": "line",
-                    "line": "gg"
+                    "dialogueID": 1,
+                    "dialogueType": "line",
+                    "dialogueText": "This is a new dialogue node!",
+                    "nextNode": -1,
+                    "dialogueNodeX": -3,
+                    "dialogueNodeY": 142,
+                    "outgoingSockets": 1,
+                    "bgColor": "rgb(179, 0, 36)",
+                    "nodeElement": "",
+                    "outgoingLines": [
+                        {
+                            "fromNode": 1,
+                            "fromSocket": "0",
+                            "toNode": 2,
+                            "lineElem": "",
+                            "transitionConditions": []
+                        }
+                    ]
                 },
                 {
-                    "type": "end",
-                    "answer2": "jjj",
-                    "nextscene2": "3"
-                }
-            ]
-        },
-        {
-            "id": "3",
-            "dialogs": [
-                {
-                    "char": "koo",
-                    "type": "line",
-                    "line": "hh"
+                    "dialogueID": 2,
+                    "dialogueType": "question",
+                    "dialogueText": "How goes the battle?",
+                    "nextNode": -1,
+                    "dialogueNodeX": 25,
+                    "dialogueNodeY": 203,
+                    "outgoingSockets": 3,
+                    "bgColor": "rgb(179, 0, 36)",
+                    "nodeElement": "",
+                    "outgoingLines": [
+                        {
+                            "fromNode": 2,
+                            "fromSocket": "0",
+                            "toNode": 3,
+                            "lineElem": "",
+                            "transitionConditions": []
+                        },
+                        {
+                            "fromNode": 2,
+                            "fromSocket": "1",
+                            "toNode": 4,
+                            "lineElem": "",
+                            "transitionConditions": []
+                        },
+                        {
+                            "fromNode": 2,
+                            "fromSocket": "2",
+                            "toNode": 5,
+                            "lineElem": "",
+                            "transitionConditions": []
+                        }
+                    ]
                 },
                 {
-                    "type": "end"
+                    "dialogueID": 3,
+                    "dialogueType": "answer",
+                    "siblings": 3,
+                    "siblingNumber": 1,
+                    "dialogueText": "Good good.",
+                    "nextNode": -1,
+                    "dialogueNodeX": -295,
+                    "dialogueNodeY": 223,
+                    "outgoingSockets": 1,
+                    "bgColor": "rgb(179, 0, 36)",
+                    "nodeElement": "",
+                    "outgoingLines": []
+                },
+                {
+                    "dialogueID": 4,
+                    "dialogueType": "answer",
+                    "siblings": 3,
+                    "siblingNumber": 2,
+                    "dialogueText": "Bad bad.",
+                    "nextNode": -1,
+                    "dialogueNodeX": 41,
+                    "dialogueNodeY": 472,
+                    "outgoingSockets": 1,
+                    "bgColor": "#b30024",
+                    "nodeElement": "",
+                    "outgoingLines": []
+                },
+                {
+                    "dialogueID": 5,
+                    "dialogueType": "answer",
+                    "siblings": 3,
+                    "siblingNumber": 3,
+                    "dialogueText": "Neutral neutral.",
+                    "nextNode": -1,
+                    "dialogueNodeX": 334,
+                    "dialogueNodeY": 253,
+                    "outgoingSockets": 1,
+                    "bgColor": "rgb(179, 0, 36)",
+                    "nodeElement": "",
+                    "outgoingLines": []
                 }
             ]
         }
