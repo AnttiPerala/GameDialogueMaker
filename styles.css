@@ -5,6 +5,14 @@ body {
 
 }
 
+@font-face {
+    font-family: 'Rajdhani-Bold';
+    src: url('fonts/Rajdhani-Bold.ttf') format('truetype');
+    font-weight: bold;
+    font-style: normal;
+    
+}
+
 
 #header {
     display: grid;
@@ -26,8 +34,9 @@ body {
 
 #siteTitle {
 
-    font-size: 3rem;
-
+    font-size: 3.5rem;
+    font-family: 'Rajdhani-Bold', sans-serif;
+    color: #b2cfff;
 }
 
 #mainArea {
@@ -57,6 +66,7 @@ body {
     background-color: #e7e7e7;
     height: 50vh;
     overflow-y: scroll;
+    z-index: 200;
 }
 
 .plus {

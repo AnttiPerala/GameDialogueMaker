@@ -59,8 +59,8 @@ $('body').on('click', '.blockPlusButton', function () {
                 dialogueType: 'line',
                 dialogueText: 'This is a new dialogue node!',
                 nextNode: -1,
-                dialogueNodeX: characterObject.characterNodeX -150,
-                dialogueNodeY: characterObject.characterNodeY + 150,
+                dialogueNodeX: 0,
+                dialogueNodeY: 200, //these can be hardcoded since they are relative values relative to their parent nodes 
                 outgoingSockets: 1,
                 bgColor: earlierObjectBGColor,
                 nodeElement: $('<div></div>'),
@@ -70,6 +70,7 @@ $('body').on('click', '.blockPlusButton', function () {
             };
 
             characterObject.dialogueNodes.push(newDialogueNode);
+            console.log(newDialogueNode);
 
         } else {
 
@@ -105,8 +106,8 @@ $('body').on('click', '.blockPlusButton', function () {
                     dialogueType: 'line',
                     dialogueText: 'This is a new dialogue node!',
                     nextNode: -1,
-                    dialogueNodeX: previousDialogueNodeInMasterObject.dialogueNodeX - 200,
-                    dialogueNodeY: previousDialogueNodeInMasterObject.dialogueNodeY + 200,
+                    dialogueNodeX: 0,
+                    dialogueNodeY: 200,
                     outgoingSockets: 1,
                     bgColor: earlierObjectBGColor,
                     nodeElement: $('<div></div>'),
@@ -116,6 +117,8 @@ $('body').on('click', '.blockPlusButton', function () {
                 };
 
                 characterObject.dialogueNodes.push(newDialogueNode);
+                console.log(newDialogueNode);
+
 
             } else if (parentBlockType == "question") { //parent is question so this should be an answer
 
@@ -124,11 +127,11 @@ $('body').on('click', '.blockPlusButton', function () {
                     dialogueID: biggestDialogueID + 1,
                     dialogueType: 'answer',
                     siblings: 3,
-                    siblingNumber: 1,
+                    siblingNumber: clickedPlusButtonButtonIndex,
                     dialogueText: 'Fine thank you',
                     nextNode: -1,
-                    dialogueNodeX: previousDialogueNodeInMasterObject.dialogueNodeX + 200,
-                    dialogueNodeY: previousDialogueNodeInMasterObject.dialogueNodeX + 200,
+                    dialogueNodeX: (previousDialogueNodeInMasterObject.dialogueNodeX - 382) + (clickedPlusButtonButtonIndex *(382)),
+                    dialogueNodeY: 200,
                     outgoingSockets: 1,
                     bgColor: earlierObjectBGColor,
                     nodeElement: $('<div></div>'),
