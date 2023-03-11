@@ -27,7 +27,8 @@ $('body').on('click', '.blockPlusButton', function () {
 
         let characterObject = findCharacterNodeBasedOnPassedInHtmlElement(this);
 
-        let previousDialogueNodeInMasterObject = findDialogueNodeBasedOnPassedInHtmlElement(this);
+        let previousDialogueNodeInMasterObject = findDialogueObjectBasedOnPassedInHtmlElement(this);
+        
 
         let earlierObjectBGColor = previousDialogueNodeInMasterObject.bgColor;
 

@@ -7,8 +7,14 @@ function getDialogueNodeById(charID, id) {
     if (!character) {
         return null; // character not found
     }
-    const node = character.dialogueNodes.find(node => node.dialogueID == id);
-    return node || null; // return node if found, else null
+    if (id != 0){ //not the characterNode, which i set to zero
+        const node = character.dialogueNodes.find(node => node.dialogueID == id);
+        return node || null; // return node if found, else null
+    } else {//end if
+        const char = getCharacterById(charID);
+        return char;
+    }
+    
 }
 
 
@@ -23,13 +29,29 @@ function getCharacterById(id) {
 }
 
 
-function findDialogueNodeBasedOnPassedInHtmlElement(elem){
+function findDialogueObjectBasedOnPassedInHtmlElement(elem){
 
-    let dialogueID = $(elem).closest('.blockWrap').attr('id').replace(/\D/g, ''); //get just the number from the id
+    let characterID ='';
+    let dialogueID='';
 
-    let characerID = $(elem).closest('.characterRoot').attr('id').replace(/\D/g, ''); //get just the number from the id
+    //check for character root, both in the situation where the element was the root or one of the direct children 
+    if ($(elem).closest('.blockWrap').hasClass('characterRoot') || $(elem).hasClass('characterRoot')) { //if the element is already the characterRoot
+        if ($(elem).closest('.blockWrap').length > 0){
+            characterID = $(elem).closest('.blockWrap').attr('id').replace(/\D/g, ''); //get just the number from the id
+        } else {
+            characterID = $(elem).attr('id').replace(/\D/g, ''); //get just the number from the id
+        }
+        
+        dialogueID = 0;
+    } else {
+          //regular nodes
+        dialogueID = $(elem).closest('.blockWrap').attr('id').replace(/\D/g, ''); //get just the number from the id
 
-    let dialogueNodeFromObject = getDialogueNodeById(characerID, dialogueID);
+        characterID = $(elem).closest('.characterRoot').attr('id').replace(/\D/g, ''); //get just the number from the id
+    }
+
+
+    let dialogueNodeFromObject = getDialogueNodeById(characterID, dialogueID);
 
     return dialogueNodeFromObject;
 
@@ -37,17 +59,23 @@ function findDialogueNodeBasedOnPassedInHtmlElement(elem){
 
 function findCharacterNodeBasedOnPassedInHtmlElement(elem) {
 
-    let characerID;
+    let characterID;
 
-    if ($(elem).hasClass('characterRoot')){ //if the element is already the characterRoot
-        characerID = elem.attr('id').replace(/\D/g, ''); //get just the number from the id
+    if ($(elem).hasClass('characterRoot') || $(elem).closest('.blockWrap').hasClass('characterRoot')){ //if the element is already the characterRoot
+        if ($(elem).hasClass('characterRoot')){
+            characterID = $(elem).attr('id').replace(/\D/g, ''); //get just the number from the id
+        } else {
+            characterID = $(elem).closest('.blockWrap').attr('id').replace(/\D/g, ''); //get just the number from the id
+        }
+        
+        
     } else { //the element is not the characterRoot
-        characerID = $(elem).closest('.characterRoot').attr('id').replace(/\D/g, ''); //get just the number from the id
+        characterID = $(elem).closest('.characterRoot').attr('id').replace(/\D/g, ''); //get just the number from the id
 
     }
 
 
-    let characterNodeFromObject = getCharacterById(characerID);
+    let characterNodeFromObject = getCharacterById(characterID);
 
     return characterNodeFromObject;
 

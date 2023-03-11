@@ -12,6 +12,7 @@ $('.plus').on('click', function () {
         characterID: charactersSoFar+1,
         characterNodeX: 271 * (charactersSoFar + 1),
         characterNodeY: 85,
+        bgColor: '#4b4b4b',
         nodeElement: $('<div class="blockWrap characterRoot"></div>'),
         outgoingLines: [
            
@@ -79,7 +80,7 @@ $('body').on('mousedown', '.line', function () {
 //COLOR PICKER
 
 $('#blockColor').on('change input', function () {
-    console.log(`change ${$(this).val()}`);
+    //console.log(`change ${$(this).val()}`);
     let selectedDomObject = $('.selected');
     //if nothing got selected (so no node is active)
     if (selectedDomObject.length === 0){
@@ -200,7 +201,7 @@ jQuery(document).on('change', '.selectBlockType', function () {
 
     const selectedValue = $(this).val();
 
-        let nodeToUpdate = findDialogueNodeBasedOnPassedInHtmlElement(this);
+        let nodeToUpdate = findDialogueObjectBasedOnPassedInHtmlElement(this);
 
     nodeToUpdate.dialogueType = selectedValue;
     nodeToUpdate.outgoingSockets = 3; //when changing the block type to question, set default answer amount to three also in the aobject
@@ -324,7 +325,7 @@ $(document).on('change keyup', 'textarea.dialogue', function () {
 
     let updatedText = $(this).val();
 
-    let nodeToUpdate = findDialogueNodeBasedOnPassedInHtmlElement(this);
+    let nodeToUpdate = findDialogueObjectBasedOnPassedInHtmlElement(this);
 
     nodeToUpdate.dialogueText = updatedText;
 
@@ -339,7 +340,7 @@ $(document).on('change', '.answerNumber', function () {
 
     let updatedValue = $(this).val();
 
-    let nodeToUpdate = findDialogueNodeBasedOnPassedInHtmlElement(this);
+    let nodeToUpdate = findDialogueObjectBasedOnPassedInHtmlElement(this);
 
     nodeToUpdate.outgoingSockets = updatedValue;
 
@@ -350,7 +351,7 @@ $(document).on('change', '.next', function () {
 
     let updatedValue = $(this).val();
 
-    let nodeToUpdate = findDialogueNodeBasedOnPassedInHtmlElement(this);
+    let nodeToUpdate = findDialogueObjectBasedOnPassedInHtmlElement(this);
 
     nodeToUpdate.nextNode = updatedValue;
 
