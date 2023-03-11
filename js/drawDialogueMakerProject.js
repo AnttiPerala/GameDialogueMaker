@@ -117,8 +117,7 @@ function drawDialogueMakerProject() {
                         updateElementPositionInObject(ui.helper); //update master object positions
                         $(".conditionCircle").show();//bring the circle visibility back up
 
-                    },
-                    cancel: cloneMode ? "*" : null //dont allow dragging in cloneMode
+                    }
 
                 })
                 .css({ top: rigidY + 'px', left: rigidX + 'px', position: 'absolute'}); //absolute needs to be called AFTER draggable
@@ -163,8 +162,7 @@ function drawDialogueMakerProject() {
                     // Your code to update some other element or data
                     updateElementPositionInObject(ui.helper); //update master object positions
                     $(".conditionCircle").show();//bring the circle visibility back up
-                },
-                cancel: cloneMode ? "*" : null //dont allow dragging in cloneMode
+                }
             })
             .css({ left: gameDialogueMakerProject.characters[i].characterNodeX, top: gameDialogueMakerProject.characters[i].characterNodeY });
 

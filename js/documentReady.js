@@ -35,8 +35,7 @@ $(document).ready(function () {
         drag: function (event, ui) {
             //console.log('dragging');
             updateAllLines(ui.helper); //called only when dragged
-        },
-        cancel: cloneMode ? "*" : null //dont allow dragging in cloneMode
+        }
     });
     $("#mainArea").draggable(
         'enable'
