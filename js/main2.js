@@ -3,6 +3,10 @@
 
 TO DO:
 
+Play mode for testing the dialogue interactively
+
+The ability to load a JSON file back in for editing
+
 LatestNode is still causing problems with other characters than character 1 when adding questions and answers
 
 Regarding the positioning, it seems like the elements should have position absolute and it is relative to their parent node
