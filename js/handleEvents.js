@@ -1,6 +1,4 @@
 
-
-
 //CLICK ON THE MAIN PLUS BUTTON TO ADD A NEW CHARACTER 
 
 $('.plus').on('click', function () {
@@ -28,14 +26,10 @@ $('.plus').on('click', function () {
 });
 
 
-
 //MOUSE DOWN LOG FOR EASIER DEBUGGING
 $(document).mousedown(function () {
    //console.log("NEW MOUSEDOWN!!!!!!!");
 });
-
-
-
 
 
 //SELECT BLOCKS BY CLICKING ON THEM
@@ -114,10 +108,7 @@ $('#blockColor').on('change input', function () {
 
     } // end else if selectedDomObject.length !== 0
 
-
-    
 }) //END COLOR PICKER
-
 
 //COPY FORMATTING BRUSH FEATURE
 
@@ -154,9 +145,7 @@ $('body').on('mousedown', '.blockWrap', function () {
             characterObjectToChange = getCharacterById(characterID); //send the ID number to the find function
             characterObjectToChange.bgColor = colorOfSelectedNode;
 
-
         } else { //the element is not the characterRoot
-
 
             //if no node was selected
             if (selectedNode.length === 0) {
@@ -166,8 +155,6 @@ $('body').on('mousedown', '.blockWrap', function () {
                 
                 //console.log('colorOfSelectedNode: ' + colorOfSelectedNode);
                 /* $(this).css('transform', 'scale(' + selectedSize + ')'); */
-
-
 
                 let blockWrapToBeColoredCharacterID = $(blockWrapToBeColored).closest('.characterRoot').attr('id').replace(/\D/g, ''); //get just the number from the id
 
@@ -184,15 +171,11 @@ $('body').on('mousedown', '.blockWrap', function () {
 
         }
 
-
-
         }//end else
 
-       
     }
 }
 );
-
 
 
 //SET THE BLOCK TYPE TO QUESTION
@@ -205,8 +188,6 @@ jQuery(document).on('change', '.selectBlockType', function () {
 
     nodeToUpdate.dialogueType = selectedValue;
     nodeToUpdate.outgoingSockets = 3; //when changing the block type to question, set default answer amount to three also in the aobject
-
-   
 
     if(selectedValue == "question"){
        //console.log('question');
@@ -296,16 +277,12 @@ jQuery(document).on('change', '.answerNumber', function () {
 
             $(this).remove();
 
-
         }
         
     });
 
-
-
     }
 )
-
 
 
 //TYPE IN THE CHARACTER NAME FIELD
@@ -368,6 +345,50 @@ jQuery(document).on('click', '#export', function () {
     exportJson(); //defined in separate exportJson.js file
 
 })
+
+//FUNCTION TO ADD EMPTY DIVS TO A LOADED JSON OBJECT
+function addEmptyDivsToTheObject(){
+
+//put some empty divs back in the object
+for (let character of gameDialogueMakerProject.characters) {
+    character.nodeElement = $('<div class="blockWrap characterRoot"></div>');
+    for (let dialogueNode of character.dialogueNodes) {
+        dialogueNode.nodeElement = $('<div></div>');
+        for (let outgoingLine of dialogueNode.outgoingLines) {
+            outgoingLine.lineElem = '';
+        }
+    }
+}
+    }
+
+//CLICK ON THE LOAD JSON BUTTON
+$('#openFile').click(function () {
+    $('<input type="file" accept=".json">')
+        .on('change', function () {
+            const file = this.files[0];
+
+            if (file) {
+                const reader = new FileReader();
+
+                reader.onload = function (e) {
+                    try {
+                        const jsonData = JSON.parse(e.target.result);
+                        gameDialogueMakerProject = jsonData;
+                        addEmptyDivsToTheObject();
+                        clearCanvasBeforeReDraw();
+                        drawDialogueMakerProject();
+                       
+                    } catch (err) {
+                        console.error('Error parsing JSON:', err);
+                    }
+                };
+
+                reader.readAsText(file);
+               
+            }
+        })
+        .click();
+});
 
 //CLICK ON THE TUTORIAL TO DESTROY IT
 jQuery(document).on('click', '#tutorial', function () {

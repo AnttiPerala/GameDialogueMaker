@@ -13,20 +13,26 @@ $(document).ready(function () {
         //myLog(` null it seems: ${myObjectString}`, 1);
     }
 
+    addEmptyDivsToTheObject();
 
 
     //myLog(`Inside document ready and local storage should be loaded now ${gameDialogueMakerProject}`, 0);
 
-    //put some empty divs back in the object
-    for (let character of gameDialogueMakerProject.characters) {
-        character.nodeElement = $('<div class="blockWrap characterRoot"></div>');
-        for (let dialogueNode of character.dialogueNodes) {
-            dialogueNode.nodeElement = $('<div></div>');
-            for (let outgoingLine of dialogueNode.outgoingLines) {
-                outgoingLine.lineElem = '';
+    function addEmptyDivsToTheObject(){
+        
+        //put some empty divs back in the object
+        for (let character of gameDialogueMakerProject.characters) {
+            character.nodeElement = $('<div class="blockWrap characterRoot"></div>');
+            for (let dialogueNode of character.dialogueNodes) {
+                dialogueNode.nodeElement = $('<div></div>');
+                for (let outgoingLine of dialogueNode.outgoingLines) {
+                    outgoingLine.lineElem = '';
+                }
             }
         }
     }
+
+    
 
     drawDialogueMakerProject();
 
