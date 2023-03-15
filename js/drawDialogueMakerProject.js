@@ -238,7 +238,7 @@ function drawDialogueMakerProject() {
             //Should we also save the SVG element in the object? I think the proble here is that we are trying to find the svg path from the object and not from DOM..
 
             //const path = document.getElementById('leader-line-5-line-path');
-            const midpoint = drawConditionCircle(thePath.get(0), currLine.fromNode, currLine.toNode);
+            const midpoint = drawConditionCircle(thePath.get(0), gameDialogueMakerProject.characters[i].characterID, currLine.fromNode, currLine.toNode);
 
             // Loop through the transition conditions of the current outgoing line and add a 'withCondition' class to the corresponding circles
             for (let l = 0; l < currLine.transitionConditions.length; l++) {
@@ -247,7 +247,7 @@ function drawDialogueMakerProject() {
                 //myLog(` Transition found, it's number is ${l}`, 1, fileInfo = getFileInfo());
 
                 //select the matching circle from DOM
-                let theCircleinDOM = $('.conditionCircle[data-fromnode="' + currLine.fromNode + '"][data-tonode="' + currLine.toNode + '"]');
+                let theCircleinDOM = $('.conditionCircle[data-fromnode="' + currLine.fromNode + '"][data-tonode="' + currLine.toNode + '"][data-character="' + gameDialogueMakerProject.characters[i].characterID + '"]');
 
                 theCircleinDOM.addClass('withCondition');
                 theCircleinDOM.attr("title", "Click to change the condition for the transition");
@@ -382,7 +382,7 @@ function drawDialogueMakerProject() {
                             //Should we also save the SVG element in the object? I think the proble here is that we are trying to find the svg path from the object and not from DOM..
 
                             //const path = document.getElementById('leader-line-5-line-path');
-                            const midpoint = drawConditionCircle(thePath.get(0), currLine.fromNode, currLine.toNode);
+                            const midpoint = drawConditionCircle(thePath.get(0), gameDialogueMakerProject.characters[i].characterID, currLine.fromNode, currLine.toNode);
 
                         } else {
                             //myLog(`line was undefined: ${theLine}`, 3, fileInfo = getFileInfo())
@@ -404,7 +404,7 @@ function drawDialogueMakerProject() {
                         //myLog(` Transition found, it's number is ${l}`, 1, fileInfo = getFileInfo());
 
                         //select the matching circle from DOM
-                        let theCircleinDOM = $('.conditionCircle[data-fromnode="' + currLine.fromNode + '"][data-tonode="' + currLine.toNode + '"]');
+                        let theCircleinDOM = $('.conditionCircle[data-fromnode="' + currLine.fromNode + '"][data-tonode="' + currLine.toNode + '"][data-character="' + gameDialogueMakerProject.characters[i].characterID + '"]');
 
                         theCircleinDOM.addClass('withCondition');
                         theCircleinDOM.attr("title", "Click to change the condition for the transition");

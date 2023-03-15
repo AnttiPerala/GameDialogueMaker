@@ -1,4 +1,4 @@
-function drawConditionCircle(path, fromNode, toNode) {
+function drawConditionCircle(path, character, fromNode, toNode) {
 
     if (path){
         // Get the starting and ending coordinates of the line
@@ -16,6 +16,7 @@ function drawConditionCircle(path, fromNode, toNode) {
 
         div.setAttribute("data-fromnode", fromNode);
         div.setAttribute("data-tonode", toNode);
+        div.setAttribute("data-character", character);
         div.setAttribute("title", "Click to add a condition for the transition");
 
         // Add the div to the body
