@@ -505,6 +505,14 @@ jQuery(document).on('click', '.conditionCircle .okTransition', function (event) 
     let comparisonOperatorFromInput = $(conditionCircle).find('.comparisonOperator').val();
     let variableValueFromInput = $(conditionCircle).find('.variableValue').val();
 
+    let numberOrNot = checkIfNumberLike(variableValueFromInput);
+
+    if (numberOrNot == "NaN"){
+        //not a number so store as string
+    } else {
+        variableValueFromInput = Number(variableValueFromInput);
+    }
+
     myElem = {
 
         'variableName': variableNameFromInput,

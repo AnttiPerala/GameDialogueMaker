@@ -161,3 +161,19 @@ function getLineObjectFromMasterObjectUsingFromAndTo(fromNode, toNode) {
 
     return foundLine;
 }
+
+//check if its a number like value
+
+function checkIfNumberLike(myinput){
+
+    if (isNaN(myinput)) {
+        console.log("Input value is not a number");
+        return("NaN");
+    } else {
+        console.log("Input value is a number");
+        return("numer");
+    }
+
+
+}
+
