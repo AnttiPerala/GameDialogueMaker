@@ -291,7 +291,8 @@ function drawDialogueMakerProject() {
                     //draw dotted lines from nodes with a positive next value
 
                     let theLine = new LeaderLine(
-                        lineStart.get(0), //get(0) converts jQuery object to regular dom object
+                        //find the next-input in the node where the line should start
+                        lineStart.find('.next').get(0), //get(0) converts jQuery object to regular dom object
                         lineEndElementTopSocket.get(0),
                         {
                             color: 'gray',

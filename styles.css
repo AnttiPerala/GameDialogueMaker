@@ -170,7 +170,14 @@ body {
 }
 
 .topConnectionSocket {
-    margin-bottom: -2.2rem;
+    margin-bottom: -3.5rem;
+}
+
+.roundSocket{
+    width: 1rem;
+    height: 1rem;
+    border-radius: 50%;
+    background-color: gray;
 }
 
 .block input::placeholder {

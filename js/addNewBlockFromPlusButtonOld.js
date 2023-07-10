@@ -103,7 +103,7 @@ $('body').on('click', '.blockPlusButton', function () {
                 <div class="blockWrap">
                 <div class="contentWrap">
                     <div style="display: flex; align-items:center; justify-content: center;">
-                        <div class="topConnectionSocket">o</div>
+                        <div class="topConnectionSocket"><div class="roundSocket"></div></div>
                     </div>
                         <div id="id${newBlockId}" class="block">
                             <div style="text-align: left;">

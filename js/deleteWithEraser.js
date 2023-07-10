@@ -22,11 +22,29 @@ $('body').on('mousedown', '.block, .line', function () {
 
         //delete the corresponding node from the object
 
-        //lets first check if the clicked node (or it's immediate parent) was a character root node
-        if ($(this).hasClass('characterRoot') || $(this).parent().parent().hasClass('characterRoot') || $(this).children().hasClass('characterRoot')) {
-
-        
+        //lets first check if the clicked node (or it's immediate 2nd parent) was a character root node
+        if ($(this).hasClass('characterRoot') || $(this).parent().parent().hasClass('characterRoot')) {
             console.log(`clicked node was character root`);
+
+            //i think it's not safe to let nodes exists without a characterRoot parent so I think we need to delete the entire character tree from the gameDialogueMakerProject
+
+            let characterIDToErase = $(this).closest('.characterRoot').attr('id').replace(/\D/g, '');
+
+            let characterObjectToErase = getCharacterById(characterIDToErase);
+
+            //this gives us the correct character
+            const characterIndex = gameDialogueMakerProject.characters.findIndex(char => char.characterID == characterIDToErase);
+
+            gameDialogueMakerProject.characters.splice(characterIndex, 1);
+
+            // Loop through the characters and decrement the characterID of each character starting from the deleted index
+            for (let i = characterIndex; i < gameDialogueMakerProject.characters.length; i++) {
+                gameDialogueMakerProject.characters[i].characterID--;
+            }
+
+            clearCanvasBeforeReDraw();
+            drawDialogueMakerProject();
+
         } else {
 
             console.log(`clicked node was not character root, but had classes  ${$(this).attr('class')}`);
@@ -42,8 +60,9 @@ $('body').on('mousedown', '.block, .line', function () {
             //based on the character id and the node id we can find the correct node from the master object:
             let nodeTOErase = getDialogueNodeById(characterToEraseFrom, idToBeErased);
 
+            //this gives us the correct character
             const characterIndex = gameDialogueMakerProject.characters.findIndex(char => char.characterID == characterToEraseFrom);
-            //let character = gameDialogueMakerProject.characters[characterIndex];
+            //this give us the correct dialogue node from the character
             const nodeIndex = characterObjectToEraseFrom.dialogueNodes.findIndex(node => node.dialogueID == idToBeErased);
 
 
@@ -82,24 +101,14 @@ $('body').on('mousedown', '.block, .line', function () {
 
             shiftObjecElementsThatAreGreaterThanDeletedIDDownByOne(characterObjectToEraseFrom, idToBeErased); //the passed in character is the actual object here
 
+            drawDialogueMakerProject();
+
         } //end else
 
        
 
-        drawDialogueMakerProject();
+       
 
-        
-
-/* 
-
-        //loop through the connected lines that should also be erased
-        let allConnectedLines = $('.line[data-block1="' + $(this).attr('id') + '"],.line[data-block2="' + $(this).attr('id') + '"]');
-
-        $(allConnectedLines).remove();
-
-        $(this).closest('.blockWrap').remove();
-
-        //$(this).remove(); */
 
     } //end if eraseMode
 }
