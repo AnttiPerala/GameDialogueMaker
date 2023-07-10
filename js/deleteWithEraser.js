@@ -1,10 +1,10 @@
 //ERASER TOOL
 
-//enable or disable clone brush
+//enable or disable eraser brush
 $('#eraser').on('click', function () {
     eraseMode = !eraseMode; //toggle boolean
 
-    //when clone mode is on:
+    //when erase mode is on:
     if (eraseMode) {
         $('body').css('cursor', 'url(iconmonstr-eraser-1-48.png) 16 32, auto');
     } else {
@@ -22,56 +22,69 @@ $('body').on('mousedown', '.block, .line', function () {
 
         //delete the corresponding node from the object
 
-        //find the right characterRoot
-        let characterToEraseFrom = $(this).closest('.characterRoot').attr('id').replace(/\D/g, '');
-
-        let characterObjectToEraseFrom = getCharacterById(characterToEraseFrom);
-
-        //find the node ID
-        let idToBeErased = $(this).closest('.blockWrap').attr('id').replace(/\D/g, '');
-
-        //based on the character id and the node id we can find the correct node from the master object:
-        let nodeTOErase = getDialogueNodeById(characterToEraseFrom, idToBeErased);
-
-        const characterIndex = gameDialogueMakerProject.characters.findIndex(char => char.characterID == characterToEraseFrom);
-        //let character = gameDialogueMakerProject.characters[characterIndex];
-        const nodeIndex = characterObjectToEraseFrom.dialogueNodes.findIndex(node => node.dialogueID == idToBeErased);
+        //lets first check if the clicked node (or it's immediate parent) was a character root node
+        if ($(this).hasClass('characterRoot') || $(this).parent().parent().hasClass('characterRoot') || $(this).children().hasClass('characterRoot')) {
 
         
-        //remove the clicked node from the dialogueNodes array
-        characterObjectToEraseFrom.dialogueNodes.splice(nodeIndex, 1);
+            console.log(`clicked node was character root`);
+        } else {
 
-        //figure out which lines were connected to the deleted node, because they should go too
-        deleteLinesByToNode(characterObjectToEraseFrom, idToBeErased);
+            console.log(`clicked node was not character root, but had classes  ${$(this).attr('class')}`);
 
-        //update all the ids that come after the deleted node to avoid leaving gaps in the numbering. Note that this should be done for all characters if the nodes will all have unique values. But do they need to have unique values? Because maybe it doesn't even make sense to be able to go from a node under character 1 to a node under character 2. What would that even mean? But we should be able to go to any node under the same character by changing the next value.
+            //find the right characterRoot
+            let characterToEraseFrom = $(this).closest('.characterRoot').attr('id').replace(/\D/g, '');
 
-        // Loop through the dialogueNodes and decrement the dialogueID of each node starting from the deleted index
-        for (let i = nodeIndex; i < characterObjectToEraseFrom.dialogueNodes.length; i++) {
-            characterObjectToEraseFrom.dialogueNodes[i].dialogueID--;
-        }
+            let characterObjectToEraseFrom = getCharacterById(characterToEraseFrom);
 
-        // Loop through the outgoingLines and update the fromNode and toNode values based on the new dialogueID of the nodes
-        // This might be more complicated than I thought, because the lineElems might also need to be changed...
-        /* gameDialogueMakerProject.characters.forEach(character => {
-            character.outgoingLines.forEach(line => {
-                if (line.fromNode > nodeIndex) {
-                    line.fromNode--;
-                }
-                if (line.toNode > nodeIndex) {
-                    line.toNode--;
-                }
-            });
-        }); */
+            //find the node ID
+            let idToBeErased = $(this).closest('.blockWrap').attr('id').replace(/\D/g, '');
 
-        //myLog(`should erase now ${idToBeErased}`,0,fileInfo = getFileInfo());
+            //based on the character id and the node id we can find the correct node from the master object:
+            let nodeTOErase = getDialogueNodeById(characterToEraseFrom, idToBeErased);
 
-        clearCanvasBeforeReDraw();
+            const characterIndex = gameDialogueMakerProject.characters.findIndex(char => char.characterID == characterToEraseFrom);
+            //let character = gameDialogueMakerProject.characters[characterIndex];
+            const nodeIndex = characterObjectToEraseFrom.dialogueNodes.findIndex(node => node.dialogueID == idToBeErased);
 
-        //now we should shift the line numbers before the redraw since the node id's have also been shifted
-        //maybe it's enought to shift things inside the master object since dom elements will be redrawn anywas
 
-        shiftObjecElementsThatAreGreaterThanDeletedIDDownByOne(characterObjectToEraseFrom, idToBeErased); //the passed in character is the actual object here
+            //remove the clicked node from the dialogueNodes array
+            characterObjectToEraseFrom.dialogueNodes.splice(nodeIndex, 1);
+
+            //figure out which lines were connected to the deleted node, because they should go too
+            deleteLinesByToNode(characterObjectToEraseFrom, idToBeErased);
+
+            //update all the ids that come after the deleted node to avoid leaving gaps in the numbering. Note that this should be done for all characters if the nodes will all have unique values. But do they need to have unique values? Because maybe it doesn't even make sense to be able to go from a node under character 1 to a node under character 2. What would that even mean? But we should be able to go to any node under the same character by changing the next value.
+
+            // Loop through the dialogueNodes and decrement the dialogueID of each node starting from the deleted index
+            for (let i = nodeIndex; i < characterObjectToEraseFrom.dialogueNodes.length; i++) {
+                characterObjectToEraseFrom.dialogueNodes[i].dialogueID--;
+            }
+
+            // Loop through the outgoingLines and update the fromNode and toNode values based on the new dialogueID of the nodes
+            // This might be more complicated than I thought, because the lineElems might also need to be changed...
+            /* gameDialogueMakerProject.characters.forEach(character => {
+                character.outgoingLines.forEach(line => {
+                    if (line.fromNode > nodeIndex) {
+                        line.fromNode--;
+                    }
+                    if (line.toNode > nodeIndex) {
+                        line.toNode--;
+                    }
+                });
+            }); */
+
+            //myLog(`should erase now ${idToBeErased}`,0,fileInfo = getFileInfo());
+
+            clearCanvasBeforeReDraw();
+
+            //now we should shift the line numbers before the redraw since the node id's have also been shifted
+            //maybe it's enought to shift things inside the master object since dom elements will be redrawn anywas
+
+            shiftObjecElementsThatAreGreaterThanDeletedIDDownByOne(characterObjectToEraseFrom, idToBeErased); //the passed in character is the actual object here
+
+        } //end else
+
+       
 
         drawDialogueMakerProject();
 
