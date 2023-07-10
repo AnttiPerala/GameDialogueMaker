@@ -390,10 +390,18 @@ $('#openFile').click(function () {
         .click();
 });
 
+//CLICKED ON THE MANUAL BUTTON
+jQuery(document).on('click', '#showManual', function () {
+
+    $('#tutorial').toggle();
+
+
+})
+
 //CLICK ON THE TUTORIAL TO DESTROY IT
 jQuery(document).on('click', '#tutorial', function () {
 
-    this.remove();
+    $(this).hide();
 
 })
 

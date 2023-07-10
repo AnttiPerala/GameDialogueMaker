@@ -1,6 +1,11 @@
 
 $(document).ready(function () {
 
+
+    //hide the manual by default
+
+    $('#tutorial').hide();
+
     //GET THE STORED OBJECT FROM LOCAL STORAGE
 
 
@@ -17,6 +22,7 @@ $(document).ready(function () {
 
 
     //myLog(`Inside document ready and local storage should be loaded now ${gameDialogueMakerProject}`, 0);
+
 
     
 
