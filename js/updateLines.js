@@ -104,11 +104,13 @@ function updateLines(element) { //element is the dragged node dom element
                     //console.log('should update linelem next, elem is: ' + line);
                     line.lineElem.position();
                 }
+
+                if (node.nextNode !== undefined && node.nextNode > 0) {
+                    node.nextNodeLineElem.position();
+                }
             }
 
-            if (node.nextNode > 0){
-                node.nextNodeLineElem.position();
-            }
+            
 
         }
 

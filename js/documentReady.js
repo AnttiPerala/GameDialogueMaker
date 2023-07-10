@@ -30,11 +30,10 @@ $(document).ready(function () {
 
     //these make moving/dragging the canvas possible
     $("#mainArea").draggable({
-        drag: function (event, ui) {
-            //console.log('dragging');
-            $(".conditionCircle").hide();//bring the circle visibility back up
-            updateAllLines(ui.helper); //called only when dragged
-        },
+        drag: throttle(function (event, ui) {
+            $(".conditionCircle").hide();
+            updateAllLines(ui.helper);
+        }, 20),
         
         stop: function (event, ui) {
             var position = ui.position;

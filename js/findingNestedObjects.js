@@ -115,7 +115,7 @@ function findLineThatConnectsElementToParent(characterObject, dialogueID){
 
 
     if (targetLine) {
-        console.log("Found line with toNode value of " + targetNode + ": ", targetLine);
+        //console.log("Found line with toNode value of " + targetNode + ": ", targetLine);
     } else {
         console.log("Could not find line with toNode value of " + targetNode);
     }
