@@ -106,6 +106,10 @@ function updateLines(element) { //element is the dragged node dom element
                 }
             }
 
+            if (node.nextNode > 0){
+                node.nextNodeLineElem.position();
+            }
+
         }
 
 

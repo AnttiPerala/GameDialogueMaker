@@ -309,7 +309,9 @@ function drawDialogueMakerProject() {
                         }
                     );
 
-                }
+                    currentDialogueNode.nextNodeLineElem = theLine;
+
+                } //end if nextnodevalue
 
 
 

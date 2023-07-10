@@ -5,6 +5,7 @@ function exportJson(){
         character.nodeElement = '';
         for (let dialogueNode of character.dialogueNodes) {
             dialogueNode.nodeElement = '';
+            dialogueNode.nextNodeLineElem ='';
             for (let outgoingLine of dialogueNode.outgoingLines) {
                 outgoingLine.lineElem = '';
             }
