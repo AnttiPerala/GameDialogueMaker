@@ -37,6 +37,8 @@ function updateAllLines() {
 
 function updateLines(element) { //element is the dragged node dom element
 
+    console.log(` Hello from updateLines`);
+
     if (!eraseMode){
 
         $(".conditionCircle").hide();
@@ -58,8 +60,7 @@ function updateLines(element) { //element is the dragged node dom element
         //check if the dragged element is a character root and handle line drawing a bit differently in that case
 
         if (element.hasClass('characterRoot') || element.parent().hasClass('characterRoot')) { //just update everything if its the root or it's parent is the root
-            // Do something if the element has the class characterRoot
-            //myLog(`characterRoot is dragged ${element}`, 1);
+
 
             character = element.attr('id').replace(/\D/g, '');//strip char from id
             updateAllLines();
@@ -77,9 +78,6 @@ function updateLines(element) { //element is the dragged node dom element
             //myLog(`just the id number: ${justTheIdNumber}`, 1, fileInfo = getFileInfo())
 
         }
-
-
-
 
 
 
@@ -111,7 +109,6 @@ function updateLines(element) { //element is the dragged node dom element
         }
 
 
-
         //if not null, loop through each line for PARENT
         if (theParentNodeInTheMasterObject) {
             for (let i = 0; i < theParentNodeInTheMasterObject.outgoingLines.length; i++) {
@@ -122,7 +119,6 @@ function updateLines(element) { //element is the dragged node dom element
         }
 
 
-
         allConnectedLines = $(element).parent().find('.line');
 
         myelems = allConnectedLines;
@@ -131,14 +127,9 @@ function updateLines(element) { //element is the dragged node dom element
 
 
 
-            //myLog(('each lines, line number: ' + i), 3, fileInfo = getFileInfo())
-
-            //createLine(x1Pos, y1Pos, x2Pos, y2Pos, block1.attr('id'), block2.attr('id'), plusButtonNumberConnectedTo, latestNodeForLines);
-
             e.get(0).position();
         })
 
-        //$('svg').css({ 'zoom': zoomValue + '%' }); //also change the lines zoom
 
     }//end if erasemode
 
