@@ -345,9 +345,26 @@ function drawDialogueMakerProject() {
                         //get the top socket
                         let lineEndElementTopSocket = $(lineEndNodeElement).find('.topConnectionSocket');
 
+                        //test pointAnchors
+
+                        //var startElement = document.getElementById('startElement');
+                        var endElement = lineEndElementTopSocket.get(0);
+
+                        // Get the bounding rectangle of the start element
+                        var rect = endElement.getBoundingClientRect();
+
+                        // Calculate the desired start point (x, y)
+                        var endX = rect.left + rect.width / 2;
+                        var endY = rect.top + 10;  // shift by 10 pixels
+
+                        // Create a new point anchor
+                        var endPointAnchor = LeaderLine.pointAnchor(endElement, { x: 8, y: 8 });
+
+                    
+
                         let theLine = new LeaderLine(
                             plusButtonElem.get(0), //get(0) converts jQuery object to regular dom object
-                            lineEndElementTopSocket.get(0),
+                            endPointAnchor,
                             {
                                 color: '#0075ff',
                                 size: 4,
