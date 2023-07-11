@@ -496,18 +496,41 @@ function drawDialogueMakerProject() {
     })
 
 
+    var line = null; // Placeholder for the line that will be drawn
+
     $(".topConnectionSocket").mousedown(function(event) {
-        console.log("socket");
         event.stopPropagation();
         
+        var socketElement = $(this);
+        
+        line = new LeaderLine(
+          socketElement[0], // Start of the line
+          LeaderLine.pointAnchor({x: event.pageX, y: event.pageY}), // End of the line
+          {
+            color: '#0075ff',
+            size: 4,
+            dash: false,
+            path: 'straight', //deafult is straight, arc, fluid, magnet, grid
+            startSocket: 'bottom',
+            endSocket: 'bottom',
+            endPlug: 'disc'
+        }
+        );
     });
     
-    $(".roundSocket").mousedown(function(event) {
-        console.log("socket");
-        event.stopPropagation();
-        
+    $(document).mousemove(function (e) {
+        if (line) {
+            // Update the end position of the line to follow the mouse
+            line.setOptions({end: LeaderLine.pointAnchor({x: e.pageX, y: e.pageY})});
+        }
     });
-  
+    
+    $(document).mouseup(function () {
+        // Stop updating the line
+        line = null;
+    });
+    
+    
    
 
 } // end function drawDialogueMakerProject

@@ -701,4 +701,3 @@ $(document).on('click', '.blockPlusButton[data-acceptclicks="false"]', function 
     // Do something when the user clicks on the button
     drawDialogueBox('A plus button can only have one node connected. If you want to use it, delete the currently connected node first with the eraser.')
 });
-
