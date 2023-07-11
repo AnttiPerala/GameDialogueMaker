@@ -496,7 +496,17 @@ function drawDialogueMakerProject() {
     })
 
 
-
+    $(".topConnectionSocket").mousedown(function(event) {
+        console.log("socket");
+        event.stopPropagation();
+        
+    });
+    
+    $(".roundSocket").mousedown(function(event) {
+        console.log("socket");
+        event.stopPropagation();
+        
+    });
   
    
 

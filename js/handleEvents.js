@@ -118,7 +118,7 @@ $('#stylebrush').on('click', function () {
 
     //when clone mode is on:
     if (cloneMode) {
-        $('body').css('cursor', 'url(iconmonstr-paintbrush-3-64.png) 16 32, auto'); //16 32 are the interaction point coordinates of the cursor #0075ff
+        $('body').css('cursor', 'url(img/iconmonstr-paintbrush-3-64.png) 16 32, auto'); //16 32 are the interaction point coordinates of the cursor #0075ff
     } else {
         $('body').css('cursor', 'unset');
     }
@@ -632,7 +632,7 @@ $(document).keydown(function (event) {
         eraseMode = false;
         //when clone mode is on:
         if (eraseMode) {
-            $('body').css('cursor', 'url(iconmonstr-eraser-1-48.png) 16 32, auto');
+            $('body').css('cursor', 'url(img/iconmonstr-eraser-1-48.png) 16 32, auto');
         } else {
             $('body').css('cursor', 'unset');
         }
@@ -640,7 +640,7 @@ $(document).keydown(function (event) {
         cloneMode = false;
         //when clone mode is on:
         if (cloneMode) {
-            $('body').css('cursor', 'url(iconmonstr-eraser-1-48.png) 16 32, auto');
+            $('body').css('cursor', 'url(img/iconmonstr-eraser-1-48.png) 16 32, auto');
         } else {
             $('body').css('cursor', 'unset');
         }
@@ -701,3 +701,4 @@ $(document).on('click', '.blockPlusButton[data-acceptclicks="false"]', function 
     // Do something when the user clicks on the button
     drawDialogueBox('A plus button can only have one node connected. If you want to use it, delete the currently connected node first with the eraser.')
 });
+

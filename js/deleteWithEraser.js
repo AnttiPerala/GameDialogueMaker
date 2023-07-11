@@ -6,7 +6,7 @@ $('#eraser').on('click', function () {
 
     //when erase mode is on:
     if (eraseMode) {
-        $('body').css('cursor', 'url(iconmonstr-eraser-1-48.png) 16 32, auto');
+        $('body').css('cursor', 'url(img/iconmonstr-eraser-1-48.png) 16 32, auto');
     } else {
         $('body').css('cursor', 'unset');
     }
