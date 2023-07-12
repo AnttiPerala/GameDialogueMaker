@@ -589,6 +589,7 @@ function drawDialogueMakerProject() {
                     let highestIdInNewParent;
 
                     //to do: all the child nodes of the moved node should be moved as well, and their numbers changed and their lines adjusted to match with the new numbers
+                    //to do: transition conditions?
 
                     if (objectNodeFromWhichWeAreDrawing) {
 

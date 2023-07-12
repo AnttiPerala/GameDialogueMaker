@@ -474,12 +474,18 @@ jQuery(document).on('click', '.conditionCircle', function () {
             }
         });
 
+        $(this).find('.conditionInputsWrap').hide();
+
     } //end else
     
     $(this).animate({
-        width: '20vw',
-        height: '20vw'
-    }, 800);
+        width: '30vw',
+        height: '30vw'
+    }, 800, function() {
+        // This is the callback function
+        // Add the text once the animation is complete to prevent shaking
+        $(this).find('.conditionInputsWrap').show();
+    });
 
 
 
