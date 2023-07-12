@@ -31,6 +31,8 @@ function getCharacterById(id) {
 
 function findDialogueObjectBasedOnPassedInHtmlElement(elem){
 
+    //this one is passed in text fields and inputs from the dialogue node
+
     let characterID ='';
     let dialogueID='';
 

@@ -502,6 +502,10 @@ function drawDialogueMakerProject() {
         event.stopPropagation();
         
         var socketElement = $(this);
+
+        currentlyDrawingALine = true;
+
+        nodeIdFromWhichWeAreDrawing = $(this).closest('.contentWrap').find('.block').attr('id').replace(/\D/g, '');//strip char from id;
         
         line = new LeaderLine(
           socketElement[0], // Start of the line
@@ -525,10 +529,51 @@ function drawDialogueMakerProject() {
         }
     });
     
-    $(document).mouseup(function () {
-        // Stop updating the line
-        line = null;
+    $(document).mouseup(function (e) {
+        if (line) {
+            // Get the element under the cursor
+            var elementUnderCursor = document.elementFromPoint(e.clientX, e.clientY);
+    
+            // Get the jQuery object for the element under the cursor
+            var $elementUnderCursor = $(elementUnderCursor);
+    
+            // Check if the element is the target div and if its data-acceptclicks attribute is true
+            if ($elementUnderCursor.hasClass('blockPlusButton') && $elementUnderCursor.data('acceptclicks') === true && currentlyDrawingALine === true ) {
+                // The line is over the target div and the div accepts clicks, do stuff
+                console.log("Line is over the target div and it accepts clicks");
+
+                //now we should update the master object structure accordingly and then redraw
+                //start by detecting to which node the plus buttons belongs to
+                //let blockToAttachTo = $($elementUnderCursor).closest('.block');
+
+                let plusButtonIndexToAttachTo = $elementUnderCursor.data('buttonindex');
+
+                let dialogueNodeInObject = findDialogueObjectBasedOnPassedInHtmlElement($elementUnderCursor);
+
+                dialogueNodeInObject.outgoingLines.push(
+                    {
+                        fromNode: dialogueNodeInObject.dialogueID,
+                        fromSocket: plusButtonIndexToAttachTo,
+                        toNode: nodeIdFromWhichWeAreDrawing,
+                        lineElem: '',
+                        transitionConditions: [
+                            
+                        ]
+                    }
+                )
+
+            }
+
+            //to do:
+            //looks like we need to convert the x and y position of the node somehow to adapt to the new parent it gets
+    
+            // Stop updating the line
+            line = null;
+
+            currentlyDrawingALine = false;
+        }
     });
+    
     
     
    
