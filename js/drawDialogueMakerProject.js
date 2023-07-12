@@ -554,7 +554,7 @@ function drawDialogueMakerProject() {
 
                 let plusButtonIndexToAttachTo = $elementUnderCursor.data('buttonindex');
 
-                let childElementForPassingToFindDialogue = $($elementUnderCursor).closest('.blockWrap').find('.next');
+                let childElementForPassingToFindDialogue = $($elementUnderCursor).closest('.blockWrap').find('.blockid');
 
                 let dialogueFromNodeInObject = findDialogueObjectBasedOnPassedInHtmlElement(childElementForPassingToFindDialogue);
 
@@ -564,7 +564,7 @@ function drawDialogueMakerProject() {
                 //what should then happen with the numbering to avoid clashes?
                 //should also check if its an answer, because answer should only connect to questions
 
-                //wait a second, you can't get the character name based on the ID alone...
+                
                 let newParentCharacterName = getCharacterNameFromDialogueNode(dialogueFromNodeInObject);
 
                 console.log('dialogueFromNodeInObject.dialogueID: ' + dialogueFromNodeInObject.dialogueID + ' newParentCharacterName: ' + newParentCharacterName + ' characterNameFromWhichWeAreDrawing: ' + characterNameFromWhichWeAreDrawing)

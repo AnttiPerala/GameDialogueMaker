@@ -31,6 +31,8 @@ function getCharacterById(id) {
 
 function findDialogueObjectBasedOnPassedInHtmlElement(elem){
 
+    console.log('inside findDialogueObjectBasedOnPassedInHtmlElement and elem classlist is:' + $(elem).classList + ' and elem html is: ' + $(elem).html());
+
     //this one is passed in text fields and inputs from the dialogue node
 
     let characterID ='';
@@ -38,14 +40,16 @@ function findDialogueObjectBasedOnPassedInHtmlElement(elem){
 
     //check for character root, both in the situation where the element was the root or one of the direct children 
     if ($(elem).closest('.blockWrap').hasClass('characterRoot') || $(elem).hasClass('characterRoot')) { //if the element is already the characterRoot
-        if ($(elem).closest('.blockWrap').length > 0){
+        
+        if ($(elem).closest('.blockWrap').length > 0){ //whether elem is inside an element with the class .blockWrap.
             characterID = $(elem).closest('.blockWrap').attr('id').replace(/\D/g, ''); //get just the number from the id
         } else {
-            characterID = $(elem).attr('id').replace(/\D/g, ''); //get just the number from the id
+            characterID = $(elem).attr('id').replace(/\D/g, ''); //get just the number from the id. I think this assumes the element itself is the root
         }
         
         dialogueID = 0;
     } else {
+        console.log('not character root, id was: ' + $(elem).closest('.blockWrap').attr('id'));
           //regular nodes
         dialogueID = $(elem).closest('.blockWrap').attr('id').replace(/\D/g, ''); //get just the number from the id
 
