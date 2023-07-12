@@ -505,9 +505,9 @@ function drawDialogueMakerProject() {
 
         currentlyDrawingALine = true;
 
-        objectNodeFromWhichWeAreDrawing = findDialogueObjectBasedOnPassedInHtmlElement($(this).closest('.contentWrap').find('.blockid'));
+        objectNodeFromWhichWeAreDrawing = findDialogueObjectBasedOnPassedInHtmlElement($(this).closest('.blockWrap').find('.blockid'));
         
-        nodeIdFromWhichWeAreDrawing = $(this).closest('.contentWrap').find('.block').attr('id').replace(/\D/g, '');//strip char from id;
+        nodeIdFromWhichWeAreDrawing = $(this).closest('.blockWrap').find('.block').attr('id').replace(/\D/g, '');//strip char from id;
         
         characterNameFromWhichWeAreDrawing = $(this).closest('.characterRoot').find('.characterName').val();
 
