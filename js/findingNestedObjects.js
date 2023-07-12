@@ -233,7 +233,7 @@ function getCharacterNameFromDialogueNode(dialogueNode) {
 //GET THE LARGEST DIALOGUE ID OF A CHARACTER:
 
 function getMaxDialogueNodeId(character) {
-    let highestDialogueNodeId = -Infinity;
+    let highestDialogueNodeId = 0;
   
     for (let dialogueNode of character.dialogueNodes) {
         if (dialogueNode.dialogueID > highestDialogueNodeId) {
