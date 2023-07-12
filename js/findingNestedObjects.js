@@ -211,3 +211,19 @@ function getCharacterNameFromDialogueNode(dialogueNode) {
   function getCharacterByName(gameDialogueMakerProject, characterName) {
     return gameDialogueMakerProject.characters.find(char => char.characterName === characterName);
 }
+
+//GET THE LARGEST DIALOGUE ID OF A CHARACTER:
+
+function getMaxDialogueNodeId(character) {
+    let highestDialogueNodeId = -Infinity;
+  
+    for (let dialogueNode of character.dialogueNodes) {
+        if (dialogueNode.dialogueID > highestDialogueNodeId) {
+            highestDialogueNodeId = dialogueNode.dialogueID;
+        }
+    }
+  
+    return highestDialogueNodeId;
+}
+
+

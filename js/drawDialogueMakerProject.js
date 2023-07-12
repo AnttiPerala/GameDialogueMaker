@@ -556,24 +556,24 @@ function drawDialogueMakerProject() {
 
                 let childElementForPassingToFindDialogue = $($elementUnderCursor).closest('.blockWrap').find('.next');
 
-                let dialogueNodeInObject = findDialogueObjectBasedOnPassedInHtmlElement(childElementForPassingToFindDialogue);
+                let dialogueFromNodeInObject = findDialogueObjectBasedOnPassedInHtmlElement(childElementForPassingToFindDialogue);
 
-                cheggg = dialogueNodeInObject;
+                cheggg = dialogueFromNodeInObject;
 
                 //we need to check if the root character changes and if it does then we need to remove the dialogue object from the old character in the object and add it to the new one
                 //what should then happen with the numbering to avoid clashes?
                 //should also check if its an answer, because answer should only connect to questions
 
                 //wait a second, you can't get the character name based on the ID alone...
-                let newParentCharacterName = getCharacterNameFromDialogueNode(dialogueNodeInObject);
+                let newParentCharacterName = getCharacterNameFromDialogueNode(dialogueFromNodeInObject);
 
-                console.log('dialogueNodeInObject.dialogueID: ' + dialogueNodeInObject.dialogueID + ' newParentCharacterName: ' + newParentCharacterName + ' characterNameFromWhichWeAreDrawing: ' + characterNameFromWhichWeAreDrawing)
+                console.log('dialogueFromNodeInObject.dialogueID: ' + dialogueFromNodeInObject.dialogueID + ' newParentCharacterName: ' + newParentCharacterName + ' characterNameFromWhichWeAreDrawing: ' + characterNameFromWhichWeAreDrawing)
 
                 if (newParentCharacterName == characterNameFromWhichWeAreDrawing){
                     //no change in parent
-                    dialogueNodeInObject.outgoingLines.push(
+                    dialogueFromNodeInObject.outgoingLines.push(
                         {
-                            fromNode: dialogueNodeInObject.dialogueID,
+                            fromNode: dialogueFromNodeInObject.dialogueID,
                             fromSocket: plusButtonIndexToAttachTo,
                             toNode: nodeIdFromWhichWeAreDrawing,
                             lineElem: '',
@@ -583,7 +583,12 @@ function drawDialogueMakerProject() {
                         }
                     )
                 } else {
+
                     //change in parent
+
+                    let highestIdInNewParent;
+
+                    //to do: all the child nodes of the moved node should be moved as well, and their numbers changed and their lines adjusted to match with the new numbers
 
                     if (objectNodeFromWhichWeAreDrawing) {
 
@@ -594,15 +599,40 @@ function drawDialogueMakerProject() {
 
                         let getTheRightCharacterArrayToMoveTo = getCharacterByName(gameDialogueMakerProject, newParentCharacterName);
 
+                        highestIdInNewParent = getMaxDialogueNodeId(getTheRightCharacterArrayToMoveTo);
+
+                        objectNodeFromWhichWeAreDrawing.dialogueID = highestIdInNewParent + 1;
+
+
                         getTheRightCharacterArrayToMoveFrom.dialogueNodes = getTheRightCharacterArrayToMoveFrom.dialogueNodes.filter(obj => obj !== objectNodeFromWhichWeAreDrawing); // Remove the object from the first array
                         getTheRightCharacterArrayToMoveTo.dialogueNodes.push(objectNodeFromWhichWeAreDrawing); // Add the object to the second array
                     }
 
                         //to do:
                     //looks like we need to convert the x and y position of the node somehow to adapt to the new parent it gets
-                    repositionElementAfterChangeInParent($($elementUnderCursor).closest('.blockWrap'), dialogueNodeInObject.nodeElement);
+                    //repositionElementAfterChangeInParent($($elementUnderCursor).closest('.blockWrap'), dialogueNodeInObject.nodeElement);
 
-        }
+                    //let's see what happens if we just zero the coordinates:
+                    objectNodeFromWhichWeAreDrawing.dialogueNodeX = 0;
+                    objectNodeFromWhichWeAreDrawing.dialogueNodeY = 120;
+
+                    //recreate line(s)
+
+                    dialogueFromNodeInObject.outgoingLines.push(
+                        {
+                            fromNode: dialogueFromNodeInObject.dialogueID,
+                            fromSocket: plusButtonIndexToAttachTo,
+                            toNode: highestIdInNewParent+1,
+                            lineElem: '',
+                            transitionConditions: [
+                                
+                            ]
+                        }
+                    )
+
+
+
+        } //end else (change in parent)
 
                 }
 
