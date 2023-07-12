@@ -505,8 +505,14 @@ function drawDialogueMakerProject() {
 
         currentlyDrawingALine = true;
 
+        objectNodeFromWhichWeAreDrawing = findDialogueObjectBasedOnPassedInHtmlElement($(this).closest('.contentWrap').find('.blockid'));
+        
         nodeIdFromWhichWeAreDrawing = $(this).closest('.contentWrap').find('.block').attr('id').replace(/\D/g, '');//strip char from id;
         
+        characterNameFromWhichWeAreDrawing = $(this).closest('.characterRoot').find('.characterName').val();
+
+        
+
         line = new LeaderLine(
           socketElement[0], // Start of the line
           LeaderLine.pointAnchor({x: event.pageX, y: event.pageY}), // End of the line
@@ -548,29 +554,71 @@ function drawDialogueMakerProject() {
 
                 let plusButtonIndexToAttachTo = $elementUnderCursor.data('buttonindex');
 
-                let dialogueNodeInObject = findDialogueObjectBasedOnPassedInHtmlElement($elementUnderCursor);
+                let childElementForPassingToFindDialogue = $($elementUnderCursor).closest('.blockWrap').find('.next');
 
-                dialogueNodeInObject.outgoingLines.push(
-                    {
-                        fromNode: dialogueNodeInObject.dialogueID,
-                        fromSocket: plusButtonIndexToAttachTo,
-                        toNode: nodeIdFromWhichWeAreDrawing,
-                        lineElem: '',
-                        transitionConditions: [
-                            
-                        ]
+                let dialogueNodeInObject = findDialogueObjectBasedOnPassedInHtmlElement(childElementForPassingToFindDialogue);
+
+                cheggg = dialogueNodeInObject;
+
+                //we need to check if the root character changes and if it does then we need to remove the dialogue object from the old character in the object and add it to the new one
+                //what should then happen with the numbering to avoid clashes?
+                //should also check if its an answer, because answer should only connect to questions
+
+                //wait a second, you can't get the character name based on the ID alone...
+                let newParentCharacterName = getCharacterNameFromDialogueNode(dialogueNodeInObject);
+
+                console.log('dialogueNodeInObject.dialogueID: ' + dialogueNodeInObject.dialogueID + ' newParentCharacterName: ' + newParentCharacterName + ' characterNameFromWhichWeAreDrawing: ' + characterNameFromWhichWeAreDrawing)
+
+                if (newParentCharacterName == characterNameFromWhichWeAreDrawing){
+                    //no change in parent
+                    dialogueNodeInObject.outgoingLines.push(
+                        {
+                            fromNode: dialogueNodeInObject.dialogueID,
+                            fromSocket: plusButtonIndexToAttachTo,
+                            toNode: nodeIdFromWhichWeAreDrawing,
+                            lineElem: '',
+                            transitionConditions: [
+                                
+                            ]
+                        }
+                    )
+                } else {
+                    //change in parent
+
+                    if (objectNodeFromWhichWeAreDrawing) {
+
+                        console.log('Change in parent. objectNodeFromWhichWeAreDrawing.characterName: ' + objectNodeFromWhichWeAreDrawing.characterName + ' CharacterNameFromWhichWeAreDrawing: ' + characterNameFromWhichWeAreDrawing + ' newParentCharacterName: ' + newParentCharacterName);
+
+
+                        let getTheRightCharacterArrayToMoveFrom = getCharacterByName(gameDialogueMakerProject, characterNameFromWhichWeAreDrawing)
+
+                        let getTheRightCharacterArrayToMoveTo = getCharacterByName(gameDialogueMakerProject, newParentCharacterName);
+
+                        getTheRightCharacterArrayToMoveFrom.dialogueNodes = getTheRightCharacterArrayToMoveFrom.dialogueNodes.filter(obj => obj !== objectNodeFromWhichWeAreDrawing); // Remove the object from the first array
+                        getTheRightCharacterArrayToMoveTo.dialogueNodes.push(objectNodeFromWhichWeAreDrawing); // Add the object to the second array
                     }
-                )
 
-            }
+                        //to do:
+                    //looks like we need to convert the x and y position of the node somehow to adapt to the new parent it gets
+                    repositionElementAfterChangeInParent($($elementUnderCursor).closest('.blockWrap'), dialogueNodeInObject.nodeElement);
 
-            //to do:
-            //looks like we need to convert the x and y position of the node somehow to adapt to the new parent it gets
+        }
+
+                }
+
+
+                
+
+            
+            
     
             // Stop updating the line
             line = null;
 
             currentlyDrawingALine = false;
+
+            clearCanvasBeforeReDraw();
+            drawDialogueMakerProject();
         }
     });
     

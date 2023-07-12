@@ -90,10 +90,15 @@ function updateLines(element) { //element is the dragged node dom element
         //start looping from the parents lines and after that loop through each child also, but how? I think it's enough to get the relevant children by taking the nodes of a character with a bigger ID
 
         const characterToLoop = gameDialogueMakerProject.characters.find(char => char.characterID == character);
+        
         // Start iterating from dialogueID 2
-        let startIndex = characterToLoop.dialogueNodes.findIndex(d => d.dialogueID == justTheIdNumberForParent);
+        let startIndex;
 
-        // Iterate until the last node
+        if(characterToLoop) {
+            // Start iterating from dialogueID 2
+            startIndex = characterToLoop.dialogueNodes.findIndex(d => d.dialogueID == justTheIdNumberForParent);
+
+                    // Iterate until the last node
         for (let i = startIndex; i < characterToLoop.dialogueNodes.length; i++) {
             let node = characterToLoop.dialogueNodes[i];
             // Do something with the node
@@ -101,7 +106,7 @@ function updateLines(element) { //element is the dragged node dom element
             if (node) {
                 for (let i = 0; i < node.outgoingLines.length; i++) {
                     let line = node.outgoingLines[i];
-                    //console.log('should update linelem next, elem is: ' + line);
+                    console.log('should update linelem next, elem is: ' + line);
                     line.lineElem.position();
                 }
 
@@ -113,6 +118,9 @@ function updateLines(element) { //element is the dragged node dom element
             
 
         }
+        } //end characterToLoop truthy check
+
+
 
 
         //if not null, loop through each line for PARENT

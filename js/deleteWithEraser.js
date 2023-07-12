@@ -1,5 +1,8 @@
 //ERASER TOOL
 
+            //to do:
+            //looks like we need to convert the x and y position of the node somehow to adapt to the new parent it gets
+
 //enable or disable eraser brush
 $('#eraser').on('click', function () {
     eraseMode = !eraseMode; //toggle boolean

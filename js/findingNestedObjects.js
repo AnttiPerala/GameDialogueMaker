@@ -179,3 +179,35 @@ function checkIfNumberLike(myinput){
 
 }
 
+
+//FIND THE CHARACTERS NAME BASED ON A DIALOGUENODE REFERENCE
+
+function getCharacterNameFromDialogueNode(dialogueNode) {
+    let characterName;
+  
+    // Iterate over characters
+    for (let character of gameDialogueMakerProject.characters) {
+      // Iterate over dialogueNodes
+      for (let node of character.dialogueNodes) {
+        // Check if the dialogueNode matches the provided dialogueNode
+        if (node === dialogueNode) {
+          characterName = character.characterName;
+          break;  // Exit the loop early since we found a match
+        }
+      }
+  
+      // If we've found a characterName, we can stop searching
+      if (characterName) {
+        break;
+      }
+    }
+  
+    return characterName;
+}
+
+
+ 
+  //GET CHARACTER OBJECT IF YOU KNOW THE NAME:
+  function getCharacterByName(gameDialogueMakerProject, characterName) {
+    return gameDialogueMakerProject.characters.find(char => char.characterName === characterName);
+}
