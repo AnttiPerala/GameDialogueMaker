@@ -3,6 +3,8 @@
 
 TO DO:
 
+Plus button of a new character stays blue even after adding a node
+
 Play mode for testing the dialogue interactively
 
 The ability to load a JSON file back in for editing
