@@ -34,7 +34,7 @@ $('body').on('click', '.blockPlusButton', function () {
 
         //get the biggest dialogueID so far in the character
 
-        let biggestDialogueID = 0;
+        let biggestDialogueID = getMaxDialogueNodeId(characterObject)
 
         //check if it's a characterRoot node:
 
@@ -73,10 +73,8 @@ $('body').on('click', '.blockPlusButton', function () {
             console.log(newDialogueNode);
 
         } else {
+            //was not characterRoot
 
-
-
-           
 
             characterObject.dialogueNodes.forEach(function (node) {
                 if (node.dialogueID > biggestDialogueID) {

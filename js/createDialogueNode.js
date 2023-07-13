@@ -96,7 +96,7 @@ function createDialogueNode(nodeElement, dialogueIDSent, dialogueType, dialogueT
 
                 <div class="contentWrap">
                 <div style="display: flex; align-items:center; justify-content: center;">
-                    <div class="topConnectionSocket"><div class="roundSocket"></div></div>
+                    <div class="topConnectionSocket" data-hasline="false"><div class="roundSocket"></div></div>
                 </div>
                     <div id="id${dialogueIDSent}" class="block">
                         <div style="text-align: left;">

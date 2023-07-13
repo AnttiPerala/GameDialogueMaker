@@ -82,18 +82,7 @@ $('body').on('mousedown', '.block, .line', function () {
                 characterObjectToEraseFrom.dialogueNodes[i].dialogueID--;
             }
 
-            // Loop through the outgoingLines and update the fromNode and toNode values based on the new dialogueID of the nodes
-            // This might be more complicated than I thought, because the lineElems might also need to be changed...
-            /* gameDialogueMakerProject.characters.forEach(character => {
-                character.outgoingLines.forEach(line => {
-                    if (line.fromNode > nodeIndex) {
-                        line.fromNode--;
-                    }
-                    if (line.toNode > nodeIndex) {
-                        line.toNode--;
-                    }
-                });
-            }); */
+        
 
             //myLog(`should erase now ${idToBeErased}`,0,fileInfo = getFileInfo());
 
@@ -138,7 +127,11 @@ function deleteLinesByToNode(characterObjectToEraseFrom,toNodeId) {
                 if (outgoingLine.toNode == toNodeId) {
                     console.log('a match with passed in toNode and lines toNode');
                     dialogueNode.outgoingLines.splice(i, 1);
+                    //now also select the node html element and make the topConnectionSocket data-hasline="false" so that it can be reconnected
+                    $(dialogueNode.nodeElement).find('.topConnectionSocket').attr('data-hasline', 'false');
                     i--; // decrement i since we just removed an element from the array
+                    
+
                 }
             }
         });
