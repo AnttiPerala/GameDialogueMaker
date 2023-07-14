@@ -642,14 +642,29 @@ if (dialogueNodeInMaster) {
 
           // Creating a new line when the mousedown event happens on .topConnectionSocket
              // Start point is at the mouse position when the mousedown event happened
-            const startPoint = {
+
+             const startPoint = {
+                x: $(myelement).offset().left - $(document).scrollLeft(), 
+                y: $(myelement).offset().top - $(document).scrollTop()
+            };
+
+            const origEndPoint = {
                 x: event.pageX - $(document).scrollLeft(), 
                 y: event.pageY - $(document).scrollTop()
             };
             
             line = new LeaderLine(
                 LeaderLine.pointAnchor(startPoint),
-                LeaderLine.pointAnchor(startPoint)
+                LeaderLine.pointAnchor(origEndPoint),
+                {
+                    color: "#0075ff",
+                    size: 4,
+                    dash: false,
+                    path: "straight", //deafult is straight, arc, fluid, magnet, grid
+                    startSocket: "bottom",
+                    endSocket: "bottom",
+                    endPlug: "disc",
+                  }
             );
 
             $(myelement).remove(); //remove old line
@@ -665,7 +680,16 @@ if (dialogueNodeInMaster) {
                 };
                 line = new LeaderLine(
                     LeaderLine.pointAnchor(startPoint),
-                    LeaderLine.pointAnchor(endPoint)
+                    LeaderLine.pointAnchor(endPoint),
+                    {
+                        color: "#0075ff",
+                        size: 4,
+                        dash: false,
+                        path: "straight", //deafult is straight, arc, fluid, magnet, grid
+                        startSocket: "bottom",
+                        endSocket: "bottom",
+                        endPlug: "disc",
+                      }
                 );
             });
         
