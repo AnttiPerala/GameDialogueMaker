@@ -53,11 +53,8 @@ function drawDialogueMakerProject() {
     //myLog(`latestNode ${JSON.stringify(latestNode) }`,3,fileInfo = getFileInfo())
 
     //loop through all dialogue nodes of a character
-    for (
-      let j = 0;
-      j < gameDialogueMakerProject.characters[i].dialogueNodes.length;
-      j++
-    ) {
+    for (let j = 0;j < gameDialogueMakerProject.characters[i].dialogueNodes.length;j++) {
+
       //console.log(gameDialogueMakerProject.characters[i].dialogueNodes[j].dialogueText);
       //append the dialogue node to the previous dialogue node. But if it's a answer node, maybe it needs to be appended to the closest question node.
 
@@ -191,7 +188,7 @@ function drawDialogueMakerProject() {
 
     addAutoResize();
 
-    let plusButtonElem = $(currI.nodeElement).find(".blockPlusButton");
+    let plusButtonElem = $(currI.nodeElement).find(".blockPlusButton").eq(0); //important to only select the first found elem with eq
 
     if (gameDialogueMakerProject.characters[i].outgoingLines.length < 1){
 
@@ -201,6 +198,8 @@ function drawDialogueMakerProject() {
             console.log('character node had no outgoing lines');
     } else {
         //outgoing lines found for character
+
+        $(plusButtonElem).attr('data-acceptclicks', 'false');
 
           //loop through the object AGAIN to create the lines:
 
@@ -564,24 +563,24 @@ function drawDialogueMakerProject() {
 
     //loop through all the lines of this dialogueNode
 if (dialogueNodeInMaster) {
-    console.log('dialogueNodeInMaster exists:', dialogueNodeInMaster);
+    //console.log('dialogueNodeInMaster exists:', dialogueNodeInMaster);
     if (dialogueNodeInMaster.outgoingLines.length > 0) {
-      console.log('outgoingLines length:', dialogueNodeInMaster.outgoingLines.length);
+      //console.log('outgoingLines length:', dialogueNodeInMaster.outgoingLines.length);
       dialogueNodeInMaster.outgoingLines.forEach((outgoingLine) => {
         // Do something with the outgoingLine
-        console.log('outgoingLine:', outgoingLine);
+        //console.log('outgoingLine:', outgoingLine);
         if (outgoingLine.fromSocket == plusButtonIndex) {
-          console.log('outgoingLine.fromSocket == plusButtonIndex', outgoingLine.fromSocket, plusButtonIndex);
+          //console.log('outgoingLine.fromSocket == plusButtonIndex', outgoingLine.fromSocket, plusButtonIndex);
           //we have an outgoing line
           $(this).attr("data-acceptclicks", false);
-          console.log('data-acceptclicks attribute:', $(this).attr("data-acceptclicks"));
+          //console.log('data-acceptclicks attribute:', $(this).attr("data-acceptclicks"));
         }
       });
     } else {
-      console.log('No outgoing lines.');
+      //console.log('No outgoing lines.');
     } //end if dialogueNodeInMaster.outgoingLines
   } else {
-    console.log('dialogueNodeInMaster does not exist.');
+    //console.log('dialogueNodeInMaster does not exist.');
   } //end if dialogueNodeInMaster
   
 
