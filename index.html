@@ -119,27 +119,19 @@
             <p>The "next" value tells Construct which node it should go to after the current one. We are automatically
                 setting it to the next child node if the user has created one. If there is no child node, then the user
                 can define where to go next by setting the value manually. </p>
-            <p>The ID for each node is automatically assigned and I don't recommend changing them for now. The answer
-                nodes need to get the same ID as the parent question has.</p>
+            <p>The ID for each node is automatically assigned and I don't recommend changing them for now. </p>
             <p>Adding line breaks in the text are of the node will separate those into different dialogues in Construct,
                 meaning that they will be displayed separately one-by-one. That way you can make sure large texts fit
                 the dialogue box design of your game. </p>
 
             <h3>TO DO:</h3>
             <ul>
-                <li>Thinking now of rewriting the entire thing to have one giant object in memory which is controlling
-                    the drawing on the page. Now there is so much crazy traversal difficulties.. This object would also
-                    allow for easy saves and exports.</li>
-                <li>A way to import the JSON file back in order to create a node tree from it.</li>
-                <li>Deleting elements is not reliable at the moment, the ID's especially need some work</li>
-                <li>The save and delete save buttons don't work properly yet. Export to json should work though.</li>
+                
+               
+               
                 <li>Proper mobile support</li>
                 <li>Mouse wheel zoom</li>
                 <li>Collapse nodes to save space</li>
-                <li>Draw a dotted line between relevant nodes when user manually sets the value of "next"</li>
-                <li>Conditions for the connecting lines, so that we can compare a condition before allowing the
-                    transition. Note that this feature needs to be programmed also for the c3p-file provided by Laura_D.
-                    I'm planning om using a dictionary for this so that I can have dynamic "variable" names.</li>
                 <li>Generic JSON exporter for other game engines</li>
                 <li>Automatic splitting of long dialogues based on character count treshold setting</li>
                 <li>Smart reordering of IDs based on user input</li>
