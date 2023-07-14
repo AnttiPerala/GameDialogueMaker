@@ -627,6 +627,54 @@ if (dialogueNodeInMaster) {
         if (myelement && myelement.classList.contains('leader-line')) {
           console.log(`mouse over socket AND svg`);
 
+          //use the info on the clicked line to select the correct line from the master object
+          let lineCharacterId = $(myelement).attr('data-character');
+
+          let lineFromNodeId = $(myelement).attr('data-fromnode');
+
+          let lineToNodeId = $(myelement).attr('data-tonode');
+
+          console.log(`lineCharacterId ${lineCharacterId} lineFromNodeId ${lineFromNodeId} lineToNodeId ${lineToNodeId}`);
+
+          let theRetrievedLeaderline = getLineElemFromObject(gameDialogueMakerProject, lineCharacterId, lineFromNodeId, lineToNodeId);
+
+          //change the line to mouse coords
+
+          // Creating a new line when the mousedown event happens on .topConnectionSocket
+             // Start point is at the mouse position when the mousedown event happened
+            const startPoint = {
+                x: event.pageX - $(document).scrollLeft(), 
+                y: event.pageY - $(document).scrollTop()
+            };
+            
+            line = new LeaderLine(
+                LeaderLine.pointAnchor(startPoint),
+                LeaderLine.pointAnchor(startPoint)
+            );
+
+            $(myelement).remove(); //remove old line
+
+            console.log(`new line created: `, line);
+
+            $(document).mousemove(function(event) {
+                // Update line end point on mousemove
+                line.remove();
+                const endPoint = {
+                    x: event.pageX - $(document).scrollLeft(), 
+                    y: event.pageY - $(document).scrollTop()
+                };
+                line = new LeaderLine(
+                    LeaderLine.pointAnchor(startPoint),
+                    LeaderLine.pointAnchor(endPoint)
+                );
+            });
+        
+            $(document).mouseup(function() {
+                // Stop updating line when mouse button is released
+                $(document).off('mousemove');
+            });
+          
+
         } else {
           // Mouse is not over an svg element with class "leader-line"
         }

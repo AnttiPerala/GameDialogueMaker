@@ -244,4 +244,35 @@ function getMaxDialogueNodeId(character) {
     return highestDialogueNodeId;
 }
 
+//FOR FINDING A LINE REFERENCE FROM THE MASTER OBJECT WHEN YOU KNOW THE CHARACTER ID, FROMNODE AND TONODE
 
+function getLineElemFromObject(gameDialogueMakerProject, characterId, fromNodeValue, toNodeValue) {
+    // Search through the characters array
+
+    console.log(`hello from getLineElemFromObject. characterId: ${characterId}`);
+
+    let character = gameDialogueMakerProject.characters.find(character => character.characterID == characterId);
+    
+    if (!character) {
+        console.log(`no character found`);
+        return null; // No character found with the given ID
+    }
+
+    console.log(`character match`);
+
+    // Search through the character's outgoingLines array
+    let outgoingLine = character.outgoingLines.find(line => line.fromNode == fromNodeValue && line.toNode == toNodeValue);
+    
+    if (!outgoingLine) {
+        // If not found in character's outgoingLines, search through each dialogueNodes
+        for (let dialogueNode of character.dialogueNodes) {
+            outgoingLine = dialogueNode.outgoingLines.find(line => line.fromNode == fromNodeValue && line.toNode == toNodeValue);
+            if (outgoingLine) {
+                console.log(`found matching line using getLineElemFromObject ${outgoingLine}`);
+                break; // Found a matching outgoingLine, so break out of the loop
+            }
+        }
+    }
+    
+    return outgoingLine ? outgoingLine.lineElem : null; // Return the lineElem or null if not found
+}
