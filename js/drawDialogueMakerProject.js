@@ -599,12 +599,43 @@ if (dialogueNodeInMaster) {
   var line = null; // Placeholder for the line that will be drawn
 
   $(".topConnectionSocket").mousedown(function (event) {
-    event.stopPropagation();
+
 
     var socketElement = $(this);
 
-    if ($(socketElement).attr("data-hasline") === 'true') { //true must be in quotes
-      //do something to remove the line
+    if ($(socketElement).attr("data-hasline") === 'true') {
+    //hide the socket to help elementFromPoint
+    
+    //need to temporarily enable svg pointer events for proper detections
+    $('svg.leader-line').each(function () {
+        this.style.setProperty('pointer-events', 'auto', 'important');
+      });
+
+
+        //first select the line
+        var x = event.clientX, 
+        y = event.clientY,
+        myelement = document.elementFromPoint(x, y);
+
+          console.log(`myelement was`, myelement);
+    
+        // climb up the DOM tree to the root svg
+        while (myelement && !(myelement instanceof SVGSVGElement)) {
+          myelement = myelement.ownerSVGElement;
+        }
+    
+        if (myelement && myelement.classList.contains('leader-line')) {
+          console.log(`mouse over socket AND svg`);
+
+        } else {
+          // Mouse is not over an svg element with class "leader-line"
+        }
+
+          //turn svg pointer events back on
+    $('svg.leader-line').each(function () {
+        this.style.setProperty('pointer-events', 'none', 'important');
+      });
+
     } else { //only draw the line if the socket was empty
 
         currentlyDrawingALine = true;
@@ -641,6 +672,7 @@ if (dialogueNodeInMaster) {
 
     } //end else for if ($(socketElement).attr('data-hasline') == 'true')
 
+    event.stopPropagation();
     
   });
 
