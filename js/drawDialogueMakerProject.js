@@ -636,66 +636,73 @@ if (dialogueNodeInMaster) {
 
           console.log(`lineCharacterId ${lineCharacterId} lineFromNodeId ${lineFromNodeId} lineToNodeId ${lineToNodeId}`);
 
-          let theRetrievedLeaderline = getLineElemFromObject(gameDialogueMakerProject, lineCharacterId, lineFromNodeId, lineToNodeId);
 
-          //change the line to mouse coords
+            $(myelement).remove();
+        
 
-          // Creating a new line when the mousedown event happens on .topConnectionSocket
-             // Start point is at the mouse position when the mousedown event happened
+            //nah, let's try to get the actual element the original line is attached to 
+            //we can start by finding the correct fromNode
 
-             const startPoint = {
-                x: $(myelement).offset().left - $(document).scrollLeft(), 
-                y: $(myelement).offset().top - $(document).scrollTop()
+            let originalFromNode = getDialogueNodeById(lineCharacterId, lineFromNodeId);
+
+            let originalFromNodeDomElem = originalFromNode.nodeElement;
+
+            console.log('originalFromNodeDomElem: ', originalFromNodeDomElem);
+
+            const mousePoint = {
+                x: event.pageX, 
+                y: event.pageY
             };
 
-            const origEndPoint = {
-                x: event.pageX - $(document).scrollLeft(), 
-                y: event.pageY - $(document).scrollTop()
-            };
-            
-            line = new LeaderLine(
-                LeaderLine.pointAnchor(startPoint),
-                LeaderLine.pointAnchor(origEndPoint),
+            let line = new LeaderLine(
+                originalFromNodeDomElem.get(0),
+                LeaderLine.pointAnchor(mousePoint),
                 {
                     color: "#0075ff",
                     size: 4,
                     dash: false,
-                    path: "straight", //deafult is straight, arc, fluid, magnet, grid
+                    path: "straight",
                     startSocket: "bottom",
                     endSocket: "bottom",
                     endPlug: "disc",
-                  }
+                }
             );
-
-            $(myelement).remove(); //remove old line
-
-            console.log(`new line created: `, line);
-
+        
             $(document).mousemove(function(event) {
                 // Update line end point on mousemove
                 line.remove();
                 const endPoint = {
-                    x: event.pageX - $(document).scrollLeft(), 
-                    y: event.pageY - $(document).scrollTop()
+                    x: event.pageX, 
+                    y: event.pageY
                 };
                 line = new LeaderLine(
-                    LeaderLine.pointAnchor(startPoint),
+                    originalFromNodeDomElem.get(0),
                     LeaderLine.pointAnchor(endPoint),
                     {
                         color: "#0075ff",
                         size: 4,
                         dash: false,
-                        path: "straight", //deafult is straight, arc, fluid, magnet, grid
+                        path: "straight",
                         startSocket: "bottom",
                         endSocket: "bottom",
                         endPlug: "disc",
-                      }
+                    }
                 );
             });
         
             $(document).mouseup(function() {
                 // Stop updating line when mouse button is released
                 $(document).off('mousemove');
+                $(document).off('mouseup');
+
+                //delete the line from the master object
+                let theLineInTheObject = deleteLineFromObject(gameDialogueMakerProject, lineCharacterId, lineFromNodeId, lineToNodeId);
+
+                //delete the line, ...maybe redraw instead
+                //line.remove(); //note this is leaderLines remove method not jQuery
+                clearCanvasBeforeReDraw();
+                drawDialogueMakerProject();
+
             });
           
 

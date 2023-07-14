@@ -276,3 +276,44 @@ function getLineElemFromObject(gameDialogueMakerProject, characterId, fromNodeVa
     
     return outgoingLine ? outgoingLine.lineElem : null; // Return the lineElem or null if not found
 }
+
+//DELETE A LINE FROM THE OBJECT
+
+function deleteLineFromObject(gameDialogueMakerProject, characterId, fromNodeValue, toNodeValue) {
+    // Search through the characters array
+    console.log(`hello from getLineElemFromObject. characterId: ${characterId}`);
+
+    let character = gameDialogueMakerProject.characters.find(character => character.characterID == characterId);
+
+    if (!character) {
+        console.log(`no character found`);
+        return null; // No character found with the given ID
+    }
+
+    console.log(`character match`);
+
+    // Search through the character's outgoingLines array
+    let outgoingLine = character.outgoingLines.find(line => line.fromNode == fromNodeValue && line.toNode == toNodeValue);
+
+    if (outgoingLine) {
+        // Remove the outgoingLine from the character's outgoingLines array
+        const index = character.outgoingLines.indexOf(outgoingLine);
+        character.outgoingLines.splice(index, 1);
+        console.log(`removed outgoingLine`);
+    } else {
+        // If not found in character's outgoingLines, search through each dialogueNodes
+        for (let dialogueNode of character.dialogueNodes) {
+            outgoingLine = dialogueNode.outgoingLines.find(line => line.fromNode == fromNodeValue && line.toNode == toNodeValue);
+            if (outgoingLine) {
+                // Remove the outgoingLine from the dialogueNode's outgoingLines array
+                const index = dialogueNode.outgoingLines.indexOf(outgoingLine);
+                dialogueNode.outgoingLines.splice(index, 1);
+                console.log(`removed outgoingLine from dialogueNode`);
+                break; // Found a matching outgoingLine, so break out of the loop
+            }
+        }
+    }
+
+    return outgoingLine ? outgoingLine.lineElem : null; // Return the lineElem or null if not found
+}
+
