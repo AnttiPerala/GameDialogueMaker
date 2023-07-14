@@ -422,9 +422,7 @@ function drawDialogueMakerProject() {
             let lineEndNodeElement = lineEndNode.nodeElement;
 
             //get the top socket
-            let lineEndElementTopSocket = $(lineEndNodeElement).find(
-              ".topConnectionSocket"
-            );
+            let lineEndElementTopSocket = $(lineEndNodeElement).find(".topConnectionSocket").eq(0);
 
             //set the socket to contain a line
           $(lineEndElementTopSocket).attr('data-hasline', 'true');
@@ -697,6 +695,9 @@ if (dialogueNodeInMaster) {
 
                 //delete the line from the master object
                 let theLineInTheObject = deleteLineFromObject(gameDialogueMakerProject, lineCharacterId, lineFromNodeId, lineToNodeId);
+
+                console.log('socketElement', socketElement);
+                $(socketElement).attr('data-hasline', 'false');
 
                 //delete the line, ...maybe redraw instead
                 //line.remove(); //note this is leaderLines remove method not jQuery
