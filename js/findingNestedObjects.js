@@ -319,23 +319,45 @@ function deleteLineFromObject(gameDialogueMakerProject, characterId, fromNodeVal
 
 //TRAVERSE ALL NODES CONNECTED TO A NODE WITH LINES
 
-function* iterateConnectedNodes(dialogueNode, visitedNodes = new Set()) { //* makes it a generator function
+function* iterateConnectedNodes(dialogueNode, visitedNodes = new Set()) {
     visitedNodes.add(dialogueNode.dialogueID);
-
-    yield dialogueNode; // Yield the current dialogueNode
-
+    
+    yield dialogueNode;
+  
     for (let outgoingLine of dialogueNode.outgoingLines) {
-        const toNode = gameDialogueMakerProject.characters[0].dialogueNodes.find(node => node.dialogueID === outgoingLine.toNode);
-
-        if (!visitedNodes.has(toNode.dialogueID)) {
-            yield* iterateConnectedNodes(toNode, visitedNodes); // Recursively yield connected nodes
-        }
+      const character = gameDialogueMakerProject.characters[0];
+      const toNode = character.dialogueNodes.find(node => node.dialogueID === outgoingLine.toNode);
+      
+      if (toNode && !visitedNodes.has(toNode.dialogueID)) {
+        yield* iterateConnectedNodes(toNode, visitedNodes);
+      }
     }
-}
-
-// Example usage:
-const startNode = gameDialogueMakerProject.characters[0].dialogueNodes[0];
-for (let node of iterateConnectedNodes(startNode)) {
+  }
+  
+  // Example usage:
+  const startNode = gameDialogueMakerProject.characters[0].dialogueNodes[0];
+  
+  for (let node of iterateConnectedNodes(startNode)) {
     // Perform further manipulation on each node (move or delete)
     console.log(node);
+  }
+  
+
+//GET CHARACTER ID FROM PASSED IN DIALOGUE NODE
+
+function findCharacterIDByPassingInDialogueNode(dialogueNode) {
+    // Iterate through all characters
+    for(let character of gameDialogueMakerProject.characters) {
+        // Iterate through all dialogueNodes of the current character
+        for(let node of character.dialogueNodes) {
+            // If the current node is the same object instance as the input dialogueNode
+            if(node === dialogueNode) {
+                // Return the characterID
+                return character.characterID;
+            }
+        }
+    }
+    // Return null if no matching characterID was found
+    console.log(`hello from findCharacterIDByPassingInDialogueNode: no matching characterID was found`);
+    return null;
 }

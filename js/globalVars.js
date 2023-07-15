@@ -7,6 +7,9 @@ let characterNameFromWhichWeAreDrawing = '';
 let latestNodeForLines;
 let zoomValue;
 let selectedColor;
+let lineCharacterId;
+let lineFromNodeId;
+let lineToNodeId;
 
 
 //the master object is called gameDialogueMakerProject

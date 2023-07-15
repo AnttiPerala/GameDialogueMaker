@@ -626,11 +626,11 @@ if (dialogueNodeInMaster) {
           console.log(`mouse over socket AND svg`);
 
           //use the info on the clicked line to select the correct line from the master object
-          let lineCharacterId = $(myelement).attr('data-character');
+          lineCharacterId = $(myelement).attr('data-character');
 
-          let lineFromNodeId = $(myelement).attr('data-fromnode');
+          lineFromNodeId = $(myelement).attr('data-fromnode');
 
-          let lineToNodeId = $(myelement).attr('data-tonode');
+          lineToNodeId = $(myelement).attr('data-tonode');
 
           console.log(`lineCharacterId ${lineCharacterId} lineFromNodeId ${lineFromNodeId} lineToNodeId ${lineToNodeId}`);
 
@@ -725,6 +725,8 @@ if (dialogueNodeInMaster) {
         $(this).closest(".blockWrap").find(".blockid")
       );
 
+   
+
     nodeIdFromWhichWeAreDrawing = $(this)
       .closest(".blockWrap")
       .find(".block")
@@ -802,20 +804,18 @@ if (dialogueNodeInMaster) {
         //what should then happen with the numbering to avoid clashes?
         //should also check if its an answer, because answer should only connect to questions
 
-        let newParentCharacterName = getCharacterNameFromDialogueNode(
+        let newParentCharacterID = findCharacterIDByPassingInDialogueNode(
           dialogueFromNodeInObject
         );
 
         console.log(
-          "dialogueFromNodeInObject.dialogueID: " +
-            dialogueFromNodeInObject.dialogueID +
-            " newParentCharacterName: " +
-            newParentCharacterName +
-            " characterNameFromWhichWeAreDrawing: " +
-            characterNameFromWhichWeAreDrawing
+            "newParentCharacterID: " +
+            newParentCharacterID +
+            " lineCharacterId: " +
+            lineCharacterId
         );
 
-        if (newParentCharacterName == characterNameFromWhichWeAreDrawing) {
+        if (newParentCharacterID == lineCharacterId) {
           //no change in parent
           dialogueFromNodeInObject.outgoingLines.push({
             fromNode: dialogueFromNodeInObject.dialogueID,
@@ -833,37 +833,20 @@ if (dialogueNodeInMaster) {
           //to do: transition conditions?
 
           if (objectNodeFromWhichWeAreDrawing) {
-            console.log(
-              "Change in parent. objectNodeFromWhichWeAreDrawing.characterName: " +
-                objectNodeFromWhichWeAreDrawing.characterName +
-                " CharacterNameFromWhichWeAreDrawing: " +
-                characterNameFromWhichWeAreDrawing +
-                " newParentCharacterName: " +
-                newParentCharacterName
-            );
 
-            let getTheRightCharacterArrayToMoveFrom = getCharacterByName(
-              gameDialogueMakerProject,
-              characterNameFromWhichWeAreDrawing
-            );
-
-            let getTheRightCharacterArrayToMoveTo = getCharacterByName(
-              gameDialogueMakerProject,
-              newParentCharacterName
-            );
 
             highestIdInNewParent = getMaxDialogueNodeId(
-              getTheRightCharacterArrayToMoveTo
+              gameDialogueMakerProject.characters[lineCharacterId-1]
             );
 
             objectNodeFromWhichWeAreDrawing.dialogueID =
               highestIdInNewParent + 1;
 
-            getTheRightCharacterArrayToMoveFrom.dialogueNodes =
-              getTheRightCharacterArrayToMoveFrom.dialogueNodes.filter(
+              gameDialogueMakerProject.characters[lineCharacterId-1].dialogueNodes =
+              gameDialogueMakerProject.characters[lineCharacterId-1].dialogueNodes.filter(
                 (obj) => obj !== objectNodeFromWhichWeAreDrawing
               ); // Remove the object from the first array
-            getTheRightCharacterArrayToMoveTo.dialogueNodes.push(
+              gameDialogueMakerProject.characters[newParentCharacterID-1].dialogueNodes.push(
               objectNodeFromWhichWeAreDrawing
             ); // Add the object to the second array
           }
@@ -888,7 +871,7 @@ if (dialogueNodeInMaster) {
 
           //we should loop through all nodes that are connected to the node that got a new parent:
           // Example usage:
-          const startNode = gameDialogueMakerProject.characters[0].dialogueNodes[0];
+          const startNode = gameDialogueMakerProject.characters[newParentCharacterID-1].dialogueNodes[dialogueFromNodeInObject.dialogueID-1];
           for (let node of iterateConnectedNodes(startNode)) {
               // Perform further manipulation on each node (move or delete)
               console.log(node);
