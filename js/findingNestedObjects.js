@@ -317,3 +317,36 @@ function deleteLineFromObject(gameDialogueMakerProject, characterId, fromNodeVal
     return outgoingLine ? outgoingLine.lineElem : null; // Return the lineElem or null if not found
 }
 
+//TRAVERSE ALL NODES CONNECTED TO A NODE WITH LINES
+
+function traverseConnectedNodes(dialogueNode, visitedNodes = new Set()) {
+    visitedNodes.add(dialogueNode.dialogueID);
+  
+    console.log(`Processing dialogueNode ${dialogueNode.dialogueID}`);
+  
+    for (let outgoingLine of dialogueNode.outgoingLines) {
+        const toNode = gameDialogueMakerProject.characters[0].dialogueNodes.find(node => node.dialogueID === outgoingLine.toNode);
+      
+        if (!visitedNodes.has(toNode.dialogueID)) {
+            traverseConnectedNodes(toNode, visitedNodes);
+        }
+    }
+  
+    for (let childNode of gameDialogueMakerProject.characters[0].dialogueNodes) {
+        if (visitedNodes.has(childNode.dialogueID)) continue;
+      
+        for (let outgoingLine of childNode.outgoingLines) {
+            const toNode = gameDialogueMakerProject.characters[0].dialogueNodes.find(node => node.dialogueID === outgoingLine.toNode);
+          
+            if (visitedNodes.has(toNode.dialogueID)) {
+                // Perform actions on the childNode or its connected grandchildren here
+                console.log(`Processing childNode ${childNode.dialogueID}`);
+                console.log(`Connected toNode ${toNode.dialogueID}`);
+            }
+        }
+    }
+}
+
+// Example usage:
+const startNode = gameDialogueMakerProject.characters[0].dialogueNodes[0];
+traverseConnectedNodes(startNode);

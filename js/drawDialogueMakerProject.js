@@ -797,7 +797,6 @@ if (dialogueNodeInMaster) {
             childElementForPassingToFindDialogue
           );
 
-        cheggg = dialogueFromNodeInObject;
 
         //we need to check if the root character changes and if it does then we need to remove the dialogue object from the old character in the object and add it to the new one
         //what should then happen with the numbering to avoid clashes?
@@ -886,6 +885,11 @@ if (dialogueNodeInMaster) {
             lineElem: "",
             transitionConditions: [],
           });
+
+          //we should loop through all nodes that are connected to the node that got a new parent:
+          traverseConnectedNodes(objectNodeFromWhichWeAreDrawing); //this still needs work
+          //we will also have to update the objects toNode and fromNode outgoingLine information to match the new numbering
+
         } //end else (change in parent)
       }//end if (line)
 
