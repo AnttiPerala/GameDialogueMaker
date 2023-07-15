@@ -722,7 +722,7 @@ if (dialogueNodeInMaster) {
 
     objectNodeFromWhichWeAreDrawing =
       findDialogueObjectBasedOnPassedInHtmlElement(
-        $(this).closest(".blockWrap").find(".blockid")
+        $(this).closest(".blockWrap").find(".blockid") //gets the blockid input since the function needs a child element
       );
 
    
@@ -775,7 +775,7 @@ if (dialogueNodeInMaster) {
       // Get the jQuery object for the element under the cursor
       var $elementUnderCursor = $(elementUnderCursor);
 
-      // Check if the element is the target div and if its data-acceptclicks attribute is true
+      // Check if the element is a plus button and if its data-acceptclicks attribute is true
       if (
         $elementUnderCursor.hasClass("blockPlusButton") &&
         $elementUnderCursor.data("acceptclicks") === true &&
@@ -794,6 +794,7 @@ if (dialogueNodeInMaster) {
           .closest(".blockWrap")
           .find(".blockid");
 
+          //this is the dialogueNode of the plus button block
         let dialogueFromNodeInObject =
           findDialogueObjectBasedOnPassedInHtmlElement(
             childElementForPassingToFindDialogue
@@ -836,7 +837,7 @@ if (dialogueNodeInMaster) {
 
 
             highestIdInNewParent = getMaxDialogueNodeId(
-              gameDialogueMakerProject.characters[lineCharacterId-1]
+              gameDialogueMakerProject.characters[newParentCharacterID-1]
             );
 
             objectNodeFromWhichWeAreDrawing.dialogueID =
