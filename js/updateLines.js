@@ -24,7 +24,9 @@ function updateAllLines() {
             character.dialogueNodes.forEach((dialogueNode) => {
                 dialogueNode.outgoingLines.forEach((outgoingLine) => {
                     const lineElem = outgoingLine.lineElem;
-                    lineElem.position(); //LeaderLine function call
+                    if(lineElem && typeof lineElem.position === 'function') {
+                        lineElem.position(); //LeaderLine function call
+                    }
                 });
             });
         });

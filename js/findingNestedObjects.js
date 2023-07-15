@@ -123,7 +123,7 @@ function findLineThatConnectsElementToParent(characterObject, dialogueID){
     if (targetLine) {
         //console.log("Found line with toNode value of " + targetNode + ": ", targetLine);
     } else {
-        console.log("Could not find line with toNode value of " + targetNode);
+        //console.log("Could not find line with toNode value of " + targetNode);
     }
     return targetLine;
 }
@@ -232,17 +232,21 @@ function getCharacterNameFromDialogueNode(dialogueNode) {
 
 //GET THE LARGEST DIALOGUE ID OF A CHARACTER:
 
+//takes a character object as argument
 function getMaxDialogueNodeId(character) {
     let highestDialogueNodeId = 0;
   
-    for (let dialogueNode of character.dialogueNodes) {
-        if (dialogueNode.dialogueID > highestDialogueNodeId) {
-            highestDialogueNodeId = dialogueNode.dialogueID;
+    if (character.dialogueNodes && character.dialogueNodes.length > 0) {
+        for (let dialogueNode of character.dialogueNodes) {
+            if (dialogueNode.dialogueID > highestDialogueNodeId) {
+                highestDialogueNodeId = dialogueNode.dialogueID;
+            }
         }
     }
-  
+  console.log(`returning highestDialogueNodeId which was: ${highestDialogueNodeId}`);
     return highestDialogueNodeId;
 }
+
 
 //FOR FINDING A LINE REFERENCE FROM THE MASTER OBJECT WHEN YOU KNOW THE CHARACTER ID, FROMNODE AND TONODE
 
@@ -320,44 +324,101 @@ function deleteLineFromObject(gameDialogueMakerProject, characterId, fromNodeVal
 //TRAVERSE ALL NODES CONNECTED TO A NODE WITH LINES
 
 function* iterateConnectedNodes(dialogueNode, visitedNodes = new Set()) {
-    visitedNodes.add(dialogueNode.dialogueID);
-    
-    yield dialogueNode;
-  
-    for (let outgoingLine of dialogueNode.outgoingLines) {
-      const character = gameDialogueMakerProject.characters[0];
-      const toNode = character.dialogueNodes.find(node => node.dialogueID === outgoingLine.toNode);
-      
-      if (toNode && !visitedNodes.has(toNode.dialogueID)) {
-        yield* iterateConnectedNodes(toNode, visitedNodes);
-      }
+    if (!dialogueNode || !dialogueNode.dialogueID) {
+        return;
     }
-  }
-  
-  // Example usage:
-  const startNode = gameDialogueMakerProject.characters[0].dialogueNodes[0];
-  
-  for (let node of iterateConnectedNodes(startNode)) {
+
+    visitedNodes.add(dialogueNode.dialogueID);
+
+    yield dialogueNode;
+
+    for (let outgoingLine of dialogueNode.outgoingLines) {
+        const character = gameDialogueMakerProject.characters[0];
+        const toNode = character.dialogueNodes.find(node => node.dialogueID === outgoingLine.toNode);
+
+        if (toNode && !visitedNodes.has(toNode.dialogueID)) {
+            yield* iterateConnectedNodes(toNode, visitedNodes);
+        }
+    }
+}
+
+// Example usage:
+const startNode = gameDialogueMakerProject.characters[0].dialogueNodes[0];
+
+for (let node of iterateConnectedNodes(startNode)) {
     // Perform further manipulation on each node (move or delete)
     console.log(node);
-  }
+}
+
   
 
 //GET CHARACTER ID FROM PASSED IN DIALOGUE NODE
 
 function findCharacterIDByPassingInDialogueNode(dialogueNode) {
+    // Check if the dialogueNode has a characterID key
+    if (dialogueNode && dialogueNode.hasOwnProperty('characterID')) {
+        // Return the characterID value
+        return dialogueNode.characterID;
+    }
+
     // Iterate through all characters
-    for(let character of gameDialogueMakerProject.characters) {
-        // Iterate through all dialogueNodes of the current character
-        for(let node of character.dialogueNodes) {
-            // If the current node is the same object instance as the input dialogueNode
-            if(node === dialogueNode) {
-                // Return the characterID
-                return character.characterID;
+    for (let character of gameDialogueMakerProject.characters) {
+        // Check if the character has dialogueNodes
+        if (character.dialogueNodes && character.dialogueNodes.length > 0) {
+            // Iterate through all dialogueNodes of the current character
+            for (let node of character.dialogueNodes) {
+                // If the current node is the same object instance as the input dialogueNode
+                if (typeof node === 'object' && node === dialogueNode) {
+                    // Return the characterID
+                    return character.characterID;
+                }
             }
         }
     }
+
     // Return null if no matching characterID was found
-    console.log(`hello from findCharacterIDByPassingInDialogueNode: no matching characterID was found`);
+    console.log('hello from findCharacterIDByPassingInDialogueNode: no matching characterID was found');
     return null;
+}
+
+
+
+//UPDATE THE DIALOGUE ID's WHILE MAINTAINING THE CORRECT LINE RELATIONSHIPS
+
+function updateDialogueIds(gameDialogueMakerProject, characterIndex, newIdFunction) {
+    let character = gameDialogueMakerProject.characters[characterIndex];
+    let idMapping = {};
+
+    // First pass: update all dialogueID's and build the idMapping
+    for (let i = 0; i < character.dialogueNodes.length; i++) {
+        let dialogueNode = character.dialogueNodes[i];
+        let oldId = dialogueNode.dialogueID;
+        let newId = newIdFunction(oldId);
+
+        idMapping[oldId] = newId;
+        dialogueNode.dialogueID = newId;
+    }
+
+    // Second pass: update all the fromNode and toNode ids in outgoingLines
+    for (let i = 0; i < character.dialogueNodes.length; i++) {
+        let dialogueNode = character.dialogueNodes[i];
+
+        for (let j = 0; j < dialogueNode.outgoingLines.length; j++) {
+            let line = dialogueNode.outgoingLines[j];
+            line.fromNode = idMapping[line.fromNode];
+            line.toNode = idMapping[line.toNode];
+        }
+    }
+
+    return gameDialogueMakerProject;
+}
+
+// Generate a function that starts IDs from any number
+function generateNewIdFunction(start) {
+    let nextId = start;
+    return function(oldId) {
+        let newId = nextId;
+        nextId++;
+        return newId;
+    }
 }

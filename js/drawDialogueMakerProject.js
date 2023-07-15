@@ -805,6 +805,8 @@ if (dialogueNodeInMaster) {
         //what should then happen with the numbering to avoid clashes?
         //should also check if its an answer, because answer should only connect to questions
 
+          console.log(`dialogueFromNodeInOnbject: `, dialogueFromNodeInObject);
+
         let newParentCharacterID = findCharacterIDByPassingInDialogueNode(
           dialogueFromNodeInObject
         );
@@ -835,21 +837,29 @@ if (dialogueNodeInMaster) {
 
           if (objectNodeFromWhichWeAreDrawing) {
 
+            console.log(`about to get the max node id, the character is: ` , gameDialogueMakerProject.characters[newParentCharacterID-1]);
 
             highestIdInNewParent = getMaxDialogueNodeId(
               gameDialogueMakerProject.characters[newParentCharacterID-1]
             );
 
-            objectNodeFromWhichWeAreDrawing.dialogueID =
-              highestIdInNewParent + 1;
+            //set the id of the node that gets reparented
+            objectNodeFromWhichWeAreDrawing.dialogueID = highestIdInNewParent + 1;
 
+            console.log(`should remove the node next, the array now before removing looks like this`, ...gameDialogueMakerProject.characters[lineCharacterId-1].dialogueNodes);
+
+            // Remove the object from the first array
               gameDialogueMakerProject.characters[lineCharacterId-1].dialogueNodes =
               gameDialogueMakerProject.characters[lineCharacterId-1].dialogueNodes.filter(
                 (obj) => obj !== objectNodeFromWhichWeAreDrawing
-              ); // Remove the object from the first array
+              ); 
+
+              console.log(`should have removed the node, the array now looks like this`, ...gameDialogueMakerProject.characters[lineCharacterId-1].dialogueNodes);
+
+              // Add the object to the second array
               gameDialogueMakerProject.characters[newParentCharacterID-1].dialogueNodes.push(
               objectNodeFromWhichWeAreDrawing
-            ); // Add the object to the second array
+            ); 
           }
 
           //to do:
@@ -860,7 +870,7 @@ if (dialogueNodeInMaster) {
           objectNodeFromWhichWeAreDrawing.dialogueNodeX = 0;
           objectNodeFromWhichWeAreDrawing.dialogueNodeY = 200;
 
-          //recreate line(s)
+          //recreate line(s), draws a a line from the new parent to the new child
 
           dialogueFromNodeInObject.outgoingLines.push({
             fromNode: dialogueFromNodeInObject.dialogueID,
@@ -876,6 +886,26 @@ if (dialogueNodeInMaster) {
           for (let node of iterateConnectedNodes(startNode)) {
               // Perform further manipulation on each node (move or delete)
               console.log(node);
+              console.log(`newParentCharacterID: ${newParentCharacterID}`);
+
+              // Remove the object from the first array
+              gameDialogueMakerProject.characters[lineCharacterId-1].dialogueNodes =
+              gameDialogueMakerProject.characters[lineCharacterId-1].dialogueNodes.filter(
+                (obj) => obj !== node
+              ); 
+
+              // Add the object to the second array
+              gameDialogueMakerProject.characters[newParentCharacterID-1].dialogueNodes.push(
+                node
+            );
+
+            //change the id of the node
+              // Generate newIdFunction
+            let newIdFunction = generateNewIdFunction(highestIdInNewParent+2);
+
+            // Update gameDialogueMakerProject
+            gameDialogueMakerProject = updateDialogueIds(gameDialogueMakerProject, 0, newIdFunction);
+
           }
           //we will also have to update the objects toNode and fromNode outgoingLine information to match the new numbering
 
