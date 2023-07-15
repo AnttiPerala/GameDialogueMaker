@@ -887,7 +887,12 @@ if (dialogueNodeInMaster) {
           });
 
           //we should loop through all nodes that are connected to the node that got a new parent:
-          traverseConnectedNodes(objectNodeFromWhichWeAreDrawing); //this still needs work
+          // Example usage:
+          const startNode = gameDialogueMakerProject.characters[0].dialogueNodes[0];
+          for (let node of iterateConnectedNodes(startNode)) {
+              // Perform further manipulation on each node (move or delete)
+              console.log(node);
+          }
           //we will also have to update the objects toNode and fromNode outgoingLine information to match the new numbering
 
         } //end else (change in parent)

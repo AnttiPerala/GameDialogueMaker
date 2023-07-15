@@ -319,34 +319,23 @@ function deleteLineFromObject(gameDialogueMakerProject, characterId, fromNodeVal
 
 //TRAVERSE ALL NODES CONNECTED TO A NODE WITH LINES
 
-function traverseConnectedNodes(dialogueNode, visitedNodes = new Set()) {
+function* iterateConnectedNodes(dialogueNode, visitedNodes = new Set()) { //* makes it a generator function
     visitedNodes.add(dialogueNode.dialogueID);
-  
-    console.log(`Processing dialogueNode ${dialogueNode.dialogueID}`);
-  
+
+    yield dialogueNode; // Yield the current dialogueNode
+
     for (let outgoingLine of dialogueNode.outgoingLines) {
         const toNode = gameDialogueMakerProject.characters[0].dialogueNodes.find(node => node.dialogueID === outgoingLine.toNode);
-      
+
         if (!visitedNodes.has(toNode.dialogueID)) {
-            traverseConnectedNodes(toNode, visitedNodes);
-        }
-    }
-  
-    for (let childNode of gameDialogueMakerProject.characters[0].dialogueNodes) {
-        if (visitedNodes.has(childNode.dialogueID)) continue;
-      
-        for (let outgoingLine of childNode.outgoingLines) {
-            const toNode = gameDialogueMakerProject.characters[0].dialogueNodes.find(node => node.dialogueID === outgoingLine.toNode);
-          
-            if (visitedNodes.has(toNode.dialogueID)) {
-                // Perform actions on the childNode or its connected grandchildren here
-                console.log(`Processing childNode ${childNode.dialogueID}`);
-                console.log(`Connected toNode ${toNode.dialogueID}`);
-            }
+            yield* iterateConnectedNodes(toNode, visitedNodes); // Recursively yield connected nodes
         }
     }
 }
 
 // Example usage:
 const startNode = gameDialogueMakerProject.characters[0].dialogueNodes[0];
-traverseConnectedNodes(startNode);
+for (let node of iterateConnectedNodes(startNode)) {
+    // Perform further manipulation on each node (move or delete)
+    console.log(node);
+}
