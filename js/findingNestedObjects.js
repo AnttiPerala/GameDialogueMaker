@@ -432,3 +432,17 @@ function generateNewIdFunction(start) {
         return newId;
     }
 }
+
+//USE FIND ONLY TO A RECURSION LIMIT
+
+jQuery.fn.findWithDepth = function(selector, maxDepth) {
+    var depths = [], i, elements = jQuery();
+    if(maxDepth > 0){
+        for(i = 0; i < maxDepth; i++) {
+            depths = i === 0 ? this.children() : depths.children();
+            elements = elements.add(depths.filter(selector));
+        }
+    }
+    return elements;
+};
+

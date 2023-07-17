@@ -250,12 +250,15 @@ jQuery(document).on('change', '.answerNumber', function () {
     //remove all plus buttons
     let blockWrap = jQuery(this).closest('.blockWrap');
     
-    blockWrap.find('.blockPlusButton').remove();
+    blockWrap.findWithDepth('.blockPlusButton', 3).remove(); //here we should only remove the immediate children
 
     for (let i = 0; i < selectedValue; i++) {
+
+        let newPlusButton = $(`<div class="blockPlusButton" data-buttonindex=${i} data-acceptclicks=true>+</div>`);
         //append more plus buttons
-        jQuery(this).closest('.blockWrap').find('.plusButtonContainer').first().append(`<div class="blockPlusButton" data-buttonindex=${i} data-acceptclicks=true>+</div>`);
-        
+        jQuery(this).closest('.blockWrap').find('.plusButtonContainer').first().append(newPlusButton);
+        //need to turn connected plus buttons gray
+        checkIfPlusButtonShouldBeTurnedOff(newPlusButton);
     }
 
     //when the number is lowered, we need to delete the blocks connected to the deleted plus buttons:
