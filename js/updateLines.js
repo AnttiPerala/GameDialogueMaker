@@ -4,7 +4,10 @@ let allConnectedLines;
 //when the mainArea is dragged or an update for all lines is needed for some reason
 function updateAllLines() {
 
-    if (!eraseMode) {
+    if (eraseMode){
+        return;
+    }
+
         
         gameDialogueMakerProject.characters.forEach((character) => {
 
@@ -43,7 +46,7 @@ function updateAllLines() {
         });
         //$('svg').css({ 'zoom': zoomValue + '%' }); //also change the lines zoom
         
-    }//end if eraseMode
+   
     
 
 }
@@ -52,13 +55,11 @@ function updateLines(element) { //element is the dragged node dom element
 
     //console.log(` Hello from updateLines`);
 
-    if (!eraseMode){
+    if (eraseMode){
+        return;
+    }
 
         $(".conditionCircle").hide();
-
-        //myLog('calling updateLines', 1, fileInfo = getFileInfo());
-
-        //myLog(('element id: ' + element.attr('id')), 1, fileInfo = getFileInfo());
 
         //scoping
 
@@ -135,6 +136,7 @@ function updateLines(element) { //element is the dragged node dom element
                    
                 }
 
+                //for the dotted line
                 if (node.nextNode !== undefined && node.nextNode > 0) {
                     node.nextNodeLineElem.position();
                 }
@@ -169,10 +171,7 @@ function updateLines(element) { //element is the dragged node dom element
             e.get(0).position();
         })
 
-
-    }//end if erasemode
-
-    
+ 
 
 }
 
