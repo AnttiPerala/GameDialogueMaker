@@ -8,27 +8,38 @@ function updateAllLines() {
         
         gameDialogueMakerProject.characters.forEach((character) => {
 
-            //all lines of character nodes
-            character.outgoingLines.forEach((outgoingLine) => {
-                const lineElem = outgoingLine.lineElem;
+               //only do this is the eye symbol is open and the children are not hidden
 
-                // check if lineElem is an instance of LeaderLine
-                if (lineElem instanceof LeaderLine) {
-                    lineElem.position(); // call the position function on the instance
-                } else {
-                    console.error('lineElem is not an instance of LeaderLine');
+       if (character.hideChildren == true){
+        console.log(`inside updateLines, character.hideChildren: ${character.hideChildren}`);
+        
+      } else {
+
+           //all lines of character nodes
+           character.outgoingLines.forEach((outgoingLine) => {
+            const lineElem = outgoingLine.lineElem;
+
+            // check if lineElem is an instance of LeaderLine
+            if (lineElem instanceof LeaderLine) {
+                lineElem.position(); // call the position function on the instance
+            } else {
+                console.error('lineElem is not an instance of LeaderLine');
+            }
+        });
+
+        //all lines of regular dialogue nodes
+        character.dialogueNodes.forEach((dialogueNode) => {
+            dialogueNode.outgoingLines.forEach((outgoingLine) => {
+                const lineElem = outgoingLine.lineElem;
+                if(lineElem && typeof lineElem.position === 'function') {
+                    lineElem.position(); //LeaderLine function call
                 }
             });
+        });
 
-            //all lines of regular dialogue nodes
-            character.dialogueNodes.forEach((dialogueNode) => {
-                dialogueNode.outgoingLines.forEach((outgoingLine) => {
-                    const lineElem = outgoingLine.lineElem;
-                    if(lineElem && typeof lineElem.position === 'function') {
-                        lineElem.position(); //LeaderLine function call
-                    }
-                });
-            });
+      }//end else (character.hideChildren was not on)
+
+         
         });
         //$('svg').css({ 'zoom': zoomValue + '%' }); //also change the lines zoom
         
@@ -100,8 +111,14 @@ function updateLines(element) { //element is the dragged node dom element
             // Start iterating from dialogueID 2
             startIndex = characterToLoop.dialogueNodes.findIndex(d => d.dialogueID == justTheIdNumberForParent);
 
-                    // Iterate until the last node
+        // Iterate until the last node
         for (let i = startIndex; i < characterToLoop.dialogueNodes.length; i++) {
+
+            if (characterToLoop.hideChildren == true){
+                console.log(`inside updateLines, character.hideChildren: ${characterToLoop.hideChildren}`);
+                break;
+            }
+
             let node = characterToLoop.dialogueNodes[i];
             // Do something with the node
             //if not null, loop through each line
