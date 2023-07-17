@@ -358,22 +358,20 @@ function deleteLineFromObject(gameDialogueMakerProject, characterId, fromNodeVal
 
 //TRAVERSE ALL NODES CONNECTED TO A NODE WITH LINES
 
-//note that this also yields back the original passed in dialogueNode
-
-function* iterateConnectedNodes(dialogueNode, characterId, visitedNodes = new Set()) {
-    if (!dialogueNode || !dialogueNode.dialogueID) {
-        console.log("Invalid dialogueNode:", dialogueNode);
+function* iterateConnectedNodes(startNode, characterId, visitedNodes = new Set()) {
+    if (!startNode || !startNode.dialogueID) {
+        console.log("Invalid startNode:", startNode);
         return;
     }
 
-    visitedNodes.add(dialogueNode.dialogueID);
+    visitedNodes.add(startNode.dialogueID);
 
-    console.log("Visiting dialogueNode:", dialogueNode);
+    console.log("Visiting startNode:", startNode);
 
-    yield dialogueNode;
+    yield startNode;
 
-    for (let outgoingLine of dialogueNode.outgoingLines) {
-        const character = gameDialogueMakerProject.characters.find(char => char.characterID === characterId);
+    for (let outgoingLine of startNode.outgoingLines) {
+        const character = gameDialogueMakerProject.characters[characterId];
         const toNode = character.dialogueNodes.find(node => node.dialogueID === outgoingLine.toNode);
 
         if (toNode && !visitedNodes.has(toNode.dialogueID)) {
@@ -384,6 +382,14 @@ function* iterateConnectedNodes(dialogueNode, characterId, visitedNodes = new Se
 }
 
 
+
+// Example usage:
+const startNode = gameDialogueMakerProject.characters[0].dialogueNodes[0];
+
+for (let node of iterateConnectedNodes(startNode)) {
+    // Perform further manipulation on each node (move or delete)
+    console.log(node);
+}
 
   
 
@@ -419,26 +425,39 @@ function findCharacterIDByPassingInDialogueNode(dialogueNode) {
 
 //UPDATE THE DIALOGUE ID's WHILE MAINTAINING THE CORRECT LINE RELATIONSHIPS
 
-function updateDialogueIds(dialogueNode, newIdFunction, idMapping = {}) {
-    let oldId = dialogueNode.dialogueID;
-    let newId = newIdFunction(oldId);
+function updateDialogueIds(gameDialogueMakerProject, characterIndex, newIdFunction) {
+    let character = gameDialogueMakerProject.characters[characterIndex];
+    let idMapping = {};
 
-    console.log(`Updating dialogueID from ${oldId} to ${newId}`);
+    // First pass: update all dialogueID's and build the idMapping
+    for (let i = 0; i < character.dialogueNodes.length; i++) {
+        let dialogueNode = character.dialogueNodes[i];
+        let oldId = dialogueNode.dialogueID;
+        let newId = newIdFunction(oldId);
 
-    idMapping[oldId] = newId;
-    dialogueNode.dialogueID = newId;
+        console.log(`Updating dialogueID from ${oldId} to ${newId}`);
 
-    for (let j = 0; j < dialogueNode.outgoingLines.length; j++) {
-        let line = dialogueNode.outgoingLines[j];
-        line.fromNode = idMapping[line.fromNode] || line.fromNode;
-        line.toNode = idMapping[line.toNode] || line.toNode;
+        idMapping[oldId] = newId;
+        dialogueNode.dialogueID = newId;
+    }
 
-        console.log(`Updated outgoingLine ${j}: fromNode - ${line.fromNode}, toNode - ${line.toNode}`);
+    // Second pass: update all the fromNode and toNode ids in outgoingLines
+    for (let i = 0; i < character.dialogueNodes.length; i++) {
+        let dialogueNode = character.dialogueNodes[i];
+
+        for (let j = 0; j < dialogueNode.outgoingLines.length; j++) {
+            let line = dialogueNode.outgoingLines[j];
+            line.fromNode = idMapping[line.fromNode];
+            line.toNode = idMapping[line.toNode];
+
+            console.log(`Updated outgoingLine ${j}: fromNode - ${line.fromNode}, toNode - ${line.toNode}`);
+        }
     }
 
     console.log('Dialogue ID update completed');
-}
 
+    return gameDialogueMakerProject;
+}
 
 // Generate a function that starts IDs from any number
 function generateNewIdFunction(start) {
@@ -463,41 +482,21 @@ jQuery.fn.findWithDepth = function(selector, maxDepth) {
     return elements;
 };
 
-//DEEP CLONE
-
-function deepClone(obj, domMap = new Map()) {
-    if (obj === null || typeof obj !== 'object' || 'isActiveClone' in obj || obj instanceof HTMLElement || obj instanceof SVGElement)
-        return obj;
-
-    let temp;
-
-    if (obj instanceof Date)
-        temp = new obj.constructor(); // or new Date(obj);
-    else
-        temp = {};
-
-    for (let key in obj) {
-        if (Object.prototype.hasOwnProperty.call(obj, key)) {
-            obj['isActiveClone'] = null;
-            temp[key] = deepClone(obj[key], domMap);
-            delete obj['isActiveClone'];
-        }
+function reparentNodeAndDescendants(node, oldParentId, newParentId, highestIdInNewParent) {
+    let newIdFunction = generateNewIdFunction(highestIdInNewParent + 1);
+    
+    // Iterate over all descendants of the node.
+    for (let child of iterateConnectedNodes(node, oldParentId)) {
+      // Change the parent of the descendant.
+      child.dialogueID = newIdFunction();
+  
+      // Remove the descendant from the original parent's array.
+      gameDialogueMakerProject.characters[oldParentId - 1].dialogueNodes =
+        gameDialogueMakerProject.characters[oldParentId - 1].dialogueNodes.filter(
+          (obj) => obj !== child
+        );
+  
+      // Add the descendant to the new parent's array.
+      gameDialogueMakerProject.characters[newParentId - 1].dialogueNodes.push(child);
     }
-
-    if (temp.hasOwnProperty('dialogueID')) {
-        const dialogueID = temp.dialogueID;
-        console.log(`Object: ${obj}, dialogueID: ${dialogueID}`); // debug line
-        domMap.set(dialogueID, $(`#dialogue${dialogueID}`));
-    }
-
-    return temp;
-}
-
-
-
-// Usage:
-let domMap = new Map();
-let clone = deepClone(originalObject, domMap);
-
-// Now, domMap contains a mapping from dialogueID to DOM elements
-// You can use this map to recreate the DOM elements in the cloned nodes.
+  }
