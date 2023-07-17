@@ -827,6 +827,13 @@ function drawDialogueMakerProject() {
 let highestIdInNewParent = getMaxDialogueNodeId(gameDialogueMakerProject.characters[newParentCharacterID-1]);
 reparentNodeAndDescendants(objectNodeFromWhichWeAreDrawing, lineCharacterId, newParentCharacterID, highestIdInNewParent);
 
+dialogueFromNodeInObject.outgoingLines.push({
+  fromNode: dialogueFromNodeInObject.dialogueID,
+  fromSocket: 0,
+  toNode: objectNodeFromWhichWeAreDrawing.dialogueID,
+  lineElem: "",
+  transitionConditions: [],
+});
 
            /* let highestIdInNewParent;
 

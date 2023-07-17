@@ -425,39 +425,20 @@ function findCharacterIDByPassingInDialogueNode(dialogueNode) {
 
 //UPDATE THE DIALOGUE ID's WHILE MAINTAINING THE CORRECT LINE RELATIONSHIPS
 
-function updateDialogueIds(gameDialogueMakerProject, characterIndex, newIdFunction) {
-    let character = gameDialogueMakerProject.characters[characterIndex];
-    let idMapping = {};
+function updateDialogueIds(dialogueNode, newIdFunction) {
+    // Change the dialogueNode's ID
+    let oldId = dialogueNode.dialogueID;
+    dialogueNode.dialogueID = newIdFunction(oldId);
 
-    // First pass: update all dialogueID's and build the idMapping
-    for (let i = 0; i < character.dialogueNodes.length; i++) {
-        let dialogueNode = character.dialogueNodes[i];
-        let oldId = dialogueNode.dialogueID;
-        let newId = newIdFunction(oldId);
-
-        console.log(`Updating dialogueID from ${oldId} to ${newId}`);
-
-        idMapping[oldId] = newId;
-        dialogueNode.dialogueID = newId;
-    }
-
-    // Second pass: update all the fromNode and toNode ids in outgoingLines
-    for (let i = 0; i < character.dialogueNodes.length; i++) {
-        let dialogueNode = character.dialogueNodes[i];
-
-        for (let j = 0; j < dialogueNode.outgoingLines.length; j++) {
-            let line = dialogueNode.outgoingLines[j];
-            line.fromNode = idMapping[line.fromNode];
-            line.toNode = idMapping[line.toNode];
-
-            console.log(`Updated outgoingLine ${j}: fromNode - ${line.fromNode}, toNode - ${line.toNode}`);
+    // Change the IDs in the outgoingLines
+    for (let line of dialogueNode.outgoingLines) {
+        line.fromNode = dialogueNode.dialogueID;
+        if (line.toNode === oldId) {
+            line.toNode = dialogueNode.dialogueID;
         }
     }
-
-    console.log('Dialogue ID update completed');
-
-    return gameDialogueMakerProject;
 }
+
 
 // Generate a function that starts IDs from any number
 function generateNewIdFunction(start) {
@@ -482,21 +463,33 @@ jQuery.fn.findWithDepth = function(selector, maxDepth) {
     return elements;
 };
 
-function reparentNodeAndDescendants(node, oldParentId, newParentId, highestIdInNewParent) {
+function reparentNodeAndDescendants(objectNodeFromWhichWeAreDrawing, lineCharacterId, newParentCharacterID) {
+    // Get all connected nodes
+    const startNode = objectNodeFromWhichWeAreDrawing;
+    const nodesToMove = Array.from(iterateConnectedNodes(startNode, lineCharacterId - 1)); // Collect all nodes to move
+
+    // Find the highest ID in the new parent's nodes
+    let highestIdInNewParent = getMaxDialogueNodeId(
+        gameDialogueMakerProject.characters[newParentCharacterID - 1]
+    );
+
     let newIdFunction = generateNewIdFunction(highestIdInNewParent + 1);
-    
-    // Iterate over all descendants of the node.
-    for (let child of iterateConnectedNodes(node, oldParentId)) {
-      // Change the parent of the descendant.
-      child.dialogueID = newIdFunction();
-  
-      // Remove the descendant from the original parent's array.
-      gameDialogueMakerProject.characters[oldParentId - 1].dialogueNodes =
-        gameDialogueMakerProject.characters[oldParentId - 1].dialogueNodes.filter(
-          (obj) => obj !== child
-        );
-  
-      // Add the descendant to the new parent's array.
-      gameDialogueMakerProject.characters[newParentId - 1].dialogueNodes.push(child);
+
+    for (let node of nodesToMove) {
+        // Remove the node from the first array
+        gameDialogueMakerProject.characters[lineCharacterId - 1].dialogueNodes =
+            gameDialogueMakerProject.characters[lineCharacterId - 1].dialogueNodes.filter(
+                (obj) => obj !== node
+            );
+
+        // Update node's ID
+        updateDialogueIds(node, newIdFunction);
+
+        node.dialogueNodeX = 10;
+        node.dialogueNodeY = 10;
+        // Add the updated node to the second array
+        gameDialogueMakerProject.characters[newParentCharacterID - 1].dialogueNodes.push(node);
+
     }
-  }
+}
+
