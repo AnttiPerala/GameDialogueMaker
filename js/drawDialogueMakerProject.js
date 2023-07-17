@@ -822,104 +822,61 @@ function drawDialogueMakerProject() {
         } else {
           //change in parent
 
-           let highestIdInNewParent;
+           let highestIdInNewParent = 0;
 
-           
-          //to do: all the child nodes of the moved node should be moved as well, and their numbers changed and their lines adjusted to match with the new numbers
-          //to do: transition conditions?
-
-          if (objectNodeFromWhichWeAreDrawing) {
+           highestIdInNewParent = getMaxDialogueNodeId(
+            gameDialogueMakerProject.characters[newParentCharacterID-1]
+          );
 
          
-
-
-
-
-            console.log(`about to get the max node id, the character is: ` , gameDialogueMakerProject.characters[newParentCharacterID-1]);
-
-            highestIdInNewParent = getMaxDialogueNodeId(
-              gameDialogueMakerProject.characters[newParentCharacterID-1]
-            );
-
-            //set the id of the node that gets reparented
-            objectNodeFromWhichWeAreDrawing.dialogueID = highestIdInNewParent + 1;
-
-            console.log(`should remove the node with text ${objectNodeFromWhichWeAreDrawing.dialogueText} next, the array now before removing looks like this`, ...gameDialogueMakerProject.characters[lineCharacterId-1].dialogueNodes);
-
-            // Remove the object from the first array
-              gameDialogueMakerProject.characters[lineCharacterId-1].dialogueNodes =
-              gameDialogueMakerProject.characters[lineCharacterId-1].dialogueNodes.filter(
-                (obj) => obj !== objectNodeFromWhichWeAreDrawing
-              ); 
-
-              console.log(`should have removed the node with text ${objectNodeFromWhichWeAreDrawing.dialogueText}, the array now looks like this`, ...gameDialogueMakerProject.characters[lineCharacterId-1].dialogueNodes);
-
-              // Add the object to the second array
-              gameDialogueMakerProject.characters[newParentCharacterID-1].dialogueNodes.push(
-              objectNodeFromWhichWeAreDrawing
-            ); 
-          }
-
-          //to do:
-          //looks like we need to convert the x and y position of the node somehow to adapt to the new parent it gets
-          //repositionElementAfterChangeInParent($($elementUnderCursor).closest('.blockWrap'), dialogueNodeInObject.nodeElement);
-
-          //let's see what happens if we just zero the coordinates:
-          objectNodeFromWhichWeAreDrawing.dialogueNodeX = 0;
-          objectNodeFromWhichWeAreDrawing.dialogueNodeY = 200;
-
-          //recreate line(s), draws a a line from the new parent to the new child
-
-          dialogueFromNodeInObject.outgoingLines.push({
-            fromNode: dialogueFromNodeInObject.dialogueID,
-            fromSocket: plusButtonIndexToAttachTo,
-            toNode: highestIdInNewParent + 1,
-            lineElem: "",
-            transitionConditions: [],
-          }); 
-
-        
           //we should loop through all nodes that are connected to the node that got a new parent:
           // but first lets check if it has outgoingLines or not to know if it's even necessary
 
-          if (objectNodeFromWhichWeAreDrawing.outgoingLines.length > 0){
-
+          if (objectNodeFromWhichWeAreDrawing.outgoingLines.length > 0) {
             console.log(`the dialogueNode had ${objectNodeFromWhichWeAreDrawing.outgoingLines.length} outgoingLines`);
+    
+            const startNode = gameDialogueMakerProject.characters[newParentCharacterID - 1].dialogueNodes[dialogueFromNodeInObject.dialogueID - 1];
+            const nodesToMove = Array.from(iterateConnectedNodes(startNode, newParentCharacterID - 1)); // Collect all nodes to move
+    
+            let newIdFunction = generateNewIdFunction(highestIdInNewParent + 2);
 
-            const startNode = gameDialogueMakerProject.characters[newParentCharacterID-1].dialogueNodes[dialogueFromNodeInObject.dialogueID-1];
-          for (let node of iterateConnectedNodes(startNode)) {
-              // Perform further manipulation on each node (move or delete)
-              console.log(node);
-              console.log(`newParentCharacterID: ${newParentCharacterID}`);
-
-              // Remove the object from the first array
-              gameDialogueMakerProject.characters[lineCharacterId-1].dialogueNodes =
-              gameDialogueMakerProject.characters[lineCharacterId-1].dialogueNodes.filter(
-                (obj) => obj !== node
-              ); 
-
-              // Add the object to the second array
-              gameDialogueMakerProject.characters[newParentCharacterID-1].dialogueNodes.push(
-                node
-            );
-
-            //change the id of the node
-              // Generate newIdFunction
-            let newIdFunction = generateNewIdFunction(highestIdInNewParent+2);
-
-            // Update gameDialogueMakerProject
-            gameDialogueMakerProject = updateDialogueIds(gameDialogueMakerProject, 0, newIdFunction);
-
+            // Store the clones temporarily
+            let clones = [];
+            
+            for (let node of nodesToMove) {
+                // Clone the node first
+                let clonedNode = JSON.parse(JSON.stringify(node));
+                // Remove the HTML references from the clone
+                clonedNode.nodeElement = null;
+                clonedNode.nextNodeLineElem = null;
+                for (let outgoingLine of clonedNode.outgoingLines) {
+                    outgoingLine.lineElem = null;
+                }
+                // Update the IDs in the clone
+                updateDialogueIds(clonedNode, newIdFunction);
+                // Store the clone
+                clones.push(clonedNode);
+            }
+            
+            // Now remove the originals and add the clones
+            for (let node of nodesToMove) {
+                // Remove the original node from the first array
+                gameDialogueMakerProject.characters[lineCharacterId - 1].dialogueNodes =
+                    gameDialogueMakerProject.characters[lineCharacterId - 1].dialogueNodes.filter(
+                        (obj) => obj !== node
+                    );
+            }
+            
+            for (let clonedNode of clones) {
+                // Add the cloned and updated node to the second array
+                gameDialogueMakerProject.characters[newParentCharacterID - 1].dialogueNodes.push(clonedNode);
+            }
+            
+            
+        // we will also have to update the objects toNode and fromNode outgoingLine information to match the new numbering
           }
-          //we will also have to update the objects toNode and fromNode outgoingLine information to match the new numbering
 
-
-          }
-
-          
-
-
-        } //end else (change in parent)
+    } //end else (change in parent)
       }//end if (line)
 
       // Stop updating the line
