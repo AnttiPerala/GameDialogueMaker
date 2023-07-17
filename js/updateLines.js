@@ -124,9 +124,15 @@ function updateLines(element) { //element is the dragged node dom element
             //if not null, loop through each line
             if (node) {
                 for (let i = 0; i < node.outgoingLines.length; i++) {
-                    let line = node.outgoingLines[i];
-                    //console.log('should update linelem next, elem is: ' + line);
-                    line.lineElem.position();
+                    /* let line = node.outgoingLines[i];
+                     // Check if the element is in the DOM
+                    if(document.body.contains(line.lineElem[0])) { //make it regular DOM node
+                        // update lines here
+                        line.lineElem.position();
+                    } else {
+                        console.warn("Attempting to update line for element not in DOM. Line.lineElem was ", line.lineElem );
+                    } */
+                   
                 }
 
                 if (node.nextNode !== undefined && node.nextNode > 0) {
