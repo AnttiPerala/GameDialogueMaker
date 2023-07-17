@@ -247,7 +247,19 @@ jQuery(document).on('change', '.answerNumber', function () {
 
     const selectedValue = $(this).val();
 
-    //remove all plus buttons
+    let dialogueNodeToUpdate = findDialogueObjectBasedOnPassedInHtmlElement(this);
+
+    dialogueNodeToUpdate.outgoingSockets = $(this).val();
+
+    //check for situation in which there are less plus buttons than outgoing lines and simply remove the last line
+    if(dialogueNodeToUpdate.outgoingLines.length > dialogueNodeToUpdate.outgoingSockets) {
+        dialogueNodeToUpdate.outgoingLines.splice( dialogueNodeToUpdate.outgoingSockets);
+    }
+
+    clearCanvasBeforeReDraw();
+    drawDialogueMakerProject();
+
+/*     //remove all plus buttons
     let blockWrap = jQuery(this).closest('.blockWrap');
     
     blockWrap.findWithDepth('.blockPlusButton', 3).remove(); //here we should only remove the immediate children
@@ -255,15 +267,24 @@ jQuery(document).on('change', '.answerNumber', function () {
     for (let i = 0; i < selectedValue; i++) {
 
         let newPlusButton = $(`<div class="blockPlusButton" data-buttonindex=${i} data-acceptclicks=true>+</div>`);
+        
+        let theDialogueElementInDOM = jQuery(this).closest('.blockWrap');
+
+        let theDialogueElementInObject = findMatchingDialogueNodeInObjectFromPassedInBlockwrap(theDialogueElementInDOM); 
+        
         //append more plus buttons
-        jQuery(this).closest('.blockWrap').find('.plusButtonContainer').first().append(newPlusButton);
+        theDialogueElementInDOM.find('.plusButtonContainer').first().append(newPlusButton);
+
+        theDialogueElementInObject.nodeElement.find('.plusButtonContainer').first().append(newPlusButton);
+        
+        
         //need to turn connected plus buttons gray
         checkIfPlusButtonShouldBeTurnedOff(newPlusButton);
-    }
+    } */
 
     //when the number is lowered, we need to delete the blocks connected to the deleted plus buttons:
 
-    $(blockWrap).find('.line').each(function (index) {
+    /* $(blockWrap).find('.line').each(function (index) {
 
        //console.log(`this.attr("data-block2") ${$(this).attr("data-block2")}`);
 
@@ -288,10 +309,9 @@ jQuery(document).on('change', '.answerNumber', function () {
 
         }
         
-    });
+    }); */
 
-    }
-)
+ }); //end onchange answernumber
 
 
 //TYPE IN THE CHARACTER NAME FIELD

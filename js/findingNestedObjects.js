@@ -168,6 +168,41 @@ function getLineObjectFromMasterObjectUsingFromAndTo(fromNode, toNode) {
     return foundLine;
 }
 
+//FIND LINE START AND END OBJECTS FROM LINE ELEMENT
+function getLineAnchorHTMLElementsFromLine(line) {
+    // Convert the start and end elements to jQuery objects
+    let $start = $(line.start);
+    let $end = $(line.end);
+
+    // Ensure the start element is a plusButton and the end element has the class 'topConnectionSocket'
+    if ($start.is('.blobkPlusButton') && $end.is('.topConnectionSocket')) {
+        return { start: $start, end: $end };
+    } else {
+        console.warn("Line start and end elements do not match expected classes. start was ", $start);
+        console.warn("Line end was ", $end);
+        return null;
+    }
+}
+
+//GET MATCHING OBJECT ELEMENT BASED ON PASSED IN BLOCKWRAP
+function findMatchingDialogueNodeInObjectFromPassedInBlockwrap(blockWrap) {
+    // Iterate over all characters
+    for(let character of gameDialogueMakerProject.characters) {
+        // Iterate over all dialogueNodes of the current character
+        for(let dialogueNode of character.dialogueNodes) {
+            // Compare the nodeElement of the dialogueNode with the provided blockWrap
+            if(dialogueNode.nodeElement.is(blockWrap)) {
+                // If they match, return the dialogueNode
+                return dialogueNode;
+            }
+        }
+    }
+
+    // If no matching dialogueNode was found, return null
+    return null;
+}
+
+
 //check if its a number like value
 
 function checkIfNumberLike(myinput){
