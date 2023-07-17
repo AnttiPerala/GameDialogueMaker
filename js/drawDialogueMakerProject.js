@@ -6,7 +6,10 @@ function drawDialogueMakerProject() {
 
   //loop through each character
   for (let i = 0; i < gameDialogueMakerProject.characters.length; i++) {
-    //console.log(gameDialogueMakerProject.characters[i].characterName);
+    console.log(gameDialogueMakerProject.characters[i].characterName);
+
+    console.log(`Processing character ${i} with hideChildren: ${gameDialogueMakerProject.characters[i].hideChildren}`);
+
 
     let currI = gameDialogueMakerProject.characters[i];
     /* Creating the character roots here  */
@@ -71,6 +74,7 @@ function drawDialogueMakerProject() {
        //only do this is the eye symbol is open and the children are not hidden
 
        if (gameDialogueMakerProject.characters[i].hideChildren == true){
+        console.log(`gameDialogueMakerProject.characters[${i}].hideChildren: ${gameDialogueMakerProject.characters[i].hideChildren}`);
         break;
       }
 
@@ -226,7 +230,14 @@ function drawDialogueMakerProject() {
 
     for (let c = 0; c < gameDialogueMakerProject.characters[i].outgoingLines.length; c++) {
 
-        let currLine = gameDialogueMakerProject.characters[i].outgoingLines[c]; //line we are handling currently
+         //only do this is the eye symbol is open and the children are not hidden
+
+         if (gameDialogueMakerProject.characters[i].hideChildren == true){
+          console.log(`gameDialogueMakerProject.characters[${i}].hideChildren: ${gameDialogueMakerProject.characters[i].hideChildren}`);
+          break;
+        }
+          
+      let currLine = gameDialogueMakerProject.characters[i].outgoingLines[c]; //line we are handling currently
 
         
         //find current line end node id
@@ -354,6 +365,13 @@ function drawDialogueMakerProject() {
 
     if (gameDialogueMakerProject.characters[i].dialogueNodes) {
       for (let j = 0;j < gameDialogueMakerProject.characters[i].dialogueNodes.length;j++) {
+
+           //only do this is the eye symbol is open and the children are not hidden
+
+       if (gameDialogueMakerProject.characters[i].hideChildren == true){
+        console.log(`gameDialogueMakerProject.characters[${i}].hideChildren: ${gameDialogueMakerProject.characters[i].hideChildren}`);
+        break;
+      }
 
         let currentDialogueNode =
           gameDialogueMakerProject.characters[i].dialogueNodes[j];
