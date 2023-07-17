@@ -4,10 +4,7 @@ let allConnectedLines;
 //when the mainArea is dragged or an update for all lines is needed for some reason
 function updateAllLines() {
 
-    if (eraseMode){
-        return;
-    }
-
+    if (!eraseMode) {
         
         gameDialogueMakerProject.characters.forEach((character) => {
 
@@ -46,7 +43,7 @@ function updateAllLines() {
         });
         //$('svg').css({ 'zoom': zoomValue + '%' }); //also change the lines zoom
         
-   
+    }//end if eraseMode
     
 
 }
@@ -55,11 +52,13 @@ function updateLines(element) { //element is the dragged node dom element
 
     //console.log(` Hello from updateLines`);
 
-    if (eraseMode){
-        return;
-    }
+    if (!eraseMode){
 
         $(".conditionCircle").hide();
+
+        //myLog('calling updateLines', 1, fileInfo = getFileInfo());
+
+        //myLog(('element id: ' + element.attr('id')), 1, fileInfo = getFileInfo());
 
         //scoping
 
@@ -125,18 +124,11 @@ function updateLines(element) { //element is the dragged node dom element
             //if not null, loop through each line
             if (node) {
                 for (let i = 0; i < node.outgoingLines.length; i++) {
-                    /* let line = node.outgoingLines[i];
-                     // Check if the element is in the DOM
-                    if(document.body.contains(line.lineElem[0])) { //make it regular DOM node
-                        // update lines here
-                        line.lineElem.position();
-                    } else {
-                        console.warn("Attempting to update line for element not in DOM. Line.lineElem was ", line.lineElem );
-                    } */
-                   
+                    let line = node.outgoingLines[i];
+                    //console.log('should update linelem next, elem is: ' + line);
+                    line.lineElem.position();
                 }
 
-                //for the dotted line
                 if (node.nextNode !== undefined && node.nextNode > 0) {
                     node.nextNodeLineElem.position();
                 }
@@ -171,7 +163,10 @@ function updateLines(element) { //element is the dragged node dom element
             e.get(0).position();
         })
 
- 
+
+    }//end if erasemode
+
+    
 
 }
 
