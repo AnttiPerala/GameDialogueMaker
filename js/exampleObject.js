@@ -6,6 +6,7 @@ let gameDialogueMakerProject = {
         characterID: 1,
         characterNodeX: 271,
         characterNodeY: 85,
+        hideChildren: false,
         bgColor: '#4b4b4b',
         nodeElement: $('<div class="blockWrap characterRoot"></div>'),
         outgoingLines: [

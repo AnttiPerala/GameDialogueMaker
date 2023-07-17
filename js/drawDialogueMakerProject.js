@@ -20,6 +20,18 @@ function drawDialogueMakerProject() {
       currI.nodeElement = $('<div class="blockWrap characterRoot"></div>');
     }
 
+    let eyeImageSource;
+    //closed or open eye:
+    if (currI.hideChildren == false){
+
+      eyeImageSource = 'img/iconmonstr-eye-filled-32.png'
+
+    } else {
+
+      eyeImageSource = 'img/iconmonstr-eye-off-filled-32.png'
+
+    }
+
     //have to define here to make a new element on each iteration:
     let characterNodeHTML = $(`
             <div class="contentWrap">
@@ -30,7 +42,7 @@ function drawDialogueMakerProject() {
                         <div class="characterElementIDLine" style="text-align: left;">
                             <span style="width: 35%; display:inline-block; text-align: right;">Character ID:</span><input class="blockid"
                                 style="width: 15%; display:inline-block;" readonly type="number">
-                                <img class="eyeImage" src="img/iconmonstr-eye-filled-32.png" alt="eye" width="24" height="24">
+                                <img class="eyeImage" src="${eyeImageSource}" alt="eye" width="24" height="24">
                         </div>
                         <input type="text" class="characterName elementInfoField" placeholder="character name">
               
@@ -55,6 +67,12 @@ function drawDialogueMakerProject() {
 
     //loop through all dialogue nodes of a character
     for (let j = 0;j < gameDialogueMakerProject.characters[i].dialogueNodes.length;j++) {
+
+       //only do this is the eye symbol is open and the children are not hidden
+
+       if (gameDialogueMakerProject.characters[i].hideChildren == true){
+        break;
+      }
 
       //console.log(gameDialogueMakerProject.characters[i].dialogueNodes[j].dialogueText);
       //append the dialogue node to the previous dialogue node. But if it's a answer node, maybe it needs to be appended to the closest question node.
@@ -328,7 +346,9 @@ function drawDialogueMakerProject() {
 
 
 
-    //NOW LOOP THROUGH DIALOGUE NODES AND THEIR LINES
+    //NOW LOOP THROUGH DIALOGUE NODES AND THEIR LINES for the purpose of drawing lines
+
+   
 
     //loop through all dialogue nodes of a character
 

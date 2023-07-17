@@ -11,6 +11,7 @@ $('.plus').on('click', function () {
         characterNodeX: 271 * (charactersSoFar + 1),
         characterNodeY: 85,
         bgColor: '#4b4b4b',
+        hideChildren: false,
         nodeElement: $('<div class="blockWrap characterRoot"></div>'),
         outgoingLines: [
            
