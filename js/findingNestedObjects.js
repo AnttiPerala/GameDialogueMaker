@@ -485,8 +485,8 @@ function reparentNodeAndDescendants(objectNodeFromWhichWeAreDrawing, lineCharact
         // Update node's ID
         updateDialogueIds(node, newIdFunction);
 
-        node.dialogueNodeX = 10;
-        node.dialogueNodeY = 10;
+        //node.dialogueNodeX = 10;
+        //node.dialogueNodeY = 10;
         // Add the updated node to the second array
         gameDialogueMakerProject.characters[newParentCharacterID - 1].dialogueNodes.push(node);
 
