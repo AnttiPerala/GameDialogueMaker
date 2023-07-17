@@ -34,7 +34,12 @@ $(document).mousedown(function () {
 
 //SELECT BLOCKS BY CLICKING ON THEM
 
-$('body').on('mousedown', '.block', function () {
+$('body').on('mousedown', '.block', function (event) {
+
+    //quit immediately if the eye image was clicked since that shouldn affect selection
+    if ($(event.target).hasClass('eyeImage')) {
+        return; // Don't do anything if the event was triggered on the .eyeImage
+    }
 
     if (!eraseMode && !cloneMode) { //not erasing and the clonebrush is not active
 

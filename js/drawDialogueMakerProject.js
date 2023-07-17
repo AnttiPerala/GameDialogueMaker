@@ -27,9 +27,10 @@ function drawDialogueMakerProject() {
           
                 </div>
                     <div class="block">
-                        <div style="text-align: left;">
+                        <div class="characterElementIDLine" style="text-align: left;">
                             <span style="width: 35%; display:inline-block; text-align: right;">Character ID:</span><input class="blockid"
                                 style="width: 15%; display:inline-block;" readonly type="number">
+                                <img class="eyeImage" src="img/iconmonstr-eye-filled-32.png" alt="eye" width="24" height="24">
                         </div>
                         <input type="text" class="characterName elementInfoField" placeholder="character name">
               

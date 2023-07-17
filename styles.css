@@ -161,6 +161,15 @@ body {
     margin-right: auto;
 }
 
+.characterElementIDLine{
+       display: flex;
+ 
+}
+
+.eyeImage {
+    margin-left: auto; /* needs flex in parent */
+}
+
 .block .optionsUnderDialogue input{
     width: 2.5rem;
 }
