@@ -85,6 +85,8 @@ body {
     border: 4px solid #0075ff;
 }
 
+
+
 .blockWrap {
 
 
@@ -126,7 +128,16 @@ body {
     justify-content: center;
     align-items: center;
     position: relative;
-        
+    transition: background-color 0.3s ease, transform 0.3s ease; /* This will make the change smoothly */
+
+}
+
+.blockPlusButton:not(.no-clicks):hover {
+    /* Style on mouse hover */
+    background-color: #b2cfff; /* A slightly different color on hover */
+    transform: scale(1.05); /* Slightly larger on hover */
+    cursor: pointer; /* Change the cursor to a hand on hover */
+    color: #4b4b4b;
 }
 
 .disabled{
@@ -267,6 +278,14 @@ textarea {
     position: absolute;
     transform: translate(-50%, -50%);
 
+}
+
+.conditionCircle:hover {
+    /* Style on mouse hover */
+    transform: translate(-50%, -50%) scale(1.1); /* Slightly larger on hover */
+    cursor: pointer; /* Change the cursor to a hand on hover */
+    top: 50%;
+    left: 50%;
 }
 
 .conditionCircle.withCondition{

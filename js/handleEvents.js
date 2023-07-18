@@ -481,12 +481,12 @@ jQuery(document).on('click', '.conditionCircle', function () {
         <h3>Add a condition for the transition</h3>
         <input type="text" class="variableName elementInfoField" placeholder="Variable name to check" value="${variableName}">
         <select class="comparisonOperator">
-            <option value="&lt;">&lt;</option>
-            <option value="&gt;">&gt;</option>
-            <option value="=">=</option>
-            <option value="!=">!=</option>
-            <option value="&gt;=">&gt;=</option>
-            <option value="&lt;=">&lt;=</option>
+            <option value="=">= Equal</option>
+            <option value="!=">!= Not equal</option>
+            <option value="&lt;">&lt; Less than</option>
+            <option value="&gt;">&gt; Greater than</option>
+            <option value="&gt;=">&gt;= Greater or equal</option>
+            <option value="&lt;=">&lt;= Less or equal</option>
         </select>
         <input type="text" class="variableValue elementInfoField" placeholder="Variable value" value="${variableValue}">
         <button class="okTransition">ADD</button>
