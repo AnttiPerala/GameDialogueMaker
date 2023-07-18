@@ -465,6 +465,7 @@ function reparentNodeAndDescendants(startNode, oldParentId, newParentId, nextId,
     const newIdFunction = function(oldId) {
         let newId = nextId;
         oldToNewIds[oldId] = newId;
+        console.log(`nextId: ${nextId}`);
         nextId++;
         return newId;
     };
