@@ -423,6 +423,11 @@ function findCharacterIDByPassingInDialogueNode(dialogueNode) {
 //UPDATE THE DIALOGUE ID's WHILE MAINTAINING THE CORRECT LINE RELATIONSHIPS
 
 function updateDialogueIds(node, newIdFunction, oldToNewIds) {
+    // Assign a new ID to the node
+    let oldId = node.dialogueID;
+    let newId = newIdFunction(oldId);
+    node.dialogueID = newId;
+
     for (let line of node.outgoingLines) {
         // Update fromNode and toNode based on the oldToNewIds mapping
         if (oldToNewIds.hasOwnProperty(line.fromNode)) {
@@ -461,35 +466,47 @@ jQuery.fn.findWithDepth = function(selector, maxDepth) {
 };
 
 function reparentNodeAndDescendants(startNode, oldParentId, newParentId, nextId, gameDialogueMakerProject) {
+    // This will hold the mapping from old IDs to new IDs
     const oldToNewIds = {};
-    const newIdFunction = function(oldId) {
-        let newId = nextId;
-        oldToNewIds[oldId] = newId;
-        console.log(`nextId: ${nextId}`);
-        nextId++;
-        return newId;
-    };
+
+    // This will temporarily hold the nodes to be transferred
+    let tempArray = [];
 
     // Find the parent characters
     const oldParent = gameDialogueMakerProject.characters.find(character => character.characterID == oldParentId);
     const newParent = gameDialogueMakerProject.characters.find(character => character.characterID == newParentId);
 
-    // Create an array to temporarily hold the nodes to be transferred
-    let tempArray = [];
-
-    // Iterate through connected nodes
+    // First, generate new IDs for all the nodes and build the oldToNewIds mapping
     for (let dialogueNode of iterateConnectedNodes(startNode, oldParentId)) {
         // Remove the node from the old parent's dialogueNodes array
         oldParent.dialogueNodes = oldParent.dialogueNodes.filter(node => node.dialogueID !== dialogueNode.dialogueID);
 
-        // Update the dialogueID for the node and its outgoingLines
-        updateDialogueIds(dialogueNode, newIdFunction, oldToNewIds);
+        // Assign a new ID to the node and save the mapping from the old ID to the new ID
+        let oldId = dialogueNode.dialogueID;
+        let newId = nextId++;
+        oldToNewIds[oldId] = newId;
 
         // Push the node to the tempArray
         tempArray.push(dialogueNode);
     }
 
-    // After all nodes are processed, append them to the new parent's dialogueNodes
+    // Now, go through the nodes again and update their IDs and their outgoing lines
+    for (let dialogueNode of tempArray) {
+        // Update the node's ID
+        dialogueNode.dialogueID = oldToNewIds[dialogueNode.dialogueID];
+
+        // Update the node's outgoing lines
+        for (let line of dialogueNode.outgoingLines) {
+            if (oldToNewIds.hasOwnProperty(line.fromNode)) {
+                line.fromNode = oldToNewIds[line.fromNode];
+            }
+            if (oldToNewIds.hasOwnProperty(line.toNode)) {
+                line.toNode = oldToNewIds[line.toNode];
+            }
+        }
+    }
+
+    // Finally, append the nodes to the new parent's dialogueNodes
     newParent.dialogueNodes = newParent.dialogueNodes.concat(tempArray);
 }
 
