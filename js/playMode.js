@@ -9,6 +9,11 @@ function startPlayMode() {
     playModeActive = true;
     //get the selected node
     let selectedElement = $('.selected');
+
+    if (selectedElement.length == 0){
+        drawDialogueBox('You need to select the node from which you want to start the playback first (by clicking on it)')
+    }
+
     let selectedElementBlockWrap = selectedElement.closest('.blockWrap');
 
     let startNodeInObject = findMatchingDialogueNodeInObjectFromPassedInBlockwrap(selectedElementBlockWrap);

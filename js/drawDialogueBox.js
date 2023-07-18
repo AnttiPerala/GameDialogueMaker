@@ -25,8 +25,13 @@ function drawDialogueBox(message){
             dialogueBox.classList.add('dialogue-box-fade-out');
             setTimeout(() => {
                 dialogueBox.remove();
-            }, 1000);
+            }, 3000);
         }, 5000);
     }
 
 }
+
+$(document).on('click', '.dialogue-box', function() {
+    // put your logic here
+    $(this).remove();
+  });
