@@ -1,130 +1,186 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Game Dialogue Maker</title>
-    <style>
+   <head>
+      <meta charset="UTF-8">
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Game Dialogue Maker</title>
+      <style>
+         @font-face {
+         font-family: 'Rajdhani-Bold';
+         src: url('fonts/Rajdhani-Bold.ttf') format('truetype');
+         font-weight: bold;
+         font-style: normal;
+         }
+         body{
+         font-family: 'Rajdhani-Bold', sans-serif;
+         }
+         .container {
+         display: grid;
+         grid-template-columns: repeat(3, 1fr);
+         gap: 0.4vw;
+         width: 70vw;
+         }
+         .box{
+         padding: 1vw;
+         background: linear-gradient(deepskyblue, rgb(69, 209, 255));
+         border-radius: 0.2rem;
+         font-size: 1.4rem;
+         text-align: center;
+         }
+         .wrap{
+         display: flex;
+         align-items: center;
+         justify-content: center;
+         min-height: 95vh;
+         }
+         .iconWrap{
+         display: flex;
+         justify-content: center;
+         }
+         .iconWrap img {
+         margin: 1rem 0.5rem;
+         }
+         .container h1{
+         grid-column: span 3;
+         text-align: center;
+         color: deepskyblue;
+         font-size: 3rem;
+         }
+         .article{
+         margin-top: 8rem;
+         grid-column: span 3;
+         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+         padding: 1rem 20vw;
+         }
+         .articleHeading{
+         text-align: center;
+         color: black;
+         }
+         .articleHeading h1{
+         text-align: center;
+         color: black;
+         }
+         h1 a:visited {
+         color: deepskyblue;
+         }
+         a:hover {
+         text-decoration: underline;
+         }
+         a {
+         text-decoration: none;
+         color: black;
+         }
+         /* SCALE ICONS */
+         .box .iconWrap img {
+         transition: transform 0.5s; /* animate the scaling */
+         }
+         .box:hover .iconWrap img {
+         transform: scale(1.2); /* scale up to 1.5 times the original size */
+         }
 
-        @font-face {
-            font-family: 'Rajdhani-Bold';
-            src: url('fonts/Rajdhani-Bold.ttf') format('truetype');
-            font-weight: bold;
-            font-style: normal;
-            
-        }
-
-        body{
-            font-family: 'Rajdhani-Bold', sans-serif;
-        }
-
-        .container {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 0.4vw;
-            width: 70vw;
-        }
-        .box{
-            padding: 1vw;
-            background: linear-gradient(deepskyblue, rgb(69, 209, 255));
-            border-radius: 0.2rem;
-            font-size: 1.4rem;
-            text-align: center;
-        }
-        .wrap{
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            min-height: 95vh;
-        }
-        .iconWrap{
-            display: flex;
-            justify-content: center;
-        }
-
-        .iconWrap img {
-            margin: 1rem 0.5rem;
-
-        }
-
-        .container h1{
-            grid-column: span 3;
-            text-align: center;
-            color: deepskyblue;
-            font-size: 3rem;
-        }
-
-        .article{
-            margin-top: 8rem;
-            grid-column: span 3;
+         footer {
+            min-height: 20vh;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            padding: 1rem 10vw;
-        }
-
-        .articleHeading{
-            text-align: center;
-            color: black;
-        }
-
-        .articleHeading h1{
-            text-align: center;
-            color: black;
-        }
-
-        h1 a:visited {
-            color: deepskyblue;
-        }
-
-        a:hover {
-            text-decoration: underline;
-            
-        }
-
-        a {
-            text-decoration: none;
-            color: black;
-        }
-
-        /* SCALE ICONS */
-
-        .box .iconWrap img {
-            transition: transform 0.5s; /* animate the scaling */
-        }
-
-        .box:hover .iconWrap img {
-            transform: scale(1.2); /* scale up to 1.5 times the original size */
-        }
-
-
-    </style>
-</head>
-<body>
-    <div class="wrap">
-        
-        <div class="container">
-                <h1><a href="index.html">Game Dialogue Maker</a></h1>
-                <div class="box"><div class="iconWrap"><img src="img/about/iconmonstr-code-fork-1-64.png"></div><a href="https://ecation.fi/gameDialogueMaker/">  Create branching dialogues easily</a></div>
-                <div class="box"><div class="iconWrap"><img src="img/about/iconmonstr-control-panel-6-64.png"></div> Add conditions to transitions between dialogues</div>
-                <div class="box"><div class="iconWrap"><img src="img/about/iconmonstr-log-out-18-64.png"></div> Export in the universally supported JSON format</div>
-                <div class="box"><div class="iconWrap"><img src="img/about/iconmonstr-windows-os-5-64.png"><img src="img/about/iconmonstr-apple-os-5-64.png"><img src="img/about/iconmonstr-linux-os-5-64.png"><img src="img/about/iconmonstr-android-os-5-64.png"></div>Works on Windows, Mac, Linux, Android</div>
-                <div class="box"><div class="iconWrap"><img src="img/about/iconmonstr-video-15-64.png"></div>Test in Play Mode</div>
-                <div class="box"><a href="https://github.com/AnttiPerala/GameDialogueMaker"><div class="iconWrap"><img src="img/about/iconmonstr-lock-14-64.png"></div>Open source</a></div>
-                <div class="box"><div class="iconWrap"><img src="img/about/iconmonstr-code-4-64.png"></div>Extend easily with JavaScript</div>
-                <div class="box"><a href="https://github.com/AnttiPerala/GameDialogueMaker"><div class="iconWrap"><img src="img/about/iconmonstr-idea-1-64.png"></div>Simply download files and open index.html in browser</a></div>
-                <div class="box"><div class="iconWrap"><img src="img/about/iconmonstr-credit-card-12-64.png"></div>Free forever</div>
-                <div class="box"><div class="iconWrap"><img src="img/about/iconmonstr-cloud-25-64.png"><img src="img/about/iconmonstr-cloud-10-64.png"></div><a href="https://ecation.fi/gameDialogueMaker/">Use online</a> <a href="https://github.com/AnttiPerala/GameDialogueMaker">or offline</a></div>
-                <div class="box"><div class="iconWrap"><img src="img/about/iconmonstr-save-14-64.png"></div>Saves automatically</div>
-                <div class="box"><div class="iconWrap"><img src="img/about/iconmonstr-gamepad-3-64.png"></div>Import to your game engine</div>
-                
-                <div class="article">
-
-                    <div class="articleHeading"><h1>GameDialogueMaker:</h1><h2>A Pioneering Tool for Immersive Game Narratives</h2> </div><p>In an era where interactive games are no longer limited to the exploration of virtual landscapes but extend to deep, meaningful conversations with Non-Player Characters (NPCs), there's an ever-growing need for effective and efficient game dialogue tools. Game developers, both amateur and professional, often look for solutions that offer ease of use, adaptability, and cost-effectiveness. GameDialogueMaker emerges as a groundbreaking tool in this domain, promising to enrich the gaming experience with its impressive features.</p><h2>Ease of Branching Dialogues</h2><p>Crafting intricate narrative webs with multiple dialogue branches has never been simpler. GameDialogueMaker excels in enabling creators to build complex and engaging dialogues effortlessly. You can orchestrate intricate exchanges between player characters and NPCs, leading to various outcomes based on player choices, thereby adding layers of depth to your game narratives.</p><h2>Conditions for Transitions</h2><p>GameDialogueMaker is not only about creating dialogues but also about effectively managing the transitions between them. Adding conditions to dialogue transitions lets you create an engaging and dynamic narrative. This feature allows for the seamless integration of dialogues into the game's progress, where certain dialogues may only become available with specific conditions or achievements.</p><h2>Universal Support and Easy Export</h2><p>An essential feature of GameDialogueMaker is its universal compatibility, supporting Windows, Mac, Linux, and Android. Whether you're a Linux loyalist or a Windows enthusiast, this tool caters to every platform. Additionally, GameDialogueMaker allows users to export their creations in the universally supported JSON format. This feature facilitates easy incorporation of your dialogue system into your game, regardless of the game engine you're using.</p><h2>User-Friendly Features</h2><p>GameDialogueMaker is designed to be as user-friendly as possible. The application includes a 'Play Mode' feature to test your dialogues in real-time, providing instant feedback. It's an invaluable tool for refining the quality and impact of your dialogues. Additionally, the application saves your work automatically, ensuring no creative input is lost.</p><h2>Easy Access and Offline Mode</h2><p>Getting started with GameDialogueMaker couldn't be simpler. Users simply download the files and open the index.html in a browser to launch the application. No complex setup or installation is required. Moreover, GameDialogueMaker can be used both online and offline, making it the perfect companion for game developers, regardless of their internet connectivity situation.</p><h2>Open Source and Extendable</h2><p>GameDialogueMaker is an open-source tool, reflecting the spirit of collaborative development. Developers around the globe can contribute to its enhancement, report issues, and propose fixes. Additionally, the tool supports extensions with JavaScript. Thus, users can easily add more functionalities according to their specific needs, making it a highly flexible and adaptable tool.</p><h2>Forever Free</h2><p>Lastly, but importantly, GameDialogueMaker is free. There are no hidden costs, no premium versions, and no limited trial periods. Developers can use all the tool's features to their heart's content without worrying about costs. This tool embodies the idea that advanced, professional tools should be accessible to everyone, regardless of their financial situation.</p><h2>Conclusion</h2><p>GameDialogueMaker is a comprehensive dialogue creation tool, providing a platform where complex narratives come to life. Its rich features, easy accessibility, adaptability, and cost-effectiveness make it an invaluable asset for any game developer looking to create immersive and interactive game narratives. Whether you're a beginner just dipping your toes into the world of game development or a seasoned pro, Game Dialogue Maker offers something for everyone.</p></div>
-
-                </div>
+            background: linear-gradient(deepskyblue, rgb(69, 209, 255));
+            grid-column: span 3;
+            margin-top: 10vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+         }
+      </style>
+   </head>
+   <body>
+      <div class="wrap">
+         <div class="container">
+            <h1><a href="index.html">Game Dialogue Maker</a></h1>
+            <div class="box">
+               <div class="iconWrap"><img src="img/about/iconmonstr-code-fork-1-64.png"></div>
+               <a href="https://ecation.fi/gameDialogueMaker/">  Create branching dialogues easily</a>
             </div>
-
+            <div class="box">
+               <div class="iconWrap"><img src="img/about/iconmonstr-control-panel-6-64.png"></div>
+               Add conditions to transitions between dialogues
+            </div>
+            <div class="box">
+               <div class="iconWrap"><img src="img/about/iconmonstr-log-out-18-64.png"></div>
+               Export in the universally supported JSON format
+            </div>
+            <div class="box">
+               <div class="iconWrap"><img src="img/about/iconmonstr-windows-os-5-64.png"><img src="img/about/iconmonstr-apple-os-5-64.png"><img src="img/about/iconmonstr-linux-os-5-64.png"><img src="img/about/iconmonstr-android-os-5-64.png"></div>
+               Works on Windows, Mac, Linux, Android
+            </div>
+            <div class="box">
+               <div class="iconWrap"><img src="img/about/iconmonstr-video-15-64.png"></div>
+               Test in Play Mode
+            </div>
+            <div class="box">
+               <a href="https://github.com/AnttiPerala/GameDialogueMaker">
+                  <div class="iconWrap"><img src="img/about/iconmonstr-lock-14-64.png"></div>
+                  Open source
+               </a>
+            </div>
+            <div class="box">
+               <div class="iconWrap"><img src="img/about/iconmonstr-code-4-64.png"></div>
+               Extend easily with JavaScript
+            </div>
+            <div class="box">
+               <a href="https://github.com/AnttiPerala/GameDialogueMaker">
+                  <div class="iconWrap"><img src="img/about/iconmonstr-idea-1-64.png"></div>
+                  Simply download files and open index.html in browser
+               </a>
+            </div>
+            <div class="box">
+                <a href="#foreverfree">
+                    <div class="iconWrap"><img src="img/about/iconmonstr-credit-card-12-64.png"></div>
+                    Free forever
+                </a>
+            </div>
+            <div class="box">
+               <div class="iconWrap"><img src="img/about/iconmonstr-cloud-25-64.png"><img src="img/about/iconmonstr-cloud-10-64.png"></div>
+               <a href="https://ecation.fi/gameDialogueMaker/">Use online</a> <a href="https://github.com/AnttiPerala/GameDialogueMaker">or offline</a>
+            </div>
+            <div class="box">
+               <div class="iconWrap"><img src="img/about/iconmonstr-save-14-64.png"></div>
+               Saves automatically
+            </div>
+            <div class="box">
+               <div class="iconWrap"><img src="img/about/iconmonstr-gamepad-3-64.png"></div>
+               Import to your game engine
+            </div>
+            <div class="article">
+               <div class="articleHeading">
+                  <h1>GameDialogueMaker:</h1>
+                  <h2>A Pioneering Tool for Immersive Game Narratives</h2>
+               </div>
+               <p>In an era where interactive games are no longer limited to the exploration of virtual landscapes but extend to deep, meaningful conversations with Non-Player Characters (NPCs), there's an ever-growing need for effective and efficient game dialogue tools. Game developers, both amateur and professional, often look for solutions that offer ease of use, adaptability, and cost-effectiveness. GameDialogueMaker emerges as a groundbreaking tool in this domain, promising to enrich the gaming experience with its impressive features.</p>
+               <h2>Ease of Branching Dialogues</h2>
+               <p>Crafting intricate narrative webs with multiple dialogue branches has never been simpler. GameDialogueMaker excels in enabling creators to build complex and engaging dialogues effortlessly. You can orchestrate intricate exchanges between player characters and NPCs, leading to various outcomes based on player choices, thereby adding layers of depth to your game narratives.</p>
+               <h2>Conditions for Transitions</h2>
+               <p>GameDialogueMaker is not only about creating dialogues but also about effectively managing the transitions between them. Adding conditions to dialogue transitions lets you create an engaging and dynamic narrative. This feature allows for the seamless integration of dialogues into the game's progress, where certain dialogues may only become available with specific conditions or achievements.</p>
+               <h2>Universal Support and Easy Export</h2>
+               <p>An essential feature of GameDialogueMaker is its universal compatibility, supporting Windows, Mac, Linux, and Android. Whether you're a Linux loyalist or a Windows enthusiast, this tool caters to every platform. Additionally, GameDialogueMaker allows users to export their creations in the universally supported JSON format. This feature facilitates easy incorporation of your dialogue system into your game, regardless of the game engine you're using.</p>
+               <h2>User-Friendly Features</h2>
+               <p>GameDialogueMaker is designed to be as user-friendly as possible. The application includes a 'Play Mode' feature to test your dialogues in real-time, providing instant feedback. It's an invaluable tool for refining the quality and impact of your dialogues. Additionally, the application saves your work automatically, ensuring no creative input is lost.</p>
+               <h2>Easy Access and Offline Mode</h2>
+               <p>Getting started with GameDialogueMaker couldn't be simpler. Users simply download the files and open the index.html in a browser to launch the application. No complex setup or installation is required. Moreover, GameDialogueMaker can be used both online and offline, making it the perfect companion for game developers, regardless of their internet connectivity situation.</p>
+               <h2>Open Source and Extendable</h2>
+               <p>GameDialogueMaker is an open-source tool, reflecting the spirit of collaborative development. Developers around the globe can contribute to its enhancement, report issues, and propose fixes. Additionally, the tool supports extensions with JavaScript. Thus, users can easily add more functionalities according to their specific needs, making it a highly flexible and adaptable tool.</p>
+               <h2 id="foreverfree">Forever Free</h2>
+               <p>Lastly, but importantly, GameDialogueMaker is free. There are no hidden costs, no premium versions, and no limited trial periods. Developers can use all the tool's features to their heart's content without worrying about costs. This tool embodies the idea that advanced, professional tools should be accessible to everyone, regardless of their financial situation.</p>
+               <h2>Conclusion</h2>
+               <p>GameDialogueMaker is a comprehensive dialogue creation tool, providing a platform where complex narratives come to life. Its rich features, easy accessibility, adaptability, and cost-effectiveness make it an invaluable asset for any game developer looking to create immersive and interactive game narratives. Whether you're a beginner just dipping your toes into the world of game development or a seasoned pro, Game Dialogue Maker offers something for everyone.</p>
+            </div>
+            <footer>
+                <p>Ecation Finland</p>
+                <a href="https://ecation.fi/gameDialogueMaker/"><p>https://ecation.fi/gameDialogueMaker/</p></a>
+                <a href="https://github.com/AnttiPerala/GameDialogueMaker"><p>https://github.com/AnttiPerala/GameDialogueMaker</p></a>
+              </footer> 
+        </div>
+         
+      </div>
   
-    
-</body>
+   </body>
 </html>
