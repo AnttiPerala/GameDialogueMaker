@@ -245,7 +245,7 @@ body {
 
 #ui {
     display: grid;
-    grid-template-columns: 2fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
+    grid-template-columns: 2fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     font-size: 0.9rem;
     width: 70vw;
@@ -258,6 +258,21 @@ body {
 .uiElem:hover img {
     filter: grayscale(0);
 
+}
+
+.uiElem:hover {
+    color: #ffffff; /* Your desired color */
+}
+
+.uiElemTitle {
+    margin: 1rem 2rem;
+}
+
+.uiElem {
+    display: flex;
+    align-items: center;
+    justify-content: end;
+    flex-direction: column;
 }
 
 textarea {

@@ -10,6 +10,7 @@ let selectedColor;
 let lineCharacterId;
 let lineFromNodeId;
 let lineToNodeId;
+let playModeActive = false;
 
 
 //the master object is called gameDialogueMakerProject

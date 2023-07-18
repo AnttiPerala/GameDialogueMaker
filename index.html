@@ -43,43 +43,48 @@
                 <input type="range" min="25" max="1000" value="200" name="blocksize" id="blocksize">
             </div> -->
             <div class="uiElem">
-                <p title="Zoom the canvas">ZOOM</p>
+                <p class="uiElemTitle" title="Zoom the canvas">ZOOM</p>
                 <input type="range" min="1" max="200" value="100" name="zoomAmount" id="zoomAmount">
             </div>
             <div class="uiElem">
-                <p title="Change the color of the selected element">PICK COLOR</p>
+                <p class="uiElemTitle" title="Change the color of the selected element">PICK COLOR</p>
                 <input type="color" id="blockColor" name="blockColor" value="#DC143C">
             </div>
             <div id="stylebrush" class="uiElem">
-                <p title="Copy the style of the selected element to other elements by clicking on them with this tool">
+                <p class="uiElemTitle" title="Copy the style of the selected element to other elements by clicking on them with this tool">
                     CLONE STYLE</p>
                 <img src="img/iconmonstr-paintbrush-3-64.png" width="32px" alt="">
             </div>
+            <div id="playMode" class="uiElem">
+                <p class="uiElemTitle" title="Start playback from selected node.">
+                    PLAY MODE</p>
+                <img src="img/iconmonstr-video-15-32.png" width="32px" alt="">
+            </div>
             <div id="eraser" class="uiElem">
-                <p title="Erase blocks or lines by clicking on them with this tool">ERASE</p>
+                <p class="uiElemTitle" title="Erase blocks or lines by clicking on them with this tool">ERASE</p>
                 <img src="img/iconmonstr-eraser-1-48.png" width="32" alt="">
             </div>
             <div id="save" class="uiElem">
-                <p title="Save the mindmap to browser localstorage so that a page refresh won't delete it">SAVE PAGE</p>
+                <p class="uiElemTitle" title="Save the mindmap to browser localstorage so that a page refresh won't delete it">SAVE PAGE</p>
                 <img src="img/iconmonstr-save-3-32.png" width="32" alt="">
             </div>
             <div id="delete" class="uiElem">
-                <p title="Delete the saved mindmap from localstorage.">DELETE SAVE</p>
+                <p class="uiElemTitle" title="Delete the saved mindmap from localstorage.">DELETE SAVE</p>
                 <img src="img/iconmonstr-x-mark-6-32.png" width="32" alt="">
             </div>
 
             <div id="export" class="uiElem">
-                <p title="Export the data in JSON format">EXPORT JSON</p>
+                <p class="uiElemTitle" title="Export the data in JSON format">EXPORT JSON</p>
                 <img src="img/iconmonstr-log-out-18-32.png" width="32" alt="">
             </div>
 
             <div id="openFile" class="uiElem">
-                <p title="Open previously exported JSON file">OPEN JSON</p>
+                <p class="uiElemTitle" title="Open previously exported JSON file">OPEN JSON</p>
                 <img src="img/iconmonstr-folder-20-32.png" width="32" alt="">
             </div>
 
             <div id="showManual" class="uiElem">
-                <p title="Show the instruction manual">OPEN MANUAL</p>
+                <p class="uiElemTitle" title="Show the instruction manual">OPEN MANUAL</p>
                 <img src="img/iconmonstr-book-11-32.png" width="32" alt="">
             </div>
 
@@ -123,6 +128,14 @@
             <p>Adding line breaks in the text are of the node will separate those into different dialogues in Construct,
                 meaning that they will be displayed separately one-by-one. That way you can make sure large texts fit
                 the dialogue box design of your game. </p>
+
+                <h3>Known bugs:</h3>
+                <ul>
+      
+                    <li></li>
+                
+
+                </ul>
 
                 <h3>Important info for developers:</h3>
                 <ul>
@@ -195,6 +208,7 @@
     <script src="js/repositionElementAfterChangeInParent.js"></script>
     <script src="js/hideAndShowElementTree.js"></script>
     <script src="js/checkIfPlusButtonShouldBeTurnedOff.js"></script>
+    <script src="js/playMode.js"></script>
 
 
     
