@@ -15,6 +15,10 @@ function startPlayMode() {
 
     alert(startNodeInObject.dialogueText);
 
+    let dialogueContainer = $(`
+    
+    `);
+
     currentNode = startNode; // Assuming startNode is your starting node
     renderNode(currentNode);
 }
