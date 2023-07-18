@@ -238,7 +238,7 @@ function getCharacterNameFromDialogueNode(dialogueNode) {
         // Iterate over dialogueNodes
         for (let node of character.dialogueNodes) {
           // Check if the dialogueNode matches the provided dialogueNode
-          if (node === dialogueNode) {
+          if (node == dialogueNode) {
             characterName = character.characterName;
             break;  // Exit the loop early since we found a match
           }
@@ -368,11 +368,16 @@ function* iterateConnectedNodes(startNode, characterId, visitedNodes = new Set()
 
     console.log("Visiting startNode:", startNode);
 
+    let theCharid = findCharacterIDByPassingInDialogueNode(startNode);
+
     yield startNode;
 
     for (let outgoingLine of startNode.outgoingLines) {
-        const character = gameDialogueMakerProject.characters[characterId];
-        const toNode = character.dialogueNodes.find(node => node.dialogueID === outgoingLine.toNode);
+        const character = gameDialogueMakerProject.characters.find(character => character.characterID == theCharid);
+        const toNode = character.dialogueNodes.find(node => node.dialogueID == outgoingLine.toNode);
+
+        console.log("Outgoing line from ", startNode.dialogueID, " to ", outgoingLine.toNode);
+        console.log("Found toNode: ", toNode);
 
         if (toNode && !visitedNodes.has(toNode.dialogueID)) {
             console.log("Traversing toNode:", toNode);
@@ -382,14 +387,6 @@ function* iterateConnectedNodes(startNode, characterId, visitedNodes = new Set()
 }
 
 
-
-// Example usage:
-const startNode = gameDialogueMakerProject.characters[0].dialogueNodes[0];
-
-for (let node of iterateConnectedNodes(startNode)) {
-    // Perform further manipulation on each node (move or delete)
-    console.log(node);
-}
 
   
 
@@ -408,7 +405,7 @@ function findCharacterIDByPassingInDialogueNode(dialogueNode) {
             // Iterate through all dialogueNodes of the current character
             for (let node of character.dialogueNodes) {
                 // If the current node is the same object instance as the input dialogueNode
-                if (typeof node === 'object' && node === dialogueNode) {
+                if (typeof node == 'object' && node == dialogueNode) {
                     console.log('Found characterID by matching dialogueNode:', character.characterID);
                     return character.characterID;
                 }
@@ -425,19 +422,19 @@ function findCharacterIDByPassingInDialogueNode(dialogueNode) {
 
 //UPDATE THE DIALOGUE ID's WHILE MAINTAINING THE CORRECT LINE RELATIONSHIPS
 
-function updateDialogueIds(dialogueNode, newIdFunction) {
-    // Change the dialogueNode's ID
-    let oldId = dialogueNode.dialogueID;
-    dialogueNode.dialogueID = newIdFunction(oldId);
-
-    // Change the IDs in the outgoingLines
-    for (let line of dialogueNode.outgoingLines) {
-        line.fromNode = dialogueNode.dialogueID;
-        if (line.toNode === oldId) {
-            line.toNode = dialogueNode.dialogueID;
+function updateDialogueIds(node, newIdFunction, oldToNewIds) {
+    for (let line of node.outgoingLines) {
+        // Update fromNode and toNode based on the oldToNewIds mapping
+        if (oldToNewIds.hasOwnProperty(line.fromNode)) {
+            line.fromNode = oldToNewIds[line.fromNode];
+        }
+        if (oldToNewIds.hasOwnProperty(line.toNode)) {
+            line.toNode = oldToNewIds[line.toNode];
         }
     }
 }
+
+
 
 
 // Generate a function that starts IDs from any number
@@ -464,8 +461,10 @@ jQuery.fn.findWithDepth = function(selector, maxDepth) {
 };
 
 function reparentNodeAndDescendants(startNode, oldParentId, newParentId, nextId, gameDialogueMakerProject) {
+    const oldToNewIds = {};
     const newIdFunction = function(oldId) {
         let newId = nextId;
+        oldToNewIds[oldId] = newId;
         nextId++;
         return newId;
     };
@@ -474,8 +473,8 @@ function reparentNodeAndDescendants(startNode, oldParentId, newParentId, nextId,
     const oldParent = gameDialogueMakerProject.characters.find(character => character.characterID == oldParentId);
     const newParent = gameDialogueMakerProject.characters.find(character => character.characterID == newParentId);
 
-    // Find the index of the last child of the new parent
-    let insertIndex = newParent.dialogueNodes.length > 0 ? newParent.dialogueNodes.length : 0;
+    // Create an array to temporarily hold the nodes to be transferred
+    let tempArray = [];
 
     // Iterate through connected nodes
     for (let dialogueNode of iterateConnectedNodes(startNode, oldParentId)) {
@@ -483,12 +482,14 @@ function reparentNodeAndDescendants(startNode, oldParentId, newParentId, nextId,
         oldParent.dialogueNodes = oldParent.dialogueNodes.filter(node => node.dialogueID !== dialogueNode.dialogueID);
 
         // Update the dialogueID for the node and its outgoingLines
-        updateDialogueIds(dialogueNode, newIdFunction);
+        updateDialogueIds(dialogueNode, newIdFunction, oldToNewIds);
 
-        // Insert the node at the appropriate position in the new parent's dialogueNodes array
-        newParent.dialogueNodes.splice(insertIndex, 0, dialogueNode);
-        insertIndex++;
+        // Push the node to the tempArray
+        tempArray.push(dialogueNode);
     }
+
+    // After all nodes are processed, append them to the new parent's dialogueNodes
+    newParent.dialogueNodes = newParent.dialogueNodes.concat(tempArray);
 }
 
 
