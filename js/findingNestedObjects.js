@@ -463,33 +463,32 @@ jQuery.fn.findWithDepth = function(selector, maxDepth) {
     return elements;
 };
 
-function reparentNodeAndDescendants(objectNodeFromWhichWeAreDrawing, lineCharacterId, newParentCharacterID) {
-    // Get all connected nodes
-    const startNode = objectNodeFromWhichWeAreDrawing;
-    const nodesToMove = Array.from(iterateConnectedNodes(startNode, lineCharacterId - 1)); // Collect all nodes to move
+function reparentNodeAndDescendants(startNode, oldParentId, newParentId, nextId, gameDialogueMakerProject) {
+    const newIdFunction = function(oldId) {
+        let newId = nextId;
+        nextId++;
+        return newId;
+    };
 
-    // Find the highest ID in the new parent's nodes
-    let highestIdInNewParent = getMaxDialogueNodeId(
-        gameDialogueMakerProject.characters[newParentCharacterID - 1]
-    );
+    // Find the parent characters
+    const oldParent = gameDialogueMakerProject.characters.find(character => character.characterID == oldParentId);
+    const newParent = gameDialogueMakerProject.characters.find(character => character.characterID == newParentId);
 
-    let newIdFunction = generateNewIdFunction(highestIdInNewParent + 1);
+    // Find the index of the last child of the new parent
+    let insertIndex = newParent.dialogueNodes.length > 0 ? newParent.dialogueNodes.length : 0;
 
-    for (let node of nodesToMove) {
-        // Remove the node from the first array
-        gameDialogueMakerProject.characters[lineCharacterId - 1].dialogueNodes =
-            gameDialogueMakerProject.characters[lineCharacterId - 1].dialogueNodes.filter(
-                (obj) => obj !== node
-            );
+    // Iterate through connected nodes
+    for (let dialogueNode of iterateConnectedNodes(startNode, oldParentId)) {
+        // Remove the node from the old parent's dialogueNodes array
+        oldParent.dialogueNodes = oldParent.dialogueNodes.filter(node => node.dialogueID !== dialogueNode.dialogueID);
 
-        // Update node's ID
-        updateDialogueIds(node, newIdFunction);
+        // Update the dialogueID for the node and its outgoingLines
+        updateDialogueIds(dialogueNode, newIdFunction);
 
-        //node.dialogueNodeX = 10;
-        //node.dialogueNodeY = 10;
-        // Add the updated node to the second array
-        gameDialogueMakerProject.characters[newParentCharacterID - 1].dialogueNodes.push(node);
-
+        // Insert the node at the appropriate position in the new parent's dialogueNodes array
+        newParent.dialogueNodes.splice(insertIndex, 0, dialogueNode);
+        insertIndex++;
     }
 }
+
 
