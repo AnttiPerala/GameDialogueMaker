@@ -6,6 +6,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Game Dialogue Maker</title>
     <style>
+
+        @font-face {
+            font-family: 'Rajdhani-Bold';
+            src: url('fonts/Rajdhani-Bold.ttf') format('truetype');
+            font-weight: bold;
+            font-style: normal;
+            
+        }
+
+        body{
+            font-family: 'Rajdhani-Bold', sans-serif;
+        }
+
         .container {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -13,9 +26,11 @@
             width: 70vw;
         }
         .box{
-            padding: 2vw;
-            background-color: deepskyblue;
+            padding: 1vw;
+            background: linear-gradient(deepskyblue, rgb(69, 209, 255));
             border-radius: 0.2rem;
+            font-size: 1.4rem;
+            text-align: center;
         }
         .wrap{
             display: flex;
@@ -29,15 +44,24 @@
         }
 
         .iconWrap img {
-            margin: 0.5rem;
+            margin: 1rem 0.5rem;
 
+        }
+
+        .container h1{
+            grid-column: span 3;
+            text-align: center;
+            color: deepskyblue;
+            font-size: 3rem;
         }
 
     </style>
 </head>
 <body>
     <div class="wrap">
+        
         <div class="container">
+                <h1>Game Dialogue Maker</h1>
                 <div class="box"><div class="iconWrap"><img src="img/about/iconmonstr-code-fork-1-64.png"></div>  Create branching dialogues easily</div>
                 <div class="box"><div class="iconWrap"><img src="img/about/iconmonstr-control-panel-6-64.png"></div> Add conditions to transitions between dialogues</div>
                 <div class="box"><div class="iconWrap"><img src="img/about/iconmonstr-log-out-18-64.png"></div> Export in the universally supported JSON format</div>
@@ -47,8 +71,9 @@
                 <div class="box"><div class="iconWrap"><img src="img/about/iconmonstr-code-4-64.png"></div>Extend easily with JavaScript</div>
                 <div class="box"><div class="iconWrap"><img src="img/about/iconmonstr-idea-1-64.png"></div>Simply download and open index.html in browser</div>
                 <div class="box"><div class="iconWrap"><img src="img/about/iconmonstr-credit-card-12-64.png"></div>Free forever</div>
-                <div class="box"><div class="iconWrap"><img src="img/about/iconmonstr-credit-card-12-64.png"></div>Use online or offline</div>
-            </div>
+                <div class="box"><div class="iconWrap"><img src="img/about/iconmonstr-cloud-25-64.png"><img src="img/about/iconmonstr-cloud-10-64.png"></div>Use online or offline</div>
+                <div class="box"><div class="iconWrap"><img src="img/about/iconmonstr-save-14-64.png"></div>Saves automatically</div>
+                <div class="box"><div class="iconWrap"><img src="img/about/iconmonstr-gamepad-3-64.png"></div>Import to your game engine</div>
     </div>
 
   
