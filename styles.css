@@ -30,7 +30,11 @@ body {
     will-change: transform; /* to reduce flickering when zooming */
 }
 
-
+#about{
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-size: 0.9rem;
+    color: rgb(205, 205, 205);
+}
 
 #siteTitle {
 
