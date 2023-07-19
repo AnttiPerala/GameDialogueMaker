@@ -439,7 +439,7 @@ jQuery(document).on('click', '.conditionCircle', function () {
 
     //check if the circle already contains the inputs
     if ($(this).find('.conditionInputsWrap').length) {
-        console.log('The parent element already contains a child with the class ".conditionInputsWrap"');
+        //console.log('The parent element already contains a child with the class ".conditionInputsWrap"');
     } else {
 
         //find the line in the master object that corresponds with the clicked circle:

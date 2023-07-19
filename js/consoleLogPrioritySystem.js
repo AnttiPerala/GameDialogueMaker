@@ -19,7 +19,7 @@ function myLog(message, logPriority, fileInfo) {
 
             }
 
-            console.log(lastLog +' '+ fileInformation);
+            //console.log(lastLog +' '+ fileInformation);
 
         }
         

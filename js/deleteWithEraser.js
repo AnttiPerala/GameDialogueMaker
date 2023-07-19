@@ -27,7 +27,7 @@ $('body').on('mousedown', '.block, .line', function () {
 
         //lets first check if the clicked node (or it's immediate 2nd parent) was a character root node
         if ($(this).hasClass('characterRoot') || $(this).parent().parent().hasClass('characterRoot')) {
-            console.log(`clicked node was character root`);
+            //console.log(`clicked node was character root`);
 
             //i think it's not safe to let nodes exists without a characterRoot parent so I think we need to delete the entire character tree from the gameDialogueMakerProject
 
@@ -50,7 +50,7 @@ $('body').on('mousedown', '.block, .line', function () {
 
         } else {
 
-            console.log(`clicked node was not character root, but had classes  ${$(this).attr('class')}`);
+            //console.log(`clicked node was not character root, but had classes  ${$(this).attr('class')}`);
 
             //find the right characterRoot
             let characterToEraseFrom = $(this).closest('.characterRoot').attr('id').replace(/\D/g, '');
@@ -125,7 +125,7 @@ function deleteLinesByToNode(characterObjectToEraseFrom,toNodeId) {
                 const outgoingLine = dialogueNode.outgoingLines[i];
                 // if the toNode of the outgoing line matches the specified toNodeId, remove it from the array
                 if (outgoingLine.toNode == toNodeId) {
-                    console.log('a match with passed in toNode and lines toNode');
+                    //console.log('a match with passed in toNode and lines toNode');
                     dialogueNode.outgoingLines.splice(i, 1);
                     //now also select the node html element and make the topConnectionSocket data-hasline="false" so that it can be reconnected
                     $(dialogueNode.nodeElement).find('.topConnectionSocket').attr('data-hasline', 'false');

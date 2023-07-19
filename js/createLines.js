@@ -14,12 +14,12 @@
             let x2PosNew = connectionNode2.offset().left + connectionNode2[0].getBoundingClientRect().width / 2;
             let y2PosNew = connectionNode2.offset().top + connectionNode2[0].getBoundingClientRect().height / 2;
 
-            console.log(`x1PosNew: ${x1PosNew} y1PosNew: ${y1PosNew} x2PosNew: ${x2PosNew} y2PosNew: ${y2PosNew}`);
+            //console.log(`x1PosNew: ${x1PosNew} y1PosNew: ${y1PosNew} x2PosNew: ${x2PosNew} y2PosNew: ${y2PosNew}`);
 
             //block1 and block seem to depend on the selected block class, so they are unreliable here
             //for the new master object approach I think I will use the latestNodeForLines as the parent target
 
-            console.log(`In the begnning, block1 is: ${block1} and block2 is ${block2} and buttonindex is ${buttonindex} latestNodeForLines is: ${latestNodeForLines}`);
+            //console.log(`In the begnning, block1 is: ${block1} and block2 is ${block2} and buttonindex is ${buttonindex} latestNodeForLines is: ${latestNodeForLines}`);
 
             let length = Math.sqrt(((x1PosNew - x2PosNew) * (x1PosNew - x2PosNew)) + ((y1PosNew - y2PosNew) * (y1PosNew - y2PosNew)));
                 //let angle = Math.atan2(y2 - y1, x2 - x1) * 180 / Math.PI;
@@ -28,7 +28,7 @@
                 //get the parent of the first block so that we can prepend the line to it
                let blockWrapToPrependTo = latestNodeForLines.find(`.blockPlusButton[data-buttonindex="${buttonindex}"]`);
 
-               console.log('blockWrapToPrependTo: ' + blockWrapToPrependTo.attr('data-buttonindex'));
+               //console.log('blockWrapToPrependTo: ' + blockWrapToPrependTo.attr('data-buttonindex'));
 
                myElem = blockWrapToPrependTo;
 
@@ -38,7 +38,7 @@
 
              //check if the line already exists and if it does, just move it. Seems like can't maybe trust on the "block1 and block2" much.. 
 
-                 console.log('create line too');
+                 //console.log('create line too');
                  let line = $('<div>')
                      .prependTo($(connectionNode1)) //prepend makes lines appear in the back without having to use z-index
                      .addClass('line')

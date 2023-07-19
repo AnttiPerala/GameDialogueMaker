@@ -31,7 +31,7 @@ function getCharacterById(id) {
 
 function findDialogueObjectBasedOnPassedInHtmlElement(elem){
 
-    console.log('inside findDialogueObjectBasedOnPassedInHtmlElement and elem classlist is:' + $(elem).classList + ' and elem html is: ' + $(elem).html());
+    //console.log('inside findDialogueObjectBasedOnPassedInHtmlElement and elem classlist is:' + $(elem).classList + ' and elem html is: ' + $(elem).html());
 
     //this one is passed in text fields and inputs from the dialogue node
 
@@ -49,7 +49,7 @@ function findDialogueObjectBasedOnPassedInHtmlElement(elem){
         
         dialogueID = 0;
     } else {
-        console.log('not character root, id was: ' + $(elem).closest('.blockWrap').attr('id'));
+        //console.log('not character root, id was: ' + $(elem).closest('.blockWrap').attr('id'));
           //regular nodes
         dialogueID = $(elem).closest('.blockWrap').attr('id').replace(/\D/g, ''); //get just the number from the id
 
@@ -208,10 +208,10 @@ function findMatchingDialogueNodeInObjectFromPassedInBlockwrap(blockWrap) {
 function checkIfNumberLike(myinput){
 
     if (isNaN(myinput)) {
-        console.log("Input value is not a number");
+        //console.log("Input value is not a number");
         return("NaN");
     } else {
-        console.log("Input value is a number");
+        //console.log("Input value is a number");
         return("numer");
     }
 
@@ -225,7 +225,7 @@ function getCharacterNameFromDialogueNode(dialogueNode) {
 
     mychhh = dialogueNode;
 
-    console.log('inside the getCharacterNameFromDialogueNode function and dialogueNode is '+ dialogueNode +' dialogueNode id is: ' + $(dialogueNode).attr('id'));
+    //console.log('inside the getCharacterNameFromDialogueNode function and dialogueNode is '+ dialogueNode +' dialogueNode id is: ' + $(dialogueNode).attr('id'));
 
     let characterName;
 
@@ -278,7 +278,7 @@ function getMaxDialogueNodeId(character) {
             }
         }
     }
-  console.log(`returning highestDialogueNodeId which was: ${highestDialogueNodeId}`);
+  //console.log(`returning highestDialogueNodeId which was: ${highestDialogueNodeId}`);
     return highestDialogueNodeId;
 }
 
@@ -288,16 +288,16 @@ function getMaxDialogueNodeId(character) {
 function getLineElemFromObject(gameDialogueMakerProject, characterId, fromNodeValue, toNodeValue) {
     // Search through the characters array
 
-    console.log(`hello from getLineElemFromObject. characterId: ${characterId}`);
+    //console.log(`hello from getLineElemFromObject. characterId: ${characterId}`);
 
     let character = gameDialogueMakerProject.characters.find(character => character.characterID == characterId);
     
     if (!character) {
-        console.log(`no character found`);
+        //console.log(`no character found`);
         return null; // No character found with the given ID
     }
 
-    console.log(`character match`);
+    //console.log(`character match`);
 
     // Search through the character's outgoingLines array
     let outgoingLine = character.outgoingLines.find(line => line.fromNode == fromNodeValue && line.toNode == toNodeValue);
@@ -307,7 +307,7 @@ function getLineElemFromObject(gameDialogueMakerProject, characterId, fromNodeVa
         for (let dialogueNode of character.dialogueNodes) {
             outgoingLine = dialogueNode.outgoingLines.find(line => line.fromNode == fromNodeValue && line.toNode == toNodeValue);
             if (outgoingLine) {
-                console.log(`found matching line using getLineElemFromObject ${outgoingLine}`);
+                //console.log(`found matching line using getLineElemFromObject ${outgoingLine}`);
                 break; // Found a matching outgoingLine, so break out of the loop
             }
         }
@@ -320,16 +320,16 @@ function getLineElemFromObject(gameDialogueMakerProject, characterId, fromNodeVa
 
 function deleteLineFromObject(gameDialogueMakerProject, characterId, fromNodeValue, toNodeValue) {
     // Search through the characters array
-    console.log(`hello from getLineElemFromObject. characterId: ${characterId}`);
+    //console.log(`hello from getLineElemFromObject. characterId: ${characterId}`);
 
     let character = gameDialogueMakerProject.characters.find(character => character.characterID == characterId);
 
     if (!character) {
-        console.log(`no character found`);
+        //console.log(`no character found`);
         return null; // No character found with the given ID
     }
 
-    console.log(`character match`);
+    //console.log(`character match`);
 
     // Search through the character's outgoingLines array
     let outgoingLine = character.outgoingLines.find(line => line.fromNode == fromNodeValue && line.toNode == toNodeValue);
@@ -338,7 +338,7 @@ function deleteLineFromObject(gameDialogueMakerProject, characterId, fromNodeVal
         // Remove the outgoingLine from the character's outgoingLines array
         const index = character.outgoingLines.indexOf(outgoingLine);
         character.outgoingLines.splice(index, 1);
-        console.log(`removed outgoingLine`);
+        //console.log(`removed outgoingLine`);
     } else {
         // If not found in character's outgoingLines, search through each dialogueNodes
         for (let dialogueNode of character.dialogueNodes) {
@@ -347,7 +347,7 @@ function deleteLineFromObject(gameDialogueMakerProject, characterId, fromNodeVal
                 // Remove the outgoingLine from the dialogueNode's outgoingLines array
                 const index = dialogueNode.outgoingLines.indexOf(outgoingLine);
                 dialogueNode.outgoingLines.splice(index, 1);
-                console.log(`removed outgoingLine from dialogueNode`);
+                //console.log(`removed outgoingLine from dialogueNode`);
                 break; // Found a matching outgoingLine, so break out of the loop
             }
         }
@@ -360,13 +360,13 @@ function deleteLineFromObject(gameDialogueMakerProject, characterId, fromNodeVal
 
 function* iterateConnectedNodes(startNode, characterId, visitedNodes = new Set()) {
     if (!startNode || !startNode.dialogueID) {
-        console.log("Invalid startNode:", startNode);
+        //console.log("Invalid startNode:", startNode);
         return;
     }
 
     visitedNodes.add(startNode.dialogueID);
 
-    console.log("Visiting startNode:", startNode);
+    //console.log("Visiting startNode:", startNode);
 
     let theCharid = findCharacterIDByPassingInDialogueNode(startNode);
 
@@ -376,11 +376,11 @@ function* iterateConnectedNodes(startNode, characterId, visitedNodes = new Set()
         const character = gameDialogueMakerProject.characters.find(character => character.characterID == theCharid);
         const toNode = character.dialogueNodes.find(node => node.dialogueID == outgoingLine.toNode);
 
-        console.log("Outgoing line from ", startNode.dialogueID, " to ", outgoingLine.toNode);
-        console.log("Found toNode: ", toNode);
+        //console.log("Outgoing line from ", startNode.dialogueID, " to ", outgoingLine.toNode);
+        //console.log("Found toNode: ", toNode);
 
         if (toNode && !visitedNodes.has(toNode.dialogueID)) {
-            console.log("Traversing toNode:", toNode);
+            //console.log("Traversing toNode:", toNode);
             yield* iterateConnectedNodes(toNode, characterId, visitedNodes);
         }
     }
@@ -394,7 +394,7 @@ function* iterateConnectedNodes(startNode, characterId, visitedNodes = new Set()
 function findCharacterIDByPassingInDialogueNode(dialogueNode) {
     // Check if the dialogueNode has a characterID key
     if (dialogueNode && dialogueNode.hasOwnProperty('characterID')) {
-        console.log('Found characterID in the input dialogueNode:', dialogueNode.characterID);
+        //console.log('Found characterID in the input dialogueNode:', dialogueNode.characterID);
         return dialogueNode.characterID;
     }
 
@@ -406,7 +406,7 @@ function findCharacterIDByPassingInDialogueNode(dialogueNode) {
             for (let node of character.dialogueNodes) {
                 // If the current node is the same object instance as the input dialogueNode
                 if (typeof node == 'object' && node == dialogueNode) {
-                    console.log('Found characterID by matching dialogueNode:', character.characterID);
+                    //console.log('Found characterID by matching dialogueNode:', character.characterID);
                     return character.characterID;
                 }
             }
@@ -414,7 +414,7 @@ function findCharacterIDByPassingInDialogueNode(dialogueNode) {
     }
 
     // No matching characterID was found
-    console.log('No matching characterID was found');
+    //console.log('No matching characterID was found');
     return null;
 }
 

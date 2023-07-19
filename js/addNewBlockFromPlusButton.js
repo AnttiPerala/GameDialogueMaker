@@ -70,7 +70,7 @@ $('body').on('click', '.blockPlusButton', function () {
             };
 
             characterObject.dialogueNodes.push(newDialogueNode);
-            console.log(newDialogueNode);
+            //console.log(newDialogueNode);
 
         } else {
             //was not characterRoot
@@ -115,7 +115,7 @@ $('body').on('click', '.blockPlusButton', function () {
                 };
 
                 characterObject.dialogueNodes.push(newDialogueNode);
-                console.log(newDialogueNode);
+                //console.log(newDialogueNode);
 
 
             } else if (parentBlockType == "question") { //parent is question so this should be an answer

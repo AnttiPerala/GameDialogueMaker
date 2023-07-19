@@ -3,7 +3,7 @@ $(document).on('click', '.eyeImage', function(event) {
 
     var currentImage = $(this).attr('src');
 
-    console.log(` currentImage: ${currentImage}`);
+    //console.log(` currentImage: ${currentImage}`);
 
     let characterNodeInObject = findCharacterNodeBasedOnPassedInHtmlElement(this);
 

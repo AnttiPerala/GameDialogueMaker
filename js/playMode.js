@@ -5,7 +5,7 @@ $(playButton).click(startPlayMode);
 let currentNode = null; // This should be initialized to your starting node in startPlayMode
 
 function startPlayMode() {
-    console.log(`playmode started`);
+    //console.log(`playmode started`);
     playModeActive = true;
     //get the selected node
     let selectedElement = $('.selected');

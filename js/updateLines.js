@@ -11,7 +11,7 @@ function updateAllLines() {
                //only do this is the eye symbol is open and the children are not hidden
 
        if (character.hideChildren == true){
-        console.log(`inside updateLines, character.hideChildren: ${character.hideChildren}`);
+        //console.log(`inside updateLines, character.hideChildren: ${character.hideChildren}`);
         
       } else {
 
@@ -115,7 +115,7 @@ function updateLines(element) { //element is the dragged node dom element
         for (let i = startIndex; i < characterToLoop.dialogueNodes.length; i++) {
 
             if (characterToLoop.hideChildren == true){
-                console.log(`inside updateLines, character.hideChildren: ${characterToLoop.hideChildren}`);
+                //console.log(`inside updateLines, character.hideChildren: ${characterToLoop.hideChildren}`);
                 break;
             }
 
