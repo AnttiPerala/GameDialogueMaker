@@ -16,15 +16,29 @@ function startPlayMode() {
 
     let selectedElementBlockWrap = selectedElement.closest('.blockWrap');
 
-    let startNodeInObject = findMatchingDialogueNodeInObjectFromPassedInBlockwrap(selectedElementBlockWrap);
+    let dialogueNodeInObject = findMatchingDialogueNodeInObjectFromPassedInBlockwrap(selectedElementBlockWrap);
 
-    alert(startNodeInObject.dialogueText);
+    let charID = findCharacterIDByPassingInDialogueNode(dialogueNodeInObject);
+
+    //handle selected element being root
+    if (selectedElementBlockWrap.hasClass('characterRoot')){
+        console.log(`root`);
+        let nextNodeID = dialogueNodeInObject.outgoingLines[0].toNode;
+        let nextNodeInObject = getDialogueNodeById(charID, nextNodeID);
+        dialogueNodeInObject = nextNodeInObject ?? dialogueNodeInObject; //The nullish coalescing operator ?? checks if nextNodeInObject is null or undefined. If nextNodeInObject is null or undefined, it returns the value on the right-hand side
+
+    }
+
+    
+
+   
+    alert(dialogueNodeInObject.dialogueText);
 
     let dialogueContainer = $(`
     
     `);
 
-    currentNode = startNode; // Assuming startNode is your starting node
+    currentNode = dialogueNodeInObject; // Assuming startNode is your starting node
     renderNode(currentNode);
 }
 

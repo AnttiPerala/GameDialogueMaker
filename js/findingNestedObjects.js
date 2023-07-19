@@ -187,20 +187,27 @@ function getLineAnchorHTMLElementsFromLine(line) {
 //GET MATCHING OBJECT ELEMENT BASED ON PASSED IN BLOCKWRAP
 function findMatchingDialogueNodeInObjectFromPassedInBlockwrap(blockWrap) {
     // Iterate over all characters
-    for(let character of gameDialogueMakerProject.characters) {
+    for (let character of gameDialogueMakerProject.characters) {
+        // Check if the blockWrap matches the characterNode's nodeElement
+        if (character.nodeElement.is(blockWrap)) {
+            // If they match, return the characterNode
+            return character;
+        }
+
         // Iterate over all dialogueNodes of the current character
-        for(let dialogueNode of character.dialogueNodes) {
+        for (let dialogueNode of character.dialogueNodes) {
             // Compare the nodeElement of the dialogueNode with the provided blockWrap
-            if(dialogueNode.nodeElement.is(blockWrap)) {
+            if (dialogueNode.nodeElement.is(blockWrap)) {
                 // If they match, return the dialogueNode
                 return dialogueNode;
             }
         }
     }
 
-    // If no matching dialogueNode was found, return null
+    // If no matching dialogueNode or characterNode was found, return null
     return null;
 }
+
 
 
 //check if its a number like value
@@ -357,18 +364,18 @@ function deleteLineFromObject(gameDialogueMakerProject, characterId, fromNodeVal
 }
 
 //TRAVERSE ALL NODES CONNECTED TO A NODE WITH LINES
-
+//i think at the moment this only takes dialogueNodes and trying to add characterNode detection broke things
 function* iterateConnectedNodes(startNode, characterId, visitedNodes = new Set()) {
     if (!startNode || !startNode.dialogueID) {
-        //console.log("Invalid startNode:", startNode);
+        console.log("Invalid startNode:", startNode);
         return;
     }
 
     visitedNodes.add(startNode.dialogueID);
 
-    //console.log("Visiting startNode:", startNode);
+    console.log("Visiting startNode:", startNode);
 
-    let theCharid = findCharacterIDByPassingInDialogueNode(startNode);
+    let theCharid = findCharacterIDByPassingInDialogueNode(startNode); //which character id should we use actually?
 
     yield startNode;
 
@@ -376,11 +383,11 @@ function* iterateConnectedNodes(startNode, characterId, visitedNodes = new Set()
         const character = gameDialogueMakerProject.characters.find(character => character.characterID == theCharid);
         const toNode = character.dialogueNodes.find(node => node.dialogueID == outgoingLine.toNode);
 
-        //console.log("Outgoing line from ", startNode.dialogueID, " to ", outgoingLine.toNode);
-        //console.log("Found toNode: ", toNode);
+        console.log("Outgoing line from ", startNode.dialogueID, " to ", outgoingLine.toNode);
+        console.log("Found toNode: ", toNode);
 
         if (toNode && !visitedNodes.has(toNode.dialogueID)) {
-            //console.log("Traversing toNode:", toNode);
+            console.log("Traversing toNode:", toNode);
             yield* iterateConnectedNodes(toNode, characterId, visitedNodes);
         }
     }

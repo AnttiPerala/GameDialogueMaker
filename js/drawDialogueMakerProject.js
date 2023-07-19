@@ -808,7 +808,7 @@ function drawDialogueMakerProject() {
             newParentCharacterID +
             " lineCharacterId: " +
             lineCharacterId
-        );
+       
 
         if (newParentCharacterID == lineCharacterId) {
           //no change in parent
