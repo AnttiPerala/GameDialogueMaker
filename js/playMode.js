@@ -30,7 +30,7 @@ function startPlayMode() {
         dialogueNodeInObject = nextNodeInObject ?? dialogueNodeInObject; //The nullish coalescing operator ?? checks if nextNodeInObject is null or undefined. If nextNodeInObject is null or undefined, it returns the value on the right-hand side
 
     }
-const generator = iterateConnectedNodes(dialogueNodeInObject, charID);
+let generator = iterateConnectedNodes(dialogueNodeInObject, charID);
 generator.next().value; //move from sent in node once
     
 
@@ -107,14 +107,34 @@ generator.next().value; //move from sent in node once
     })
     
     $(document).on("click", '#rightArrow', function(){
-        
-        const nextNode = generator.next().value;
-        //const nextNextNode = generator.next().value;
-        dialogueNodeInObject = nextNode ?? dialogueNodeInObject;
-        $('.playModeDialogueContainer').remove(); // Clear the previously rendered dialogue
-        renderPlayMode(charName, dialogueNodeInObject);  // re-render the dialogue with the new node
-    })
-
+        let nextNodeId = dialogueNodeInObject.nextNode;
+        let character = gameDialogueMakerProject.characters.find(character => character.characterID == charID);
+    
+        if (nextNodeId !== -1 && nextNodeId !== "" && nextNodeId !== null && nextNodeId !== undefined) {
+            // If nextNode is set, find the corresponding node
+            let nextNode = character.dialogueNodes.find(node => node.dialogueID == nextNodeId);
+            if (nextNode) {
+                // If the next node was found, set it as the current node, create a new generator, and re-render
+                dialogueNodeInObject = nextNode;
+                generator = iterateConnectedNodes(dialogueNodeInObject, charID);
+                generator.next(); // Advance the generator to skip the initial node
+                renderPlayMode(charName, dialogueNodeInObject);
+            } else {
+                console.error(`Could not find node with ID: ${nextNodeId}`);
+            }
+        } else {
+            // If nextNode is not set, continue with the current behavior
+            const nextNode = generator.next().value;
+            if (nextNode) {
+                dialogueNodeInObject = nextNode;
+                renderPlayMode(charName, dialogueNodeInObject);
+            } else {
+                drawDialogueBox("You have reached the end of this dialogue branch");
+            }
+        }
+    });
+    
+    
 
     //currentNode = dialogueNodeInObject; // Assuming startNode is your starting node
     //renderNode(currentNode);

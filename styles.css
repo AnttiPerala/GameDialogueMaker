@@ -2,8 +2,11 @@ body {
     background-color: rgb(127, 127, 127) !important;
     color: rgb(205, 205, 205);
     margin: 0;
-
-}
+        -webkit-user-select: none; /* Safari */
+        -moz-user-select: none; /* Firefox */
+        -ms-user-select: none; /* IE10+/Edge */
+        user-select: none; /* Standard */
+    }
 
 @font-face {
     font-family: 'Rajdhani-Bold';
@@ -394,8 +397,9 @@ div.dialogueLine{
 font-size: 3rem;
 }
 
-#rightArrow{
+#rightArrow {
     font-size: 3rem;
+    text-align: right;
 }
 
 .dialogueId, .charName {
