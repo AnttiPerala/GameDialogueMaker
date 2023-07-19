@@ -31,7 +31,7 @@ function startPlayMode() {
 
     }
 const generator = iterateConnectedNodes(dialogueNodeInObject, charID);
-
+generator.next().value; //move from sent in node once
     
 
     renderPlayMode(charName, dialogueNodeInObject);
@@ -40,13 +40,21 @@ const generator = iterateConnectedNodes(dialogueNodeInObject, charID);
 
         let answerElements = ``;
 
-        //handle questions
+        //handle question
+
         if(dialogueNodeInObject.dialogueType == 'question'){
             console.log('question');
-            //loop through the outgoingLines to get each answer
-
-            answerElements = `<button>answer1</button><button>answer2</button><button>answer3</button>`
-
+            answerElements = "";
+            let character = gameDialogueMakerProject.characters.find(char => char.characterName == charName);
+            // Assuming the character is always the first one in the array
+            
+        
+            for (let outgoingLine of dialogueNodeInObject.outgoingLines) {
+                let targetNode = character.dialogueNodes.find(node => node.dialogueID == outgoingLine.toNode);
+                if (targetNode) {
+                    answerElements += `<button>${targetNode.dialogueText}</button>`;
+                }
+            }
         }
 
         let playModeDialogueContainer = $(`
