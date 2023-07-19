@@ -20,6 +20,8 @@ function startPlayMode() {
 
     let charID = findCharacterIDByPassingInDialogueNode(dialogueNodeInObject);
 
+    let charName = getCharacterNameFromDialogueNode(dialogueNodeInObject);
+
     //handle selected element being root
     if (selectedElementBlockWrap.hasClass('characterRoot')){
         console.log(`root`);
@@ -28,21 +30,70 @@ function startPlayMode() {
         dialogueNodeInObject = nextNodeInObject ?? dialogueNodeInObject; //The nullish coalescing operator ?? checks if nextNodeInObject is null or undefined. If nextNodeInObject is null or undefined, it returns the value on the right-hand side
 
     }
+const generator = iterateConnectedNodes(dialogueNodeInObject, charID);
 
     
 
-   
-    alert(dialogueNodeInObject.dialogueText);
+    renderPlayMode(charName, dialogueNodeInObject);
 
-    let dialogueContainer = $(`
+    function renderPlayMode(charName, dialogueNodeInObject){
+
+        let answerElements = ``;
+
+        //handle questions
+        if(dialogueNodeInObject.dialogueType == 'question'){
+            console.log('question');
+            //loop through the outgoingLines to get each answer
+
+            answerElements = `<button>answer1</button><button>answer2</button><button>answer3</button>`
+
+        }
+
+        let playModeDialogueContainer = $(`
+        <div class="playModeDialogueContainer">
+            <div class="infoLine">
+            Character: ${charName} Dialogue: ${dialogueNodeInObject.dialogueID}
+            </div>
+            <div class="dialogueLine">
+                ${dialogueNodeInObject.dialogueText}
+            </div>
+            <div class="answerLine"> 
+            ${answerElements}
+            </div>
+            <div class="bottomLine">
+            <div id="leftArrow" class="gridCell">&lsaquo;</div>
+            <div class="gridCell"></div>
+            <div id="rightArrow" class="gridCell">&rsaquo;</div>
+             
+            
+            </div>
+        </div>
+        `);
+
+        $('body').append(playModeDialogueContainer);
+        
+    } //end render play mode
+
+
+    $(document).on("click", '#leftArrow', function(){
+
+    })
     
-    `);
+    $(document).on("click", '#rightArrow', function(){
+        
+        const nextNode = generator.next().value;
+        //const nextNextNode = generator.next().value;
+        dialogueNodeInObject = nextNode ?? dialogueNodeInObject;
+        $('.playModeDialogueContainer').remove(); // Clear the previously rendered dialogue
+        renderPlayMode(charName, dialogueNodeInObject);  // re-render the dialogue with the new node
+    })
 
-    currentNode = dialogueNodeInObject; // Assuming startNode is your starting node
-    renderNode(currentNode);
+
+    //currentNode = dialogueNodeInObject; // Assuming startNode is your starting node
+    //renderNode(currentNode);
 }
 
-function renderNode(node) {
+/* function renderNode(node) {
     // Clear the current dialogue
     const dialogueContainer = document.getElementById('dialogueContainer');
     dialogueContainer.innerHTML = '';
@@ -61,7 +112,7 @@ function renderNode(node) {
             dialogueContainer.appendChild(answerButton);
         }
     }
-}
+} */
 
 function handleAnswerClick(toNodeId) {
     const characterId = findCharacterIDByPassingInDialogueNode(currentNode);
@@ -69,3 +120,4 @@ function handleAnswerClick(toNodeId) {
     currentNode = character.dialogueNodes.find(node => node.dialogueID == toNodeId);
     renderNode(currentNode);
 }
+
