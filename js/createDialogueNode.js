@@ -14,6 +14,10 @@ function createDialogueNode(nodeElement, dialogueIDSent, dialogueType, dialogueT
     let blockOptionsOption2 = "";
     let blockOptionsOption3 = `<span style=" text-align: right;">Next:</span><input class="next"
     style="display:inline-block;" type="number" value="${activeNextNode}">`;
+    //if we have a line going out from the node, then we remove the next input:
+    if (outgoingLines.length > 0){
+        blockOptionsOption3 = ''; //make the next element empty
+    }
     let singlePlusButton = '<div class="blockPlusButton" data-buttonindex=0 data-acceptclicks=true>+</div>';
     let plusButtons = singlePlusButton;
 

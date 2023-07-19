@@ -218,6 +218,9 @@ function drawDialogueMakerProject() {
         //no outgoing lines
             //if the character node has zero outgoing lines, make the plus button of it accept clicks:
             $(plusButtonElem).attr('data-acceptclicks', 'true');
+            
+           
+
             //console.log('character node had no outgoing lines');
     } else {
         //outgoing lines found for character
