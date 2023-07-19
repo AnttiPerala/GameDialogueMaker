@@ -725,6 +725,11 @@ jQuery(document).on('click', '#mainArea', function (event) {
             cloneMode = false;
 
         }
+
+        if (playModeActive == true){
+            $('.playModeDialogueContainer').remove();
+            playModeActive = false;
+        }
     } else {
         // The user clicked on a child element inside #mainArea
     }

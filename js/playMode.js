@@ -38,29 +38,34 @@ generator.next().value; //move from sent in node once
 
     function renderPlayMode(charName, dialogueNodeInObject){
 
+        $('.playModeDialogueContainer').remove(); // Clear the previously rendered dialogue
+
         let answerElements = ``;
 
         //handle question
 
-        if(dialogueNodeInObject.dialogueType == 'question'){
+        if (dialogueNodeInObject.dialogueType == 'question') {
             console.log('question');
             answerElements = "";
-            let character = gameDialogueMakerProject.characters.find(char => char.characterName == charName);
-            // Assuming the character is always the first one in the array
-            
+            let character = gameDialogueMakerProject.characters.find(character => character.characterID == charID);
         
-            for (let outgoingLine of dialogueNodeInObject.outgoingLines) {
-                let targetNode = character.dialogueNodes.find(node => node.dialogueID == outgoingLine.toNode);
-                if (targetNode) {
-                    answerElements += `<button>${targetNode.dialogueText}</button>`;
+            for (let i = 0; i < dialogueNodeInObject.outgoingLines.length; i++) {
+                let outgoingLine = dialogueNodeInObject.outgoingLines[i];
+                let answerNode = character.dialogueNodes.find(node => node.dialogueID == outgoingLine.toNode);
+                if (answerNode) {
+                    // Since we want the node that the answer leads to, we'll use the toNode value from the answer's outgoing line
+                    let reactionNodeId = answerNode.outgoingLines[0]?.toNode; // Optional chaining is used here to prevent errors if there is no outgoing line
+                    // Adding a data attribute to hold the reaction node's ID
+                    answerElements += `<button class="answerButton" data-reaction-node="${reactionNodeId}">${answerNode.dialogueText}</button>`;
                 }
             }
         }
+        
 
         let playModeDialogueContainer = $(`
         <div class="playModeDialogueContainer">
             <div class="infoLine">
-            Character: ${charName} Dialogue: ${dialogueNodeInObject.dialogueID}
+            Character: <span class="charName">${charName}</span> Dialogue: <span class="dialogueId">${dialogueNodeInObject.dialogueID}</span>
             </div>
             <div class="dialogueLine">
                 ${dialogueNodeInObject.dialogueText}
@@ -79,12 +84,26 @@ generator.next().value; //move from sent in node once
         `);
 
         $('body').append(playModeDialogueContainer);
+
+        $(document).on('click', '.answerButton', function() {
+            let reactionNodeId = $(this).data('reaction-node');
+            let character = gameDialogueMakerProject.characters.find(character => character.characterID == charID);
+            let reactionNode = character.dialogueNodes.find(node => node.dialogueID == reactionNodeId);
+            
+            if (reactionNode) {
+                // Update the dialogueNodeInObject and re-render the dialogue
+                dialogueNodeInObject = reactionNode;
+                renderPlayMode(charName, dialogueNodeInObject);
+            } else {
+                console.error(`Could not find reaction node with ID: ${reactionNodeId}`);
+            }
+        });
         
     } //end render play mode
 
 
     $(document).on("click", '#leftArrow', function(){
-
+        drawDialogueBox("reversing has not been implemented yet");
     })
     
     $(document).on("click", '#rightArrow', function(){

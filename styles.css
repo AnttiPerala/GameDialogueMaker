@@ -398,6 +398,11 @@ font-size: 3rem;
     font-size: 3rem;
 }
 
+.dialogueId, .charName {
+    color: #ffffff;
+    font-weight: 900;
+}
+
 /* Tooltips */
 
 .ui-tooltip {
@@ -417,6 +422,34 @@ font-size: 3rem;
 }
 
 
-
-
 /* End tooltips */
+
+/* Buttons */
+
+button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 50px;
+    position: relative;
+    padding: 0 20px;
+    margin: 0.4rem;
+    font-size: 18px;
+    text-transform: uppercase;
+    border: 0;
+    box-shadow: hsl(210deg 87% 36%) 0px 7px 0px 0px;
+    background-color: hsl(210deg 100% 44%);
+    border-radius: 12px;
+    overflow: hidden;
+    transition: 31ms cubic-bezier(.5, .7, .4, 1);
+}
+
+   button:active {
+    box-shadow: none;
+    transform: translateY(7px);
+    transition: 35ms cubic-bezier(.5, .7, .4, 1);
+   }
+   
+
+  
+   
