@@ -454,6 +454,16 @@ button {
     transition: 35ms cubic-bezier(.5, .7, .4, 1);
    }
    
+/* Mobile styles */
+
+@media (max-width: 1000px) {
+    #header{
+        grid-template-columns: 1fr;
+    }
+    #ui {
+        grid-template-columns: 1fr 1fr 1fr;
+    }
+}
 
   
    
