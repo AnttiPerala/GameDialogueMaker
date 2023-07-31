@@ -397,7 +397,7 @@ function* iterateConnectedNodes(startNode, characterId, visitedNodes = new Set()
 
   
 
-//GET CHARACTER ID FROM PASSED IN DIALOGUE NODE
+//GET CHARACTER ID FROM PASSED IN DIALOGUE OBJECT NODE
 function findCharacterIDByPassingInDialogueNode(dialogueNode) {
     // Check if the dialogueNode has a characterID key
     if (dialogueNode && dialogueNode.hasOwnProperty('characterID')) {
@@ -516,5 +516,68 @@ function reparentNodeAndDescendants(startNode, oldParentId, newParentId, nextId,
     // Finally, append the nodes to the new parent's dialogueNodes
     newParent.dialogueNodes = newParent.dialogueNodes.concat(tempArray);
 }
+
+
+/* GET ALL LINES OF A NODE RECURSIVELY DOWNSTREAM FOR UPDATING THE LINES LATER */
+
+// Helper function to recursively get lines
+function getLinesRecursively(dialogueNodes, fromNode) {
+    // Find the node that starts from the current node
+    const startingNode = dialogueNodes.find((node) => node.dialogueID == fromNode);
+    if (!startingNode) {
+        return [];
+    }
+
+    // Get all lines connected to this node
+    let lines = startingNode.outgoingLines;
+
+    // Loop through all lines, and recursively collect lines
+    startingNode.outgoingLines.forEach((line) => {
+        lines = lines.concat(getLinesRecursively(dialogueNodes, line.toNode));
+    });
+
+    return lines;
+}
+
+function getAllConnectedLines(characterID, fromDialogueID) {
+    // Find the character
+    const character = gameDialogueMakerProject.characters.find((character) => character.characterID == characterID);
+    if (!character) {
+        console.error('Character not found');
+        return;
+    }
+
+    // If fromDialogueID is undefined, then we're starting from the character root
+    if (fromDialogueID === undefined) {
+        let lines = character.outgoingLines;
+
+        // For each outgoing line from the character root, get all connected lines downstream
+        character.outgoingLines.forEach((line) => {
+            lines = lines.concat(getLinesRecursively(character.dialogueNodes, line.toNode));
+        });
+
+        return lines;
+    } else {
+        // Otherwise, start from the specified dialogue node
+        let lines = [];
+
+        // Find the incoming line to this node
+        character.dialogueNodes.forEach(node => {
+            node.outgoingLines.forEach(line => {
+                if (line.toNode === fromDialogueID) {
+                    lines.push(line);
+                }
+            })
+        });
+
+        // Add all connected lines downstream
+        lines = lines.concat(getLinesRecursively(character.dialogueNodes, fromDialogueID));
+
+        return lines;
+    }
+}
+
+
+
 
 

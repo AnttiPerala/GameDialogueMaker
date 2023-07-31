@@ -1,7 +1,8 @@
-let allConnectedLines;
+/* let allConnectedLines;
 
 // Simplify check for lineElem instance of LeaderLine
 function updateLineElem(lineElem) {
+  console.log('lineElem: ', lineElem);
   if (lineElem instanceof LeaderLine) {
     lineElem.position(); // call the position function on the instance
   } else {
@@ -26,7 +27,7 @@ function updateAllLines() {
 // Update lines based on specific element
 function updateLines(element) {
   if (eraseMode) return;
-
+  console.log('element:', element);
   $(".conditionCircle").hide();
 
   //scoping
@@ -34,6 +35,7 @@ function updateLines(element) {
   const character = id.replace(/\D/g, ''); // Strip char from id
 
   if (element.hasClass('characterRoot') || element.closest('.characterRoot').length) {
+    console.log('updateAllLines:', element);
     return updateAllLines();
   }
 
@@ -52,6 +54,7 @@ function updateLines(element) {
       let node = characterToLoop.dialogueNodes[i];
       node.outgoingLines.forEach(line => updateLineElem(line.lineElem));
 
+      //i think this is for the dotted lines
       if (node.nextNode !== undefined && node.nextNode > 0) {
         node.nextNodeLineElem.position();
       }
@@ -62,6 +65,8 @@ function updateLines(element) {
     theParentNodeInTheMasterObject.outgoingLines.forEach(line => updateLineElem(line.lineElem));
   }
 
+  console.log('element is: ', element);
+
   allConnectedLines = $(element).parent().find('.line');
 
   myelems = allConnectedLines;
@@ -69,4 +74,6 @@ function updateLines(element) {
   allConnectedLines.each(function (i, e) {
     e.get(0).position();
   });
-}
+  
+} //end updateLines()
+ */
