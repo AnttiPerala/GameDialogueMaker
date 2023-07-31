@@ -9,10 +9,20 @@ function updateLines(domNode){
     console.log('lines: ', lines );
 
     lines.forEach(line => {
-        // Assuming you have a function called 'updateLineElem'
-        //updateLineElem(line.get(0).lineElem);
         line.lineElem.position();
     });
     
 } /* end update lines 2 */
 
+function updateAllLines() {
+    if (!eraseMode) {
+        gameDialogueMakerProject.characters.forEach((character) => {
+            if (character.hideChildren === true) return;
+
+            character.outgoingLines.forEach((outgoingLine) => outgoingLine.lineElem.position());
+            character.dialogueNodes.forEach((dialogueNode) => {
+                dialogueNode.outgoingLines.forEach((outgoingLine) => outgoingLine.lineElem.position());
+            });
+        });
+    }
+}
