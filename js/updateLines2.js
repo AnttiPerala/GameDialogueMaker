@@ -5,6 +5,8 @@ function updateLines(domNode){
     let cID = findCharacterIDByPassingInDialogueNode(matchingObjectNode);
     let dID = findDialogueObjectBasedOnPassedInHtmlElement(domNode).dialogueID;
     console.log('updateLines2, domNode: ', domNode);
+    console.log('cID: ', cID );
+    console.log('dID: ', dID);
     const lines = getAllConnectedLines(cID, dID); //the result seems to be lines in the object (not dom)
     console.log('lines: ', lines );
 

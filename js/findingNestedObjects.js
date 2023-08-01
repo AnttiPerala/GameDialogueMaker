@@ -547,9 +547,12 @@ function getAllConnectedLines(characterID, fromDialogueID) {
         return;
     }
 
+    console.log('fromDialogueID was ', fromDialogueID);
+
     // If fromDialogueID is undefined, then we're starting from the character root
     if (fromDialogueID === undefined) {
         let lines = character.outgoingLines;
+        console.log('fromDialogueID was ', fromDialogueID);
 
         // For each outgoing line from the character root, get all connected lines downstream
         character.outgoingLines.forEach((line) => {
@@ -564,7 +567,7 @@ function getAllConnectedLines(characterID, fromDialogueID) {
         // Find the incoming line to this node
         character.dialogueNodes.forEach(node => {
             node.outgoingLines.forEach(line => {
-                if (line.toNode === fromDialogueID) {
+                if (line.toNode == fromDialogueID) {
                     lines.push(line);
                 }
             })
