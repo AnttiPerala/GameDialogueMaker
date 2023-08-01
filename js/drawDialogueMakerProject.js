@@ -296,7 +296,7 @@ function drawDialogueMakerProject() {
 
         //set the id also of the svg for easier selection
         const all_svgs = document.querySelectorAll("svg");
-        const this_svg = all_svgs[all_svgs.length - 1];
+        const this_svg = all_svgs[all_svgs.length - 1]; //this will select the latest svg
         this_svg.setAttribute(
             "data-character",
             gameDialogueMakerProject.characters[i].characterID
@@ -596,7 +596,7 @@ function drawDialogueMakerProject() {
 
     var socketElement = $(this);
 
-    if ($(socketElement).attr("data-hasline") === 'true') {
+    if ($(socketElement).attr("data-hasline") == 'true') {
     //hide the socket to help elementFromPoint
     
     //need to temporarily enable svg pointer events for proper detections

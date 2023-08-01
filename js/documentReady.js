@@ -51,5 +51,24 @@ $(document).ready(function () {
         'enable'
     );
 
+    theMasterObjectInTheBeginning = _.cloneDeep(gameDialogueMakerProject);
+
+    const observer = new MutationObserver((mutationsList, observer) => {
+        for (let mutation of mutationsList) {
+            if (mutation.type === 'childList') {
+                console.log('A child node has been added or removed.');
+                console.log('Parent node:', mutation.target);
+            }
+            else if (mutation.type === 'attributes') {
+                console.log('The ' + mutation.attributeName + ' attribute was modified on element:', mutation.target);
+                console.log('Element ID:', mutation.target.id);
+                console.log('Element class list:', mutation.target.classList.toString());
+                console.log('Element data attributes:', mutation.target.dataset);
+            }
+        }
+    });
+
+    observer.observe(document, { attributes: true, childList: true, subtree: true });
+
 
 });
