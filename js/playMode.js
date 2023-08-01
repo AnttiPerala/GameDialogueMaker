@@ -39,6 +39,7 @@ generator.next().value; //move from sent in node once
     function renderPlayMode(charName, dialogueNodeInObject) {
         $('.playModeDialogueContainer').remove();
         let answerElements = ``;
+        let conditionButtons = '';
         if (dialogueNodeInObject.dialogueType == 'question') {
             answerElements = "";
             let character = gameDialogueMakerProject.characters.find(character => character.characterID == charID);
@@ -48,6 +49,12 @@ generator.next().value; //move from sent in node once
                 if (answerNode) {
                     let reactionNodeId = answerNode.outgoingLines[0]?.toNode;
                     answerElements += `<button class="answerButton" data-reaction-node="${reactionNodeId}">${answerNode.dialogueText}</button>`;
+                }
+                if (outgoingLine.transitionConditions && outgoingLine.transitionConditions.length > 0) {
+                    for (let j = 0; j < outgoingLine.transitionConditions.length; j++) {
+                        let condition = outgoingLine.transitionConditions[j];
+                        conditionButtons += `<button class="conditionButton" data-variable-name="${condition.variableName}" data-comparison-operator="${condition.comparisonOperator}" data-variable-value="${condition.variableValue}">Complete condition: ${condition.variableName} ${condition.comparisonOperator} ${condition.variableValue}</button>`;
+                    }
                 }
             }
         }
@@ -61,6 +68,7 @@ generator.next().value; //move from sent in node once
         </div>
         <div class="answerLine"> 
         ${answerElements}
+        ${conditionButtons}
         </div>
         <div class="bottomLine">
         <div id="leftArrow" class="gridCell">&lsaquo;</div>
@@ -72,46 +80,77 @@ generator.next().value; //move from sent in node once
         $('body').append(playModeDialogueContainer);
 
         // Call the typewriter function for the dialogue text
-        typewriter('#dialogueLine', dialogueNodeInObject.dialogueText, 0, 20); // 20ms delay between characters
+        typewriter('#dialogueLine', dialogueNodeInObject.dialogueText, 0, 50); // 50ms delay between characters
 
-        $(document).off('click', '.answerButton').on('click', '.answerButton', function () {
-            let reactionNodeId = $(this).data('reaction-node');
-            let character = gameDialogueMakerProject.characters.find(character => character.characterID == charID);
-            let reactionNode = character.dialogueNodes.find(node => node.dialogueID == reactionNodeId);
-            if (reactionNode) {
-                dialogueNodeInObject = reactionNode;
-                renderPlayMode(charName, dialogueNodeInObject);
-            } else {
-                console.error(`Could not find reaction node with ID: ${reactionNodeId}`);
-            }
-        });
+      
     } 
 
+
 //end render play mode
+
+    $(document).off('click', '.answerButton').on('click', '.answerButton', function () {
+        let reactionNodeId = $(this).data('reaction-node');
+        let character = gameDialogueMakerProject.characters.find(character => character.characterID == charID);
+        let reactionNode = character.dialogueNodes.find(node => node.dialogueID == reactionNodeId);
+        if (reactionNode) {
+            dialogueNodeInObject = reactionNode;
+            renderPlayMode(charName, dialogueNodeInObject);
+        } else {
+            console.error(`Could not find reaction node with ID: ${reactionNodeId}`);
+        }
+    });
+
+    $(document).off('click', '.conditionButton').on('click', '.conditionButton', function () {
+        let variableName = $(this).data('variable-name');
+        let comparisonOperator = $(this).data('comparison-operator');
+        let variableValue = $(this).data('variable-value');
+
+        // Here, you would handle what happens when the condition is completed
+        // The exact behavior would depend on how your conditions are set up, 
+        // and might involve updating some state in your game
+        console.log(`Condition completed: ${variableName} ${comparisonOperator} ${variableValue}`);
+    });
+
 
 
     $(document).on("click", '#leftArrow', function(){
         drawDialogueBox("reversing has not been implemented yet");
     })
     
-    $(document).on("click", '#rightArrow', function(){
+    $(document).off('click', '#rightArrow').on('click', '#rightArrow', function () {
+        let outgoingLine = dialogueNodeInObject.outgoingLines[0]; // Assuming only one outgoing line per node
+        if (outgoingLine && outgoingLine.transitionConditions && outgoingLine.transitionConditions.length > 0) {
+            // Clear the dialogue line and remove any condition buttons
+            $('#dialogueLine').empty();
+            $('.conditionButton').remove();
+
+            // Display the transition conditions as buttons
+            outgoingLine.transitionConditions.forEach((condition, index) => {
+                $('#dialogueLine').append(`There was a condition for progressing to the next dialogue: <button class="conditionButton" data-condition-index="${index}">Fulfil  ${condition.variableName} ${condition.comparisonOperator} ${condition.variableValue}</button>`);
+            });
+        } else {
+            moveNext();
+        }
+    });
+
+    $(document).off('click', '.conditionButton').on('click', '.conditionButton', function () {
+        moveNext();
+    });
+
+    function moveNext() {
         let nextNodeId = dialogueNodeInObject.nextNode;
         let character = gameDialogueMakerProject.characters.find(character => character.characterID == charID);
-    
         if (nextNodeId !== -1 && nextNodeId !== "" && nextNodeId !== null && nextNodeId !== undefined) {
-            // If nextNode is set, find the corresponding node
             let nextNode = character.dialogueNodes.find(node => node.dialogueID == nextNodeId);
             if (nextNode) {
-                // If the next node was found, set it as the current node, create a new generator, and re-render
                 dialogueNodeInObject = nextNode;
                 generator = iterateConnectedNodes(dialogueNodeInObject, charID);
-                generator.next(); // Advance the generator to skip the initial node
+                generator.next();
                 renderPlayMode(charName, dialogueNodeInObject);
             } else {
                 console.error(`Could not find node with ID: ${nextNodeId}`);
             }
         } else {
-            // If nextNode is not set, continue with the current behavior
             const nextNode = generator.next().value;
             if (nextNode) {
                 dialogueNodeInObject = nextNode;
@@ -120,8 +159,8 @@ generator.next().value; //move from sent in node once
                 drawDialogueBox("You have reached the end of this dialogue branch");
             }
         }
-    });
-    
+    }
+
     
 
     //currentNode = dialogueNodeInObject; // Assuming startNode is your starting node

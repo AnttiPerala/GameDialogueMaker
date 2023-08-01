@@ -457,6 +457,11 @@ button {
     transform: translateY(7px);
     transition: 35ms cubic-bezier(.5, .7, .4, 1);
    }
+
+   .conditionButton{
+    background-color: hsl(69deg, 64%, 39%);
+    box-shadow: hsl(69deg 40% 36%) 0px 7px 0px 0px;
+   }
    
 /* Mobile styles */
 
