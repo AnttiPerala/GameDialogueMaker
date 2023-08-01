@@ -41,6 +41,9 @@ $('body').on('mousedown', '.block', function (event) {
     if ($(event.target).hasClass('eyeImage')) {
         return; // Don't do anything if the event was triggered on the .eyeImage
     }
+    if ($(event.target).hasClass('answerNumber')) {
+        return; // Don't do anything if the event was triggered on the .eyeImage
+    }
 
     if (!eraseMode && !cloneMode) { //not erasing and the clonebrush is not active
 

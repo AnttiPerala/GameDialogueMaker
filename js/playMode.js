@@ -36,70 +36,58 @@ generator.next().value; //move from sent in node once
 
     renderPlayMode(charName, dialogueNodeInObject);
 
-    function renderPlayMode(charName, dialogueNodeInObject){
-
-        $('.playModeDialogueContainer').remove(); // Clear the previously rendered dialogue
-
+    function renderPlayMode(charName, dialogueNodeInObject) {
+        $('.playModeDialogueContainer').remove();
         let answerElements = ``;
-
-        //handle question
-
         if (dialogueNodeInObject.dialogueType == 'question') {
-            console.log('question');
             answerElements = "";
             let character = gameDialogueMakerProject.characters.find(character => character.characterID == charID);
-        
             for (let i = 0; i < dialogueNodeInObject.outgoingLines.length; i++) {
                 let outgoingLine = dialogueNodeInObject.outgoingLines[i];
                 let answerNode = character.dialogueNodes.find(node => node.dialogueID == outgoingLine.toNode);
                 if (answerNode) {
-                    // Since we want the node that the answer leads to, we'll use the toNode value from the answer's outgoing line
-                    let reactionNodeId = answerNode.outgoingLines[0]?.toNode; // Optional chaining is used here to prevent errors if there is no outgoing line
-                    // Adding a data attribute to hold the reaction node's ID
+                    let reactionNodeId = answerNode.outgoingLines[0]?.toNode;
                     answerElements += `<button class="answerButton" data-reaction-node="${reactionNodeId}">${answerNode.dialogueText}</button>`;
                 }
             }
         }
-        
-
         let playModeDialogueContainer = $(`
-        <div class="playModeDialogueContainer">
-            <div class="infoLine">
-            Character: <span class="charName">${charName}</span> Dialogue: <span class="dialogueId">${dialogueNodeInObject.dialogueID}</span>
-            </div>
-            <div class="dialogueLine">
-                ${dialogueNodeInObject.dialogueText}
-            </div>
-            <div class="answerLine"> 
-            ${answerElements}
-            </div>
-            <div class="bottomLine">
-            <div id="leftArrow" class="gridCell">&lsaquo;</div>
-            <div class="gridCell"></div>
-            <div id="rightArrow" class="gridCell">&rsaquo;</div>
-             
-            
-            </div>
+    <div class="playModeDialogueContainer">
+        <div class="infoLine">
+        Character: <span class="charName">${charName}</span> Dialogue: <span class="dialogueId">${dialogueNodeInObject.dialogueID}</span>
         </div>
-        `);
-
+        <div id="dialogueLine" class="dialogueLine">
+            <!-- The dialogue text will be added here by the typewriter function -->
+        </div>
+        <div class="answerLine"> 
+        ${answerElements}
+        </div>
+        <div class="bottomLine">
+        <div id="leftArrow" class="gridCell">&lsaquo;</div>
+        <div class="gridCell"></div>
+        <div id="rightArrow" class="gridCell">&rsaquo;</div>
+        </div>
+    </div>
+    `);
         $('body').append(playModeDialogueContainer);
 
-        $(document).on('click', '.answerButton', function() {
+        // Call the typewriter function for the dialogue text
+        typewriter('#dialogueLine', dialogueNodeInObject.dialogueText, 0, 20); // 20ms delay between characters
+
+        $(document).off('click', '.answerButton').on('click', '.answerButton', function () {
             let reactionNodeId = $(this).data('reaction-node');
             let character = gameDialogueMakerProject.characters.find(character => character.characterID == charID);
             let reactionNode = character.dialogueNodes.find(node => node.dialogueID == reactionNodeId);
-            
             if (reactionNode) {
-                // Update the dialogueNodeInObject and re-render the dialogue
                 dialogueNodeInObject = reactionNode;
                 renderPlayMode(charName, dialogueNodeInObject);
             } else {
                 console.error(`Could not find reaction node with ID: ${reactionNodeId}`);
             }
         });
-        
-    } //end render play mode
+    } 
+
+//end render play mode
 
 
     $(document).on("click", '#leftArrow', function(){
@@ -140,26 +128,7 @@ generator.next().value; //move from sent in node once
     //renderNode(currentNode);
 }
 
-/* function renderNode(node) {
-    // Clear the current dialogue
-    const dialogueContainer = document.getElementById('dialogueContainer');
-    dialogueContainer.innerHTML = '';
 
-    // Display the node's dialogue
-    const dialogueElement = document.createElement('p');
-    dialogueElement.textContent = node.dialogue;
-    dialogueContainer.appendChild(dialogueElement);
-
-    // If the node is a question, display answer buttons
-    if (node.isQuestion) {
-        for (let outgoingLine of node.outgoingLines) {
-            const answerButton = document.createElement('button');
-            answerButton.textContent = outgoingLine.answer;
-            answerButton.addEventListener('click', () => handleAnswerClick(outgoingLine.toNode));
-            dialogueContainer.appendChild(answerButton);
-        }
-    }
-} */
 
 function handleAnswerClick(toNodeId) {
     const characterId = findCharacterIDByPassingInDialogueNode(currentNode);
@@ -168,3 +137,18 @@ function handleAnswerClick(toNodeId) {
     renderNode(currentNode);
 }
 
+/* ANIM TYPEWRITER STYLE */
+function typewriter(selector, text, index, interval) {
+    if (index === 0) {
+        $(selector).html('');
+    }
+    if (index < text.length) {
+        // Append next character to text
+        $(selector).append(text[index]);
+
+        // Wait for the specified interval, then call typewriter function for the next character
+        setTimeout(function () {
+            typewriter(selector, text, index + 1, interval);
+        }, interval);
+    }
+}

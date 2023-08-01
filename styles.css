@@ -374,7 +374,10 @@ textarea {
     border-radius: 0.4rem;
     padding: 1rem 4rem;
     box-shadow: #000000c2 20px 20px 40px 2px;
-}
+    z-index: 10;
+    min-width: 60%;
+    min-height: 70%;
+    }
 
 .playModeDialogueContainer div{
     padding: 1rem;
@@ -386,6 +389,7 @@ div.dialogueLine{
     border: 1px solid whitesmoke;
     padding: 4rem;
     background-color: #000000;
+    min-height: 10vh;
 }
 
 .bottomLine{
