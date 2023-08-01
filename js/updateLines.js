@@ -46,10 +46,10 @@ function updateLines(element) {
   const theNodeInTheMasterObject = getDialogueNodeById(character, justTheIdNumber);
   const theParentNodeInTheMasterObject = getDialogueNodeById(character, justTheIdNumberForParent);
 
-  const characterToLoop = gameDialogueMakerProject.characters.find(char => char.characterID === character);
+  const characterToLoop = gameDialogueMakerProject.characters.find(char => char.characterID == character);
 
   if (characterToLoop && characterToLoop.hideChildren !== true) {
-    const startIndex = characterToLoop.dialogueNodes.findIndex(d => d.dialogueID === justTheIdNumberForParent);
+    const startIndex = characterToLoop.dialogueNodes.findIndex(d => d.dialogueID == justTheIdNumberForParent);
     for (let i = startIndex; i < characterToLoop.dialogueNodes.length; i++) {
       let node = characterToLoop.dialogueNodes[i];
       node.outgoingLines.forEach(line => updateLineElem(line.lineElem));

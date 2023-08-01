@@ -564,14 +564,28 @@ function getAllConnectedLines(characterID, fromDialogueID) {
         // Otherwise, start from the specified dialogue node
         let lines = [];
 
-        // Find the incoming line to this node
-        character.dialogueNodes.forEach(node => {
-            node.outgoingLines.forEach(line => {
-                if (line.toNode == fromDialogueID) {
-                    lines.push(line);
-                }
-            })
+        // Check the outgoing lines of the character
+        character.outgoingLines.forEach(line => {
+            if (line.toNode == fromDialogueID) {
+                lines.push(line);
+            }
         });
+
+        // Make sure character.dialogueNodes is defined and is an array
+        if (character.dialogueNodes && Array.isArray(character.dialogueNodes)) {
+            // Find the incoming line to this node
+            character.dialogueNodes.forEach(node => {
+                node.outgoingLines.forEach(line => {
+                    if (line.toNode == fromDialogueID) {
+                        lines.push(line);
+                    }
+                })
+            });
+        } else {
+            console.error('character.dialogueNodes is not defined or not an array');
+            // handle the error case here...
+            // return, throw an error, or continue with an empty lines array, as appropriate
+        }
 
         // Add all connected lines downstream
         lines = lines.concat(getLinesRecursively(character.dialogueNodes, fromDialogueID));
@@ -579,7 +593,6 @@ function getAllConnectedLines(characterID, fromDialogueID) {
         return lines;
     }
 }
-
 
 
 
