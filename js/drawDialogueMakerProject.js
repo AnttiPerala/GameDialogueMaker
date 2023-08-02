@@ -26,7 +26,7 @@ function drawDialogueMakerProject() {
         let targetNode = dialogueNodeMap[outgoingLine.toNode];
         if (targetNode) {
           dialogueNode.children.push(targetNode);
-          childNodeIds.add(targetNode.dialogueID);
+          childNodeIds.add(targetNode.dialogueID); // stores all the dialogue node ids that are children of other dialogue nodes
         }
       });
     });
@@ -35,6 +35,7 @@ function drawDialogueMakerProject() {
     character.dialogueNodes.forEach((dialogueNode) => {
       if (!childNodeIds.has(dialogueNode.dialogueID)) {
         let dialogueElem = createDialogueHTMLElement(dialogueNode);
+        dialogueElem.css({ top: dialogueNode.dialogueNodeY + "px", left: dialogueNode.dialogueNodeX + "px" }); // Setting position here
         characterElem.append(dialogueElem);
         appendChildren(dialogueElem, dialogueNode);
       }
@@ -43,18 +44,39 @@ function drawDialogueMakerProject() {
     function appendChildren(element, node) {
       node.children.forEach((childNode) => {
         let childElem = createDialogueHTMLElement(childNode);
+        childElem.css({ top: childNode.dialogueNodeY + "px", left: childNode.dialogueNodeX + "px" }); // Setting position here
         element.append(childElem);
         appendChildren(childElem, childNode);
       });
     }
-  });
 
+   
+
+  });
 
   $('#mainArea').html(wrapper);
 
-  $('.characterRoot').draggable(draggableSettings);
+  $('.characterRoot').draggable(draggableSettings).css({position: "absolute" });
 
-  $('.dialogue').draggable(draggableSettings);
+  $('.dialogue').draggable(draggableSettings).css({position: "absolute" });
+
+
+/* A SECOND ITERATION FOR DRAWING THE LINES IS NEEDED, BECAUSE THEY DIALOGUES NEED TO ALREADY BE IN THE DOM WHEN THE LINES ARE CREATED */
+
+  gameDialogueMakerProject.characters.forEach((character) => {
+    if (character.hideChildren !== true) {
+      drawOutgoingLines(character, true); // true because it's a character
+      character.dialogueNodes.forEach((dialogueNode) => {
+        drawOutgoingLines(dialogueNode, false); // false because it's a dialogueNode
+      });
+    }
+  });
+
+  function drawOutgoingLines(node, isCharacter) {
+    node.outgoingLines.forEach((outgoingLine) => {
+      drawLines((node.dialogueID || node.characterID), outgoingLine.toNode, isCharacter, outgoingLine);
+    });
+  }
 
 } // end function drawDialogueMakerProject
 
@@ -68,7 +90,7 @@ const draggableSettings = {
     var position = ui.position;
     //myLog(("Element stopped at: (" + position.left + ", " + position.top + ")"),3);
     // Your code to update some other element or data
-    //updateElementPositionInObject(ui.helper); //update master object positions
+    updateElementPositionInObject(ui.helper); //update master object positions
     $(".conditionCircle").show(); //bring the circle visibility back up
   },
 }
@@ -90,7 +112,7 @@ function createCharacterNodeHTML(character){
   }
 
   let characterNodeHTML = $(`
-          <div class="blockWrap characterRoot" data-id="${character.characterID}">
+          <div class="blockWrap characterRoot" data-id="${character.characterID}" id="char${character.characterID}">
             <div class="contentWrap">
                 <div style="display: flex; align-items:center; justify-content: center;">
           
@@ -112,6 +134,65 @@ function createCharacterNodeHTML(character){
 
         `);
 
+  characterNodeHTML.css({
+    left: character.characterNodeX,
+    top: character.characterNodeY,
+  });
+
   return characterNodeHTML;
 
 }/*End createCharacterNodeHTML  */
+
+
+/* DRAWING THE LINES */
+
+function drawLines(sourceId, targetId, isCharacter, outgoingLine) {
+  let sourceElement, targetElement;
+
+  if (isCharacter) {
+    sourceElement = $("#char" + sourceId);
+  } else {
+    sourceElement = $("#dialogue" + sourceId);
+  }
+
+  targetElement = $("#dialogue" + targetId);
+
+  // Find the end node itself in the object
+  let lineEndNode = gameDialogueMakerProject.characters.find(
+    character => character.dialogueNodes.some(dialogueNode => dialogueNode.dialogueID == targetId)
+  ).dialogueNodes.find(dialogueNode => dialogueNode.dialogueID == targetId);
+
+  // Reference the stored DOM element
+  let lineEndNodeElement = lineEndNode ? lineEndNode.nodeElement : "";
+
+  // Get the top socket
+  let lineEndElementTopSocket = $(lineEndNodeElement).find(".topConnectionSocket"); // does this find too many children. Probably but we can just use the first one.
+
+  // Set the socket to contain a line. eq will make sure we only talk to the first found child (because other nodes can be children too)
+  $(lineEndElementTopSocket).eq(0).attr('data-hasline', 'true');
+
+  // Create a new point anchor
+  var endPointAnchor = LeaderLine.pointAnchor(
+    lineEndElementTopSocket.get(0),
+    { x: 8, y: 8 }
+  );
+
+  let theLine = new LeaderLine(
+    sourceElement.get(0), // get(0) converts jQuery object to regular DOM object
+    endPointAnchor,
+    {
+      color: "#0075ff",
+      size: 4,
+      dash: false,
+      path: "straight", // default is straight, arc, fluid, magnet, grid
+      startSocket: "bottom",
+      endSocket: "bottom",
+      endPlug: "disc",
+    }
+  );
+
+  // Stores a reference to the actual line into the object
+  outgoingLine.lineElem = theLine;
+
+  return theLine;
+}

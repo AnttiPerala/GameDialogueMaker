@@ -102,13 +102,13 @@ function createDialogueHTMLElement(dialogueNode) {
                 <div style="display: flex; align-items:center; justify-content: center;">
                     <div class="topConnectionSocket" data-hasline="false"><div class="roundSocket"></div></div>
                 </div>
-                    <div id="id${dialogueNode.dialogueID}" class="block">
+                    <div id="id${dialogueNode.dialogueID}" class="block" style="background-color: ${dialogueNode.bgColor};">
                         <div style="text-align: left;">
                             <span style="width: 15%; display:inline-block; text-align: right;">ID:</span><input class="blockid"
                                 style="width: 15%; display:inline-block;" readonly type="number" value="${dialogueNode.dialogueID}">
                         </div>
                         ${selectElementContentBasedOnParentBlockType}
-                        <textarea class="dialogue" placeholder="${dialoguePlaceholderBasedOnParentBlockType}" data-autoresize>${dialogueNode.dialogueText}</textarea>
+                        <textarea class="dialogueTextArea" placeholder="${dialoguePlaceholderBasedOnParentBlockType}" data-autoresize>${dialogueNode.dialogueText}</textarea>
                         <div>
                         <div class="optionsUnderDialogue" style="text-align: right;">
                             <div class="option1">${blockOptionsOption1}</div>
