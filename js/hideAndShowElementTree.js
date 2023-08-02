@@ -5,7 +5,7 @@ $(document).on('click', '.eyeImage', function(event) {
 
     //console.log(` currentImage: ${currentImage}`);
 
-    let characterNodeInObject = findCharacterNodeBasedOnPassedInHtmlElement(this);
+    let characterNodeInObject = getInfoByPassingInDialogueNodeOrElement(this).characterNode;
 
 
     if (currentImage === 'img/iconmonstr-eye-off-filled-32.png') {

@@ -125,6 +125,8 @@ function createDialogueHTMLElement(dialogueNode) {
                 </div>
                         `);
 
+
+
     return dialogueNode.nodeElement;
 }
 

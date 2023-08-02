@@ -50,15 +50,15 @@ function drawDialogueMakerProject() {
       });
     }
 
-   
+
 
   });
 
   $('#mainArea').html(wrapper);
 
-  $('.characterRoot').draggable(draggableSettings).css({position: "absolute" });
+  $('.characterRoot').draggable(draggableSettings).css({ position: "absolute" });
 
-  $('.dialogue').draggable(draggableSettings).css({position: "absolute" });
+  $('.dialogue').draggable(draggableSettings).css({ position: "absolute" });
 
 
 /* A SECOND ITERATION FOR DRAWING THE LINES IS NEEDED, BECAUSE THEY DIALOGUES NEED TO ALREADY BE IN THE DOM WHEN THE LINES ARE CREATED */
