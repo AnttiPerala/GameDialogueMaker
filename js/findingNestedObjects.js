@@ -427,6 +427,104 @@ function findCharacterIDByPassingInDialogueNode(dialogueNode) {
 }
 
 
+/* UNIVERSAL SYSTEM */
+function getInfoByPassingInDialogueNodeOrElement(input) {
+    let dialogueNode = input;
+    let isCharacter = false;
+    let id, characterId;
+
+    // If the input is a jQuery object/DOM element
+    if (input.jquery || input instanceof HTMLElement) {
+        // Check if it has id attribute
+        if ($(input).attr('id')) {
+            id = $(input).attr('id');
+        } else {
+            // Otherwise, find the closest '.blockWrap' and get its id
+            id = $(input).closest('.blockWrap').attr('id');
+        }
+        isCharacter = id.startsWith("char");
+
+        // Find the closest .characterRoot and get its id
+        if (!isCharacter) {
+            characterId = $(input).closest('.characterRoot').attr('id').replace('char', '');
+        }
+
+        let strippedId = id.replace(/(char|dialogue)/, '');
+
+        for (let character of gameDialogueMakerProject.characters) {
+            if (isCharacter) {
+                if (character.characterID == strippedId) {
+                    return {
+                        characterID: id,
+                        characterName: character.characterName,
+                        characterNode: character,
+                        dialogueID: null,
+                        dialogueNode: null,
+                        isCharacter: true
+                    };
+                }
+            } else {
+                for (let node of character.dialogueNodes) {
+                    if (node.dialogueID == strippedId) {
+                        dialogueNode = node;
+                        break;
+                    }
+                }
+            }
+        }
+
+        // If a matching dialogueNode was found and a characterId was obtained from the DOM
+        if (dialogueNode && characterId) {
+            for (let character of gameDialogueMakerProject.characters) {
+                if (character.characterID == characterId) {
+                    return {
+                        characterID: 'char' + characterId,
+                        characterName: character.characterName,
+                        characterNode: character,
+                        dialogueID: 'dialogue' + dialogueNode.dialogueID,
+                        dialogueNode: dialogueNode,
+                        isCharacter: false
+                    };
+                }
+            }
+        }
+    }
+
+
+    // If the input is a dialogueNode object
+    if (dialogueNode && dialogueNode.dialogueID) {
+        for (let character of gameDialogueMakerProject.characters) {
+            if (character.dialogueNodes) {
+                for (let node of character.dialogueNodes) {
+                    if (node === dialogueNode) {
+                        return {
+                            characterID: character.characterID,
+                            characterName: character.characterName,
+                            characterNode: character,
+                            dialogueID: dialogueNode.dialogueID,
+                            dialogueNode: dialogueNode,
+                            isCharacter: false
+                        };
+                    }
+                }
+            }
+        }
+    }
+
+
+    // No matching character or dialogue node was found
+    return {
+        characterID: null,
+        characterName: null,
+        characterNode: null,
+        dialogueID: null,
+        dialogueNode: null,
+        isCharacter: false
+    };
+}
+
+
+
 
 //UPDATE THE DIALOGUE ID's WHILE MAINTAINING THE CORRECT LINE RELATIONSHIPS
 
