@@ -75,12 +75,15 @@ generator.next().value; //move from sent in node once
 
         // Call the typewriter function for the dialogue text
         typewriter('#dialogueLine', dialogueNodeInObject.dialogueText, 0, 20, function () {
-            if ((dialogueNodeInObject.nextNode === -1 || dialogueNodeInObject.nextNode === "" ||
-                dialogueNodeInObject.nextNode === null || dialogueNodeInObject.nextNode === undefined) &&
-                dialogueNodeInObject.outgoingLines.length === 0) {
-                $('#dialogueLine').append('<button id="restartButton">Restart Dialogue</button>');
+            if ((dialogueNodeInObject.nextNode !== -1 && dialogueNodeInObject.nextNode !== "" &&
+                dialogueNodeInObject.nextNode !== null && dialogueNodeInObject.nextNode !== undefined)) {
+                $('.answerLine').append('<button id="nextButton">Next</button>');
             }
-        });  // 20ms delay between characters
+            else if (dialogueNodeInObject.outgoingLines.length === 0) {
+                $('.answerLine').append('<button id="restartButton">Restart Dialogue</button>');
+            }
+        }); 
+
 
         $(document).off('click', '.answerButton');
         $(document).on('click', '.answerButton', function () {
@@ -181,6 +184,15 @@ generator.next().value; //move from sent in node once
     }
 /* end moveNext */
 
+    $(document).off('click', '#nextButton').on('click', '#nextButton', function () {
+        console.log('next');
+        moveNext();
+    });
+
+
+
+
+
     $(document).off('click', '#restartButton').on('click', '#restartButton', function () {
         // Reset your dialogue to the beginning here
         startPlayMode();
@@ -225,6 +237,4 @@ function typewriter(id, text, index, time, callback) {
         typeWriterInner(id, text, index, time, callback); 
     }
 }
-
-
 
