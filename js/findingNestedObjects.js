@@ -31,7 +31,7 @@ function getCharacterById(id) {
 
 function findDialogueObjectBasedOnPassedInHtmlElement(elem){
 
-    //console.log('inside findDialogueObjectBasedOnPassedInHtmlElement and elem classlist is:' + $(elem).classList + ' and elem html is: ' + $(elem).html());
+    console.log('inside findDialogueObjectBasedOnPassedInHtmlElement and elem  is:', elem);
 
     //this one is passed in text fields and inputs from the dialogue node
 
@@ -64,6 +64,7 @@ function findDialogueObjectBasedOnPassedInHtmlElement(elem){
 }
 
 function findCharacterNodeBasedOnPassedInHtmlElement(elem) {
+    console.log('inside findCharacterNodeBasedOnPassedInHtmlElement, elem is: ', elem);
 
     let characterID;
 
@@ -478,6 +479,9 @@ function reparentNodeAndDescendants(startNode, oldParentId, newParentId, nextId,
 
     // This will temporarily hold the nodes to be transferred
     let tempArray = [];
+
+    console.log('oldParentId', oldParentId);
+    console.log('newParentId', newParentId);
 
     // Find the parent characters
     const oldParent = gameDialogueMakerProject.characters.find(character => character.characterID == oldParentId);
