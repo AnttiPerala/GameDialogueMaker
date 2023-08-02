@@ -65,16 +65,16 @@ function drawDialogueMakerProject() {
 
   gameDialogueMakerProject.characters.forEach((character) => {
     if (character.hideChildren !== true) {
-      drawOutgoingLines(character, true); // true because it's a character
+      drawOutgoingLines(character, true, character.characterID); // true because it's a character
       character.dialogueNodes.forEach((dialogueNode) => {
-        drawOutgoingLines(dialogueNode, false); // false because it's a dialogueNode
+        drawOutgoingLines(dialogueNode, false, character.characterID); // false because it's a dialogueNode
       });
     }
   });
 
-  function drawOutgoingLines(node, isCharacter) {
+  function drawOutgoingLines(node, isCharacter, characterId) {
     node.outgoingLines.forEach((outgoingLine) => {
-      drawLines((node.dialogueID || node.characterID), outgoingLine.toNode, isCharacter, outgoingLine);
+      drawLines((node.dialogueID || node.characterID), outgoingLine.toNode, isCharacter, outgoingLine, characterId);
     });
   }
 
@@ -84,7 +84,7 @@ function drawDialogueMakerProject() {
 const draggableSettings = {
   drag: function (event, ui) {
     //console.log('dragging');
-    //updateLines(ui.helper); //called only when dragged
+    updateLines(ui.helper); //called only when dragged
   },
   stop: function (event, ui) {
     var position = ui.position;
@@ -146,13 +146,15 @@ function createCharacterNodeHTML(character){
 
 /* DRAWING THE LINES */
 
-function drawLines(sourceId, targetId, isCharacter, outgoingLine) {
-  let sourceElement, targetElement;
+function drawLines(sourceId, targetId, isCharacter, outgoingLine, characterId) {
+  let sourceElement, targetElement, plusButtonElem;
 
   if (isCharacter) {
     sourceElement = $("#char" + sourceId);
+    plusButtonElem = $(sourceElement).find(".blockPlusButton").eq(outgoingLine.fromSocket);
   } else {
     sourceElement = $("#dialogue" + sourceId);
+    plusButtonElem = $(sourceElement).find(".blockPlusButton").eq(outgoingLine.fromSocket);
   }
 
   targetElement = $("#dialogue" + targetId);
@@ -178,7 +180,7 @@ function drawLines(sourceId, targetId, isCharacter, outgoingLine) {
   );
 
   let theLine = new LeaderLine(
-    sourceElement.get(0), // get(0) converts jQuery object to regular DOM object
+    plusButtonElem.get(0), // get(0) converts jQuery object to regular DOM object
     endPointAnchor,
     {
       color: "#0075ff",
@@ -194,5 +196,63 @@ function drawLines(sourceId, targetId, isCharacter, outgoingLine) {
   // Stores a reference to the actual line into the object
   outgoingLine.lineElem = theLine;
 
+  //set the id also of the svg for easier selection
+  const all_svgs = document.querySelectorAll("svg");
+  const this_svg = all_svgs[all_svgs.length - 1]; //this will select the latest svg
+  this_svg.setAttribute(
+    "data-character",
+    characterId
+  );
+  this_svg.setAttribute("data-fromnode", sourceId);
+  this_svg.setAttribute("data-tonode", targetId);
+
+  let selectTheSVGInDOM = $(
+    'svg[data-fromnode="' +
+    sourceId +
+    '"][data-tonode="' +
+    targetId +
+    '"][data-character="' +
+    characterId +
+    '"]'
+  );
+
+  let thePath = $(selectTheSVGInDOM).find(".leader-line-line-path");
+  //Should we also save the SVG element in the object? I think the proble here is that we are trying to find the svg path from the object and not from DOM..
+
+  //const path = document.getElementById('leader-line-5-line-path');
+  const midpoint = drawConditionCircle(
+    thePath.get(0),
+    characterId,
+    sourceId,
+    targetId
+  );
+
+  // Loop through the transition conditions of the current outgoing line and add a 'withCondition' class to the corresponding circles
+  for (let l = 0; l < outgoingLine.transitionConditions.length; l++) {
+    let transitionCondition = outgoingLine.transitionConditions[l];
+    // Do something with the transition condition, e.g. compare the variable value to the variable name using the comparison operator
+    //myLog(` Transition found, it's number is ${l}`, 1, fileInfo = getFileInfo());
+
+    //select the matching circle from DOM
+    let theCircleinDOM = $(
+      '.conditionCircle[data-fromnode="' +
+      sourceId +
+      '"][data-tonode="' +
+      targetId +
+      '"][data-character="' +
+      characterId +
+      '"]'
+    );
+
+    theCircleinDOM.addClass("withCondition");
+    theCircleinDOM.attr(
+      "title",
+      "Click to change the condition for the transition"
+    );
+
+    //how can we connect the transition condition to a line? Well we should have a reference to the line element already in the object
+  }
+
   return theLine;
+
 }
