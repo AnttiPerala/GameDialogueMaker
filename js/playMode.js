@@ -39,7 +39,6 @@ generator.next().value; //move from sent in node once
     function renderPlayMode(charName, dialogueNodeInObject) {
         $('.playModeDialogueContainer').remove();
         let answerElements = ``;
-        let conditionButtons = '';
         if (dialogueNodeInObject.dialogueType == 'question') {
             answerElements = "";
             let character = gameDialogueMakerProject.characters.find(character => character.characterID == charID);
@@ -49,12 +48,6 @@ generator.next().value; //move from sent in node once
                 if (answerNode) {
                     let reactionNodeId = answerNode.outgoingLines[0]?.toNode;
                     answerElements += `<button class="answerButton" data-reaction-node="${reactionNodeId}">${answerNode.dialogueText}</button>`;
-                }
-                if (outgoingLine.transitionConditions && outgoingLine.transitionConditions.length > 0) {
-                    for (let j = 0; j < outgoingLine.transitionConditions.length; j++) {
-                        let condition = outgoingLine.transitionConditions[j];
-                        conditionButtons += `<button class="conditionButton" data-variable-name="${condition.variableName}" data-comparison-operator="${condition.comparisonOperator}" data-variable-value="${condition.variableValue}">Complete condition: ${condition.variableName} ${condition.comparisonOperator} ${condition.variableValue}</button>`;
-                    }
                 }
             }
         }
@@ -68,7 +61,6 @@ generator.next().value; //move from sent in node once
         </div>
         <div class="answerLine"> 
         ${answerElements}
-        ${conditionButtons}
         </div>
         <div class="bottomLine">
         <div id="leftArrow" class="gridCell">&lsaquo;</div>
@@ -79,11 +71,30 @@ generator.next().value; //move from sent in node once
     `);
         $('body').append(playModeDialogueContainer);
 
-        // Call the typewriter function for the dialogue text
-        typewriter('#dialogueLine', dialogueNodeInObject.dialogueText, 0, 50); // 50ms delay between characters
+        
 
-      
-    } 
+        // Call the typewriter function for the dialogue text
+        typewriter('#dialogueLine', dialogueNodeInObject.dialogueText, 0, 20, function () {
+            if ((dialogueNodeInObject.nextNode === -1 || dialogueNodeInObject.nextNode === "" ||
+                dialogueNodeInObject.nextNode === null || dialogueNodeInObject.nextNode === undefined) &&
+                dialogueNodeInObject.outgoingLines.length === 0) {
+                $('#dialogueLine').append('<button id="restartButton">Restart Dialogue</button>');
+            }
+        });  // 20ms delay between characters
+
+        $(document).off('click', '.answerButton');
+        $(document).on('click', '.answerButton', function () {
+            let reactionNodeId = $(this).data('reaction-node');
+            let character = gameDialogueMakerProject.characters.find(character => character.characterID == charID);
+            let reactionNode = character.dialogueNodes.find(node => node.dialogueID == reactionNodeId);
+            if (reactionNode) {
+                dialogueNodeInObject = reactionNode;
+                renderPlayMode(charName, dialogueNodeInObject);
+            } else {
+                console.error(`Could not find reaction node with ID: ${reactionNodeId}`);
+            }
+        });
+    }
 
 
 //end render play mode
@@ -147,6 +158,14 @@ generator.next().value; //move from sent in node once
                 generator = iterateConnectedNodes(dialogueNodeInObject, charID);
                 generator.next();
                 renderPlayMode(charName, dialogueNodeInObject);
+
+                // Check if the next node is the last one
+                if ((dialogueNodeInObject.nextNode === -1 || dialogueNodeInObject.nextNode === "" ||
+                    dialogueNodeInObject.nextNode === null || dialogueNodeInObject.nextNode === undefined) &&
+                    dialogueNodeInObject.outgoingLines.length === 0) {
+                    // Append the restart button to the dialogue line
+                    $('#dialogueLine').append('<button id="restartButton">Restart Dialogue</button>');
+                }
             } else {
                 console.error(`Could not find node with ID: ${nextNodeId}`);
             }
@@ -160,7 +179,12 @@ generator.next().value; //move from sent in node once
             }
         }
     }
+/* end moveNext */
 
+    $(document).off('click', '#restartButton').on('click', '#restartButton', function () {
+        // Reset your dialogue to the beginning here
+        startPlayMode();
+    });
     
 
     //currentNode = dialogueNodeInObject; // Assuming startNode is your starting node
@@ -177,17 +201,30 @@ function handleAnswerClick(toNodeId) {
 }
 
 /* ANIM TYPEWRITER STYLE */
-function typewriter(selector, text, index, interval) {
-    if (index === 0) {
-        $(selector).html('');
-    }
-    if (index < text.length) {
-        // Append next character to text
-        $(selector).append(text[index]);
+let isTyping = false; // global variable to track if the typewriter is currently typing
 
-        // Wait for the specified interval, then call typewriter function for the next character
-        setTimeout(function () {
-            typewriter(selector, text, index + 1, interval);
-        }, interval);
+function typewriter(id, text, index, time, callback) {
+    $(id).html(""); // Clear the content before typing
+    function typeWriterInner(id, text, index, time, callback) {
+        // Add condition to stop appending
+        if (index < text.length) {
+            setTimeout(function () {
+                let char = text.charAt(index);
+                $(id).append(char);
+                typeWriterInner(id, text, ++index, time, callback);
+            }, time);
+        } else {
+            isTyping = false; // set isTyping to false when done typing
+            // Call the callback function when the typing is done
+            if (callback) callback();
+        }
+    }
+
+    if (!isTyping) { // only start typing if not currently typing
+        isTyping = true;
+        typeWriterInner(id, text, index, time, callback); 
     }
 }
+
+
+
