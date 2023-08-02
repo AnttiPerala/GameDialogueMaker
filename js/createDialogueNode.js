@@ -1,8 +1,8 @@
-function createDialogueNode(nodeElement, dialogueIDSent, dialogueType, dialogueText, nextNode, dialogueNodeX, dialogueNodeY, outgoingSockets, outgoingLines) {
+function createDialogueHTMLElement(dialogueNode) {
     let activeNextNode = '';
 
-    if (nextNode > 0){ //only display the number if it's greater than zero
-        activeNextNode = nextNode;
+    if (dialogueNode.nextNode > 0){ //only display the number if it's greater than zero
+        activeNextNode = dialogueNode.nextNode;
     }
 
     //answers should have read-only selects
@@ -15,13 +15,13 @@ function createDialogueNode(nodeElement, dialogueIDSent, dialogueType, dialogueT
     let blockOptionsOption3 = `<span style="text-align: right;" title="Optional value. Use this if you want to take the conversation to some other node from here.">Next:</span><input class="next"
     style="display:inline-block;" type="number" value="${activeNextNode}">`;
     //if we have a line going out from the node, then we remove the next input:
-    if (outgoingLines.length > 0){
+    if (dialogueNode.outgoingLines.length > 0){
         blockOptionsOption3 = ''; //make the next element empty
     }
     let singlePlusButton = '<div class="blockPlusButton" data-buttonindex=0 data-acceptclicks=true>+</div>';
     let plusButtons = singlePlusButton;
 
-    if (dialogueType == "line") {
+    if (dialogueNode.dialogueType == "line") {
 
         selectElementContentBasedOnParentBlockType = `
 
@@ -37,7 +37,7 @@ function createDialogueNode(nodeElement, dialogueIDSent, dialogueType, dialogueT
         //console.log(`inside line and storyIdToAssignBasedOnBlockType: ${storyIdToAssignBasedOnBlockType} the storyId was:  ${storyId}`);
 
 
-    } else if (dialogueType == "question") { //note that the previous node was a question so now we are actually creating an answer
+    } else if (dialogueNode.dialogueType == "question") { //note that the previous node was a question so now we are actually creating an answer
 
 
 
@@ -54,18 +54,18 @@ function createDialogueNode(nodeElement, dialogueIDSent, dialogueType, dialogueT
         blockOptionsOption1 =
 
             `
-            Answers: <input class="answerNumber" type="number" min="2" max="9" value=${outgoingSockets}>
+            Answers: <input class="answerNumber" type="number" min="2" max="9" value=${dialogueNode.outgoingSockets}>
         `;
 
         //add as many plus buttons as there are outgoingSockets
-        for (i = 1; i < outgoingSockets; i++) {
+        for (i = 1; i < dialogueNode.outgoingSockets; i++) {
 
             plusButtons += `<div class="blockPlusButton" data-buttonindex=${i} data-acceptclicks=true>+</div>`;
 
         }
 
 
-    } else if (dialogueType == "answer") {
+    } else if (dialogueNode.dialogueType == "answer") {
 
         selectElementContentBasedOnParentBlockType = `
 
@@ -77,7 +77,7 @@ function createDialogueNode(nodeElement, dialogueIDSent, dialogueType, dialogueT
         dialoguePlaceholderBasedOnParentBlockType = "Type the answer option here";
 
 
-    } else if (dialogueType == "fight") {
+    } else if (dialogueNode.dialogueType == "fight") {
 
 
         selectElementContentBasedOnParentBlockType = `
@@ -94,21 +94,21 @@ function createDialogueNode(nodeElement, dialogueIDSent, dialogueType, dialogueT
 
 
     //myLog(`dialogueIDSent: ${dialogueIDSent}`, 0, fileInfo = getFileInfo());
-    nodeElement.get(0).id = `dialogue${dialogueIDSent}`;
-    nodeElement.get(0).classList = "blockWrap";
-    nodeElement.html(`
+    dialogueNode.nodeElement.get(0).id = `dialogue${dialogueNode.dialogueID}`;
+    dialogueNode.nodeElement.get(0).classList = "blockWrap dialogue";
+    dialogueNode.nodeElement.html(`
 
                 <div class="contentWrap">
                 <div style="display: flex; align-items:center; justify-content: center;">
                     <div class="topConnectionSocket" data-hasline="false"><div class="roundSocket"></div></div>
                 </div>
-                    <div id="id${dialogueIDSent}" class="block">
+                    <div id="id${dialogueNode.dialogueID}" class="block">
                         <div style="text-align: left;">
                             <span style="width: 15%; display:inline-block; text-align: right;">ID:</span><input class="blockid"
-                                style="width: 15%; display:inline-block;" readonly type="number" value="${dialogueIDSent}">
+                                style="width: 15%; display:inline-block;" readonly type="number" value="${dialogueNode.dialogueID}">
                         </div>
                         ${selectElementContentBasedOnParentBlockType}
-                        <textarea class="dialogue" placeholder="${dialoguePlaceholderBasedOnParentBlockType}" data-autoresize>${dialogueText}</textarea>
+                        <textarea class="dialogue" placeholder="${dialoguePlaceholderBasedOnParentBlockType}" data-autoresize>${dialogueNode.dialogueText}</textarea>
                         <div>
                         <div class="optionsUnderDialogue" style="text-align: right;">
                             <div class="option1">${blockOptionsOption1}</div>
@@ -125,6 +125,6 @@ function createDialogueNode(nodeElement, dialogueIDSent, dialogueType, dialogueT
                 </div>
                         `);
 
-    return nodeElement;
+    return dialogueNode.nodeElement;
 }
 
