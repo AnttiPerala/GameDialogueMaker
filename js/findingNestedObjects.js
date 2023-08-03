@@ -433,6 +433,8 @@ function getInfoByPassingInDialogueNodeOrElement(input) {
     let isCharacter = false;
     let id, characterId;
 
+    console.log('inside getInfoByPassingInDialogueNodeOrElement, input is: ', input);
+
     // If the input is a jQuery object/DOM element
     if (input.jquery || input instanceof HTMLElement) {
         // Check if it has id attribute
@@ -455,7 +457,7 @@ function getInfoByPassingInDialogueNodeOrElement(input) {
             if (isCharacter) {
                 if (character.characterID == strippedId) {
                     return {
-                        characterID: id,
+                        characterID: strippedId,
                         characterName: character.characterName,
                         characterNode: character,
                         dialogueID: null,
@@ -478,10 +480,10 @@ function getInfoByPassingInDialogueNodeOrElement(input) {
             for (let character of gameDialogueMakerProject.characters) {
                 if (character.characterID == characterId) {
                     return {
-                        characterID: 'char' + characterId,
+                        characterID: strippedId,
                         characterName: character.characterName,
                         characterNode: character,
-                        dialogueID: 'dialogue' + dialogueNode.dialogueID,
+                        dialogueID: dialogueNode.dialogueID,
                         dialogueNode: dialogueNode,
                         isCharacter: false
                     };

@@ -16,16 +16,25 @@ function startPlayMode() {
 
     let selectedElementBlockWrap = selectedElement.closest('.blockWrap');
 
-    let dialogueNodeInObject = findMatchingDialogueNodeInObjectFromPassedInBlockwrap(selectedElementBlockWrap);
+    console.log('selectedElementBlockWrap', selectedElementBlockWrap);
 
-    let charID = findCharacterIDByPassingInDialogueNode(dialogueNodeInObject);
+    let nodeInfo = getInfoByPassingInDialogueNodeOrElement(selectedElementBlockWrap);
 
-    let charName = getCharacterNameFromDialogueNode(dialogueNodeInObject);
+    console.log('nodeInfo: ', nodeInfo);
+
+    let dialogueNodeInObject = nodeInfo.dialogueNode;
+
+    let charID = nodeInfo.characterID;
+
+    let charName = nodeInfo.characterName;
 
     //handle selected element being root
     if (selectedElementBlockWrap.hasClass('characterRoot')){
         console.log(`root`);
-        let nextNodeID = dialogueNodeInObject.outgoingLines[0].toNode;
+        console.log('nodeInfo.characterNode', nodeInfo.characterNode);
+        let nextNodeID = nodeInfo.characterNode.outgoingLines[0].toNode;
+        console.log('charID ', charID);
+        console.log('nextNodeID', nextNodeID);
         let nextNodeInObject = getDialogueNodeById(charID, nextNodeID);
         dialogueNodeInObject = nextNodeInObject ?? dialogueNodeInObject; //The nullish coalescing operator ?? checks if nextNodeInObject is null or undefined. If nextNodeInObject is null or undefined, it returns the value on the right-hand side
 
