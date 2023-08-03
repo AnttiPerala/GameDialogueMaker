@@ -433,7 +433,7 @@ function getInfoByPassingInDialogueNodeOrElement(input) {
     let isCharacter = false;
     let id, characterId;
 
-    console.log('inside getInfoByPassingInDialogueNodeOrElement, input is: ', input);
+    //console.log('inside getInfoByPassingInDialogueNodeOrElement, input is: ', input);
 
     // If the input is a jQuery object/DOM element
     if (input.jquery || input instanceof HTMLElement) {
@@ -449,15 +449,17 @@ function getInfoByPassingInDialogueNodeOrElement(input) {
         // Find the closest .characterRoot and get its id
         if (!isCharacter) {
             characterId = $(input).closest('.characterRoot').attr('id').replace('char', '');
+        } else {
+            characterId = $(input).attr('id').replace('char', '');
         }
 
         let strippedId = id.replace(/(char|dialogue)/, '');
 
         for (let character of gameDialogueMakerProject.characters) {
             if (isCharacter) {
-                if (character.characterID == strippedId) {
+                if (character.characterID == characterId) {
                     return {
-                        characterID: strippedId,
+                        characterID: characterId,
                         characterName: character.characterName,
                         characterNode: character,
                         dialogueID: null,
@@ -480,7 +482,7 @@ function getInfoByPassingInDialogueNodeOrElement(input) {
             for (let character of gameDialogueMakerProject.characters) {
                 if (character.characterID == characterId) {
                     return {
-                        characterID: strippedId,
+                        characterID: characterId,
                         characterName: character.characterName,
                         characterNode: character,
                         dialogueID: dialogueNode.dialogueID,
@@ -586,6 +588,9 @@ function reparentNodeAndDescendants(startNode, oldParentId, newParentId, nextId,
     // Find the parent characters
     const oldParent = gameDialogueMakerProject.characters.find(character => character.characterID == oldParentId);
     const newParent = gameDialogueMakerProject.characters.find(character => character.characterID == newParentId);
+
+    console.log('oldParent', oldParent);
+    console.log('newParent', newParent);
 
     // First, generate new IDs for all the nodes and build the oldToNewIds mapping
     for (let dialogueNode of iterateConnectedNodes(startNode, oldParentId)) {

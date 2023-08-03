@@ -1,6 +1,11 @@
 function mousedownOverTopConnectionSocket(event, elem){
 
+    console.log('mousedownOverTopConnectionSocket, event was: ', event);
+    console.log('elem was: ', elem);
+
     var socketElement = $(elem);
+
+    let lineInfo;
 
     let line;
 
@@ -10,10 +15,12 @@ function mousedownOverTopConnectionSocket(event, elem){
 
     //let lineToNodeId; //already define in globalVars
 
-    let socketElementCharacterID = findCharacterIDByPassingInDialogueNode(elem);
+    let socketElementCharacterID = getInfoByPassingInDialogueNodeOrElement(elem).characterID;
 
     console.log('inside mousedownOverTopConnectionSocket, socketElement is: ', socketElement);
+    console.log('socketElementCharacterID ', socketElementCharacterID);
 
+    //the socket has a line so we should unplug:
     if ($(socketElement).attr("data-hasline") == 'true') {
         //hide the socket to help elementFromPoint
 
@@ -39,22 +46,24 @@ function mousedownOverTopConnectionSocket(event, elem){
             //console.log(`mouse over socket AND svg`);
 
             //use the info on the clicked line to select the correct line from the master object
-            lineCharacterId = $(myelement).attr('data-character');
+            disconnectedLineCharacterID = $(myelement).attr('data-character');
 
-            lineFromNodeId = $(myelement).attr('data-fromnode');
+            disconnectedLineFromNodeID = $(myelement).attr('data-fromnode');
 
-            lineToNodeId = $(myelement).attr('data-tonode');
+            disconnectedLineToNodeID = $(myelement).attr('data-tonode');
 
-            console.log(`lineCharacterId ${lineCharacterId} lineFromNodeId ${lineFromNodeId} lineToNodeId ${lineToNodeId}`);
+ 
+
+            console.log(`THIS is the disconnecte line's disconnectedLineCharacterID ${disconnectedLineCharacterID} disconnectedLineFromNodeID ${disconnectedLineFromNodeID} disconnectedLineToNodeID ${disconnectedLineToNodeID}`);
 
 
-            $(myelement).remove();
+            $(myelement).remove(); //remove because we will redraw
 
 
             //nah, let's try to get the actual element the original line is attached to 
             //we can start by finding the correct fromNode
 
-            let originalFromNode = getDialogueNodeById(lineCharacterId, lineFromNodeId);
+            let originalFromNode = getDialogueNodeById(disconnectedLineCharacterID, disconnectedLineFromNodeID);
 
             let originalFromNodeDomElem = originalFromNode.nodeElement;
 
@@ -108,8 +117,13 @@ function mousedownOverTopConnectionSocket(event, elem){
                 $(document).off('mousemove');
                 $(document).off('mouseup');
 
+                console.log('mouseup, should del line now: ');
+                console.log('disconnectedLineCharacterID', disconnectedLineCharacterID);
+                console.log('disconnectedLineFromNodeID', disconnectedLineFromNodeID);
+                console.log('disconnectedLineToNodeID', disconnectedLineToNodeID);
+
                 //delete the line from the master object
-                let theLineInTheObject = deleteLineFromObject(gameDialogueMakerProject, lineCharacterId, lineFromNodeId, lineToNodeId);
+                let theLineInTheObject = deleteLineFromObject(gameDialogueMakerProject, disconnectedLineCharacterID, disconnectedLineFromNodeID, disconnectedLineToNodeID);
 
                 //console.log('socketElement', socketElement);
                 $(socketElement).attr('data-hasline', 'false');
@@ -131,27 +145,19 @@ function mousedownOverTopConnectionSocket(event, elem){
             this.style.setProperty('pointer-events', 'none', 'important');
         });
 
-    } else { //only draw the line if the socket was empty
+    } else { //draw a line because the socket was empty
 
         currentlyDrawingALine = true;
 
-        objectNodeFromWhichWeAreDrawing =
-            findDialogueObjectBasedOnPassedInHtmlElement(
-                $(elem).closest(".blockWrap").find(".blockid") //gets the blockid input since the function needs a child element
-            );
+        let currentNodeInfo = getInfoByPassingInDialogueNodeOrElement($(elem).closest(".blockWrap"));
 
+        objectNodeFromWhichWeAreDrawing = currentNodeInfo.dialogueNode;
 
+        nodeIdFromWhichWeAreDrawing = currentNodeInfo.dialogueID;
 
-        nodeIdFromWhichWeAreDrawing = $(elem)
-            .closest(".blockWrap")
-            .find(".block")
-            .attr("id")
-            .replace(/\D/g, ""); //strip char from id;
+        characterIDFromWhichWeAreDrawing = currentNodeInfo.characterID;
 
-        characterNameFromWhichWeAreDrawing = $(elem)
-            .closest(".characterRoot")
-            .find(".characterName")
-            .val();
+        console.log('currentNodeInfo.characterID!!!!!!!!!', currentNodeInfo.characterID);
 
         line = new LeaderLine(
             socketElement[0], // Start of the line
@@ -172,23 +178,27 @@ function mousedownOverTopConnectionSocket(event, elem){
         const this_svg = all_svgs[all_svgs.length - 1]; //this will select the latest svg
         this_svg.setAttribute(
             "data-character",
-            socketElementCharacterID
+            characterIDFromWhichWeAreDrawing
         );
+
+         lineInfo = {
+
+            line: line,
+
+             lineCharacterId: characterIDFromWhichWeAreDrawing,
+
+             lineFromNodeId: nodeIdFromWhichWeAreDrawing,
+
+            lineToNodeId: null
+        }
+
+        currentlyDrawnLineInfo = lineInfo;
 
     } //end else for if ($(socketElement).attr('data-hasline') == 'true')
 
     event.stopPropagation();
 
-    let lineInfo = {
-
-        line: line,
-
-        lineCharacterId: socketElementCharacterID,
-
-        lineFromNodeId: lineFromNodeId,
-
-        lineToNodeId: lineToNodeId
-    }
+   
 
     return lineInfo;
 

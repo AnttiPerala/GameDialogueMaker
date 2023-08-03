@@ -91,8 +91,9 @@ function drawDialogueMakerProject() {
   })
 
   $(document).mousemove(function (e) {
-    //console.log('mousemove, line is ', line);
-    if (currentlyDrawingALine) {
+    //console.log('mousemove, line is ', currentlyDrawnLineInfo);
+    console.log('currentlyDrawingALine ', currentlyDrawingALine );
+    if (currentlyDrawingALine) { 
       // Update the end position of the line to follow the mouse
       line.setOptions({
         end: LeaderLine.pointAnchor({ x: e.pageX, y: e.pageY }),
@@ -323,9 +324,9 @@ function handleMouseDownOverTopConnectionSocket(event, myThis){
 
   currentlyDrawnLineInfo = mousedownOverTopConnectionSocket(event, myThis); //globalvar
 
-  console.log('lineInfo', lineInfo);
+  console.log('lineInfo', currentlyDrawnLineInfo);
 
-  line = lineInfo.line;
+  line = currentlyDrawnLineInfo.line;
 
   lineCharacterId = currentlyDrawnLineInfo.lineCharacterId; //lineCharacterId is defined in globalVars
 
@@ -336,8 +337,11 @@ function handleMouseDownOverTopConnectionSocket(event, myThis){
 };
 
 function handleDocumentMouseUp(event, myThis){
+  console.log('handleDocumentMouseUp', event );
+  console.log('currentlyDrawingALine is: ', currentlyDrawingALine);
   if (currentlyDrawingALine) {
     // Get the element under the cursor
+    
     var elementUnderCursor = document.elementFromPoint(event.clientX, event.clientY);
 
     // Get the jQuery object for the element under the cursor
@@ -349,11 +353,12 @@ function handleDocumentMouseUp(event, myThis){
       $(document).off('mousemove');
       $(document).off('mouseup');
 
+      console.log('Preparing to delete line, currentlyDrawnLineInfo ', currentlyDrawnLineInfo);
       //delete the line from the master object
-      let theLineInTheObject = deleteLineFromObject(gameDialogueMakerProject, lineCharacterId, lineFromNodeId, lineToNodeId); //globalvars
+      let theLineInTheObject = deleteLineFromObject(gameDialogueMakerProject, currentlyDrawnLineInfo.lineCharacterId, lineFromNodeId, lineToNodeId); //globalvars
 
       //console.log('socketElement', socketElement);
-      $(socketElement).attr('data-hasline', 'false');
+      $(myThis).attr('data-hasline', 'false');
 
       //delete the line, ...maybe redraw instead
 
@@ -407,7 +412,7 @@ function handleDocumentMouseUp(event, myThis){
       ); */
 
 
-      if (newParentCharacterID == lineCharacterId) {
+      if (newParentCharacterID == currentlyDrawnLineInfo.lineCharacterId) {
         //no change in parent
         dialogueFromNodeInObject.outgoingLines.push({
           fromNode: dialogueFromNodeInObject.dialogueID,
@@ -420,12 +425,19 @@ function handleDocumentMouseUp(event, myThis){
       } else {
         //change in parent
 
-        console.log('Change in parent, lineCharacterId ', lineCharacterId);
+        console.log('Change in parent, currentlyDrawnLineInfo.lineCharacterId ', currentlyDrawnLineInfo.lineCharacterId);
 
         let highestIdInNewParent = getMaxDialogueNodeId(gameDialogueMakerProject.characters[newParentCharacterID - 1]);
         //console.log(`highestIdInNewParent was: ${highestIdInNewParent}`);
 
-        reparentNodeAndDescendants(objectNodeFromWhichWeAreDrawing, lineCharacterId, newParentCharacterID, highestIdInNewParent + 1, gameDialogueMakerProject);
+        console.log('calling reparent function with these arguments: ');
+        console.log('objectNodeFromWhichWeAreDrawing ', objectNodeFromWhichWeAreDrawing);
+        console.log('currentlyDrawnLineInfo.lineCharacterId ', currentlyDrawnLineInfo.lineCharacterId);
+        console.log('newParentCharacterID ', newParentCharacterID);
+        console.log('highestIdInNewParent + 1 ', highestIdInNewParent + 1);
+        console.log('gameDialogueMakerProject ', gameDialogueMakerProject);
+
+        reparentNodeAndDescendants(objectNodeFromWhichWeAreDrawing, currentlyDrawnLineInfo.lineCharacterId, newParentCharacterID, highestIdInNewParent + 1, gameDialogueMakerProject);
 
         dialogueFromNodeInObject.outgoingLines.push({
           fromNode: dialogueFromNodeInObject.dialogueID,
