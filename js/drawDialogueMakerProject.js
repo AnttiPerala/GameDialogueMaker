@@ -80,6 +80,30 @@ function drawDialogueMakerProject() {
     });
   }
 
+  $(".blockPlusButton").each(function () {
+    checkIfPlusButtonShouldBeTurnedOff(this);
+  });
+
+ //DRAGGING ON TOP OF A TOP CONNECTION SOCKET. IF IT'S EMPTY, CREATE A NEW LINE FROM IT. IF IT HAS A LINE, DELETE THE LINE.
+
+  $(".topConnectionSocket").mousedown(function (event) {
+    handleMouseDownOverTopConnectionSocket(event, this);
+  })
+
+  $(document).mousemove(function (e) {
+    //console.log('mousemove, line is ', line);
+    if (currentlyDrawingALine) {
+      // Update the end position of the line to follow the mouse
+      line.setOptions({
+        end: LeaderLine.pointAnchor({ x: e.pageX, y: e.pageY }),
+      });
+    }
+  });
+
+  $(document).mouseup(function (event) {
+    handleDocumentMouseUp(event, this);
+  })
+
 } // end function drawDialogueMakerProject
 
 /* DRAGGABLE SETTINGS */
@@ -119,7 +143,7 @@ function createCharacterNodeHTML(character){
                 <div style="display: flex; align-items:center; justify-content: center;">
           
                 </div>
-                    <div class="block">
+                    <div class="block" style="background-color: ${character.bgColor}">
                         <div class="characterElementIDLine" style="text-align: left;">
                             <span style="width: 35%; display:inline-block; text-align: right;">Character ID:</span><input class="blockid"
                                 style="width: 15%; display:inline-block;" readonly type="number" value="${character.characterID}">
@@ -294,3 +318,115 @@ function applyHideToElements() {
     descendantsToHide.addClass('hide');
   });
 }
+
+function handleMouseDownOverTopConnectionSocket(event, myThis){
+
+  let lineInfo = mousedownOverTopConnectionSocket(event, myThis);
+
+  console.log('lineInfo', lineInfo);
+
+  line = lineInfo.line;
+
+  lineCharacterId = lineInfo.lineCharacterId; //lineCharacterId is defined in globalVars
+
+  lineFromNodeId = lineInfo.lineFromNodeId;
+
+  lineToNodeId = lineInfo.lineToNodeId;
+
+};
+
+function handleDocumentMouseUp(event, myThis){
+  if (currentlyDrawingALine) {
+    // Get the element under the cursor
+    var elementUnderCursor = document.elementFromPoint(event.clientX, event.clientY);
+
+    // Get the jQuery object for the element under the cursor
+    var $elementUnderCursor = $(elementUnderCursor);
+
+    // Check if the element is a plus button and if its data-acceptclicks attribute is true
+    if (
+      $elementUnderCursor.hasClass("blockPlusButton") &&
+      $elementUnderCursor.data("acceptclicks") == true &&
+      currentlyDrawingALine == true
+    ) {
+      // The line is over the target div and the div accepts clicks, do stuff
+      //console.log("Line is over the target div and it accepts clicks");
+
+      //now we should update the master object structure accordingly and then redraw
+      //start by detecting to which node the plus buttons belongs to
+      //let blockToAttachTo = $($elementUnderCursor).closest('.block');
+
+      let plusButtonIndexToAttachTo = $elementUnderCursor.data("buttonindex");
+
+      let childElementForPassingToFindDialogue = $($elementUnderCursor)
+        .closest(".blockWrap")
+        .find(".blockid");
+
+      //this is the dialogueNode of the plus button block
+      let dialogueFromNodeInObject =
+        findDialogueObjectBasedOnPassedInHtmlElement(
+          childElementForPassingToFindDialogue
+        );
+
+
+      //we need to check if the root character changes and if it does then we need to remove the dialogue object from the old character in the object and add it to the new one
+      //what should then happen with the numbering to avoid clashes?
+      //should also check if its an answer, because answer should only connect to questions
+
+      //console.log(`dialogueFromNodeInOnbject: `, dialogueFromNodeInObject);
+
+      let newParentCharacterID = findCharacterIDByPassingInDialogueNode(
+        dialogueFromNodeInObject
+      );
+
+      /* console.log(
+          "newParentCharacterID: " +
+          newParentCharacterID +
+          " lineCharacterId: " +
+          lineCharacterId
+      ); */
+
+
+      if (newParentCharacterID == lineCharacterId) {
+        //no change in parent
+        dialogueFromNodeInObject.outgoingLines.push({
+          fromNode: dialogueFromNodeInObject.dialogueID,
+          fromSocket: plusButtonIndexToAttachTo,
+          toNode: nodeIdFromWhichWeAreDrawing,
+          lineElem: "",
+          transitionConditions: [],
+        });
+
+      } else {
+        //change in parent
+
+        console.log('Change in parent, lineCharacterId ', lineCharacterId);
+
+        let highestIdInNewParent = getMaxDialogueNodeId(gameDialogueMakerProject.characters[newParentCharacterID - 1]);
+        //console.log(`highestIdInNewParent was: ${highestIdInNewParent}`);
+
+        reparentNodeAndDescendants(objectNodeFromWhichWeAreDrawing, lineCharacterId, newParentCharacterID, highestIdInNewParent + 1, gameDialogueMakerProject);
+
+        dialogueFromNodeInObject.outgoingLines.push({
+          fromNode: dialogueFromNodeInObject.dialogueID,
+          fromSocket: plusButtonIndexToAttachTo,
+          toNode: objectNodeFromWhichWeAreDrawing.dialogueID,
+          lineElem: "",
+          transitionConditions: [],
+        });
+
+
+
+      } //end else (change in parent)
+    }//end if (line)
+
+    // Stop updating the line
+    line = null;
+
+    currentlyDrawingALine = false;
+
+    clearCanvasBeforeReDraw();
+    drawDialogueMakerProject();
+  }
+
+};
