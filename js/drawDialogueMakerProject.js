@@ -60,6 +60,8 @@ function drawDialogueMakerProject() {
 
   $('.dialogue').draggable(draggableSettings).css({ position: "absolute" });
 
+  applyHideToElements();
+
 
 /* A SECOND ITERATION FOR DRAWING THE LINES IS NEEDED, BECAUSE THEY DIALOGUES NEED TO ALREADY BE IN THE DOM WHEN THE LINES ARE CREATED */
 
@@ -112,7 +114,7 @@ function createCharacterNodeHTML(character){
   }
 
   let characterNodeHTML = $(`
-          <div class="blockWrap characterRoot" data-id="${character.characterID}" id="char${character.characterID}">
+          <div class="blockWrap characterRoot" data-id="${character.characterID}" id="char${character.characterID}" data-hidechildren="${character.hideChildren}">
             <div class="contentWrap">
                 <div style="display: flex; align-items:center; justify-content: center;">
           
@@ -253,6 +255,20 @@ function drawLines(sourceId, targetId, isCharacter, outgoingLine, characterId) {
     //how can we connect the transition condition to a line? Well we should have a reference to the line element already in the object
   }
 
+
+
   return theLine;
 
+} /* end drawLines */
+
+
+function applyHideToElements() {
+  // Select all elements with data-hidechildren="true"
+  let elementsToHide = $('[data-hidechildren="true"]');
+
+  // Loop through each element and find its descendants with class .blockWrap and hide them
+  elementsToHide.each((index, element) => {
+    let descendantsToHide = $(element).find('.blockWrap');
+    descendantsToHide.addClass('hide');
+  });
 }

@@ -94,9 +94,13 @@ function createDialogueHTMLElement(dialogueNode) {
 
 
     //myLog(`dialogueIDSent: ${dialogueIDSent}`, 0, fileInfo = getFileInfo());
-    dialogueNode.nodeElement.get(0).id = `dialogue${dialogueNode.dialogueID}`;
-    dialogueNode.nodeElement.get(0).classList = "blockWrap dialogue";
-    dialogueNode.nodeElement.html(`
+    let dialogueElement = dialogueNode.nodeElement;
+    dialogueElement.attr('data-character-id', dialogueNode.characterID);  // Adding character ID data attribute
+    dialogueElement.attr('data-dialogue-id', dialogueNode.dialogueID);  // Adding dialogue ID data attribute
+    dialogueElement.attr('data-hidechildren', dialogueNode.hideChildren);
+    dialogueElement.get(0).id = `dialogue${dialogueNode.dialogueID}`;
+    dialogueElement.get(0).classList = "blockWrap dialogue";
+    dialogueElement.html(`
 
                 <div class="contentWrap">
                 <div style="display: flex; align-items:center; justify-content: center;">
@@ -127,6 +131,6 @@ function createDialogueHTMLElement(dialogueNode) {
 
 
 
-    return dialogueNode.nodeElement;
+    return dialogueElement;
 }
 
