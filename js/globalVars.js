@@ -1,6 +1,7 @@
 let cloneMode = false;
 let eraseMode = false;
 let currentlyDrawingALine = false;
+let currentlyDrawnLineInfo;
 let nodeIdFromWhichWeAreDrawing = 0;
 let objectNodeFromWhichWeAreDrawing='';
 let characterNameFromWhichWeAreDrawing = '';

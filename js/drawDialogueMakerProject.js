@@ -321,17 +321,17 @@ function applyHideToElements() {
 
 function handleMouseDownOverTopConnectionSocket(event, myThis){
 
-  let lineInfo = mousedownOverTopConnectionSocket(event, myThis);
+  currentlyDrawnLineInfo = mousedownOverTopConnectionSocket(event, myThis); //globalvar
 
   console.log('lineInfo', lineInfo);
 
   line = lineInfo.line;
 
-  lineCharacterId = lineInfo.lineCharacterId; //lineCharacterId is defined in globalVars
+  lineCharacterId = currentlyDrawnLineInfo.lineCharacterId; //lineCharacterId is defined in globalVars
 
-  lineFromNodeId = lineInfo.lineFromNodeId;
+  lineFromNodeId = currentlyDrawnLineInfo.lineFromNodeId;
 
-  lineToNodeId = lineInfo.lineToNodeId;
+  lineToNodeId = currentlyDrawnLineInfo.lineToNodeId;
 
 };
 
@@ -342,6 +342,26 @@ function handleDocumentMouseUp(event, myThis){
 
     // Get the jQuery object for the element under the cursor
     var $elementUnderCursor = $(elementUnderCursor);
+
+    //check if it was not over anything special and delete
+    if ($elementUnderCursor.is('body') || $elementUnderCursor.is('#mainArea')) {
+      // There's nothing specific under the cursor, do something
+      $(document).off('mousemove');
+      $(document).off('mouseup');
+
+      //delete the line from the master object
+      let theLineInTheObject = deleteLineFromObject(gameDialogueMakerProject, lineCharacterId, lineFromNodeId, lineToNodeId); //globalvars
+
+      //console.log('socketElement', socketElement);
+      $(socketElement).attr('data-hasline', 'false');
+
+      //delete the line, ...maybe redraw instead
+
+      clearCanvasBeforeReDraw();
+      drawDialogueMakerProject();
+    } else {
+      // There's an element under the cursor, do something else
+    }
 
     // Check if the element is a plus button and if its data-acceptclicks attribute is true
     if (
