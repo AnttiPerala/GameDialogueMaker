@@ -25,7 +25,7 @@ $('body').on('click', '.blockPlusButton', function () {
 
         //console.log(`parentBlockType ${parentBlockType}`);
 
-        let characterObject = findCharacterNodeBasedOnPassedInHtmlElement(this);
+        let characterObject = getInfoByPassingInDialogueNodeOrElement(this).characterNode;
 
         let previousDialogueNodeInMasterObject = findDialogueObjectBasedOnPassedInHtmlElement(this);
         

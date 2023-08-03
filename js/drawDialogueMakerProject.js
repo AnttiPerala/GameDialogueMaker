@@ -114,7 +114,7 @@ function createCharacterNodeHTML(character){
   }
 
   let characterNodeHTML = $(`
-          <div class="blockWrap characterRoot" data-id="${character.characterID}" id="char${character.characterID}" data-hidechildren="${character.hideChildren}">
+          <div class="blockWrap characterRoot" data-character-id="${character.characterID}" id="char${character.characterID}" data-hidechildren="${character.hideChildren}">
             <div class="contentWrap">
                 <div style="display: flex; align-items:center; justify-content: center;">
           
@@ -151,115 +151,137 @@ function createCharacterNodeHTML(character){
 function drawLines(sourceId, targetId, isCharacter, outgoingLine, characterId) {
   let sourceElement, targetElement, plusButtonElem;
 
+  
+
   if (isCharacter) {
-    sourceElement = $("#char" + sourceId);
+    // Select the source element based on characterId and sourceId
+    sourceElement = $(`.characterRoot[data-character-id="${characterId}"]`);
     plusButtonElem = $(sourceElement).find(".blockPlusButton").eq(outgoingLine.fromSocket);
+
   } else {
-    sourceElement = $("#dialogue" + sourceId);
+    // Select the source element based on characterId and sourceId
+    sourceElement = $(`.blockWrap[data-dialogue-id="${sourceId}"][data-character-id="${characterId}"]`);
     plusButtonElem = $(sourceElement).find(".blockPlusButton").eq(outgoingLine.fromSocket);
   }
 
-  targetElement = $("#dialogue" + targetId);
+  // Select the target element based on characterId and targetId
+  targetElement = $(`.blockWrap[data-dialogue-id="${targetId}"][data-character-id="${characterId}"]`);
 
-  // Find the end node itself in the object
-  let lineEndNode = gameDialogueMakerProject.characters.find(
-    character => character.dialogueNodes.some(dialogueNode => dialogueNode.dialogueID == targetId)
-  ).dialogueNodes.find(dialogueNode => dialogueNode.dialogueID == targetId);
 
-  // Reference the stored DOM element
-  let lineEndNodeElement = lineEndNode ? lineEndNode.nodeElement : "";
 
-  // Get the top socket
-  let lineEndElementTopSocket = $(lineEndNodeElement).find(".topConnectionSocket"); // does this find too many children. Probably but we can just use the first one.
-
-  // Set the socket to contain a line. eq will make sure we only talk to the first found child (because other nodes can be children too)
-  $(lineEndElementTopSocket).eq(0).attr('data-hasline', 'true');
-
-  // Create a new point anchor
-  var endPointAnchor = LeaderLine.pointAnchor(
-    lineEndElementTopSocket.get(0),
-    { x: 8, y: 8 }
+  // Find the character based on the characterId
+  let character = gameDialogueMakerProject.characters.find(
+    (char) => char.characterID === characterId
   );
 
-  let theLine = new LeaderLine(
-    plusButtonElem.get(0), // get(0) converts jQuery object to regular DOM object
-    endPointAnchor,
-    {
-      color: "#0075ff",
-      size: 4,
-      dash: false,
-      path: "straight", // default is straight, arc, fluid, magnet, grid
-      startSocket: "bottom",
-      endSocket: "bottom",
-      endPlug: "disc",
+  if (character) {
+    // Check if the target node belongs to the current character
+    let targetNode = character.dialogueNodes.find(
+      (dialogueNode) => dialogueNode.dialogueID === targetId
+    );
+
+    // If the target node does not belong to the current character, find the character that owns it
+    if (!targetNode) {
+      let targetCharacter = gameDialogueMakerProject.characters.find((char) =>
+        char.dialogueNodes.some((node) => node.dialogueID === targetId)
+      );
+      if (targetCharacter) {
+        // Change the character and find the node in the correct character
+        character = targetCharacter;
+        targetNode = targetCharacter.dialogueNodes.find(
+          (dialogueNode) => dialogueNode.dialogueID === targetId
+        );
+      }
     }
-  );
 
-  // Stores a reference to the actual line into the object
-  outgoingLine.lineElem = theLine;
+    if (targetNode) {
+      // Reference the stored DOM element
+      let lineEndNodeElement = targetNode.nodeElement;
 
-  //set the id also of the svg for easier selection
-  const all_svgs = document.querySelectorAll("svg");
-  const this_svg = all_svgs[all_svgs.length - 1]; //this will select the latest svg
-  this_svg.setAttribute(
-    "data-character",
-    characterId
-  );
-  this_svg.setAttribute("data-fromnode", sourceId);
-  this_svg.setAttribute("data-tonode", targetId);
+      // Get the top socket
+      let lineEndElementTopSocket = $(lineEndNodeElement).find(".topConnectionSocket").eq(0);
 
-  let selectTheSVGInDOM = $(
-    'svg[data-fromnode="' +
-    sourceId +
-    '"][data-tonode="' +
-    targetId +
-    '"][data-character="' +
-    characterId +
-    '"]'
-  );
+      // Set the socket to contain a line
+      $(lineEndElementTopSocket).attr('data-hasline', 'true');
 
-  let thePath = $(selectTheSVGInDOM).find(".leader-line-line-path");
-  //Should we also save the SVG element in the object? I think the proble here is that we are trying to find the svg path from the object and not from DOM..
+      // Create a new point anchor
+      var endPointAnchor = LeaderLine.pointAnchor(
+        lineEndElementTopSocket.get(0),
+        { x: 8, y: 8 }
+      );
 
-  //const path = document.getElementById('leader-line-5-line-path');
-  const midpoint = drawConditionCircle(
-    thePath.get(0),
-    characterId,
-    sourceId,
-    targetId
-  );
+      let theLine = new LeaderLine(
+        plusButtonElem.get(0),
+        endPointAnchor,
+        {
+          color: "#0075ff",
+          size: 4,
+          dash: false,
+          path: "straight",
+          startSocket: "bottom",
+          endSocket: "bottom",
+          endPlug: "disc",
+        }
+      );
 
-  // Loop through the transition conditions of the current outgoing line and add a 'withCondition' class to the corresponding circles
-  for (let l = 0; l < outgoingLine.transitionConditions.length; l++) {
-    let transitionCondition = outgoingLine.transitionConditions[l];
-    // Do something with the transition condition, e.g. compare the variable value to the variable name using the comparison operator
-    //myLog(` Transition found, it's number is ${l}`, 1, fileInfo = getFileInfo());
+      // Stores a reference to the actual line into the object
+      outgoingLine.lineElem = theLine;
 
-    //select the matching circle from DOM
-    let theCircleinDOM = $(
-      '.conditionCircle[data-fromnode="' +
-      sourceId +
-      '"][data-tonode="' +
-      targetId +
-      '"][data-character="' +
-      characterId +
-      '"]'
-    );
+      // Set the id also of the svg for easier selection
+      const all_svgs = document.querySelectorAll("svg");
+      const this_svg = all_svgs[all_svgs.length - 1]; //this will select the latest svg
+      this_svg.setAttribute("data-character", characterId);
+      this_svg.setAttribute("data-fromnode", sourceId);
+      this_svg.setAttribute("data-tonode", targetId);
 
-    theCircleinDOM.addClass("withCondition");
-    theCircleinDOM.attr(
-      "title",
-      "Click to change the condition for the transition"
-    );
+      let selectTheSVGInDOM = $(
+        'svg[data-fromnode="' +
+        sourceId +
+        '"][data-tonode="' +
+        targetId +
+        '"][data-character="' +
+        characterId +
+        '"]'
+      );
 
-    //how can we connect the transition condition to a line? Well we should have a reference to the line element already in the object
+      let thePath = $(selectTheSVGInDOM).find(".leader-line-line-path");
+
+      const midpoint = drawConditionCircle(
+        thePath.get(0),
+        characterId,
+        sourceId,
+        targetId
+      );
+
+      // Loop through the transition conditions of the current outgoing line and add a 'withCondition' class to the corresponding circles
+      for (let l = 0; l < outgoingLine.transitionConditions.length; l++) {
+        let transitionCondition = outgoingLine.transitionConditions[l];
+
+        // Select the matching circle from DOM
+        let theCircleinDOM = $(
+          '.conditionCircle[data-fromnode="' +
+          sourceId +
+          '"][data-tonode="' +
+          targetId +
+          '"][data-character="' +
+          characterId +
+          '"]'
+        );
+
+        theCircleinDOM.addClass("withCondition");
+        theCircleinDOM.attr(
+          "title",
+          "Click to change the condition for the transition"
+        );
+      }
+
+      return theLine;
+    }
   }
+}
 
 
-
-  return theLine;
-
-} /* end drawLines */
+ /* end drawLines */
 
 
 function applyHideToElements() {

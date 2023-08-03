@@ -1,4 +1,6 @@
 function createDialogueHTMLElement(dialogueNode) {
+
+    let nodeInfo = getInfoByPassingInDialogueNodeOrElement(dialogueNode);
     let activeNextNode = '';
 
     if (dialogueNode.nextNode > 0){ //only display the number if it's greater than zero
@@ -95,7 +97,7 @@ function createDialogueHTMLElement(dialogueNode) {
 
     //myLog(`dialogueIDSent: ${dialogueIDSent}`, 0, fileInfo = getFileInfo());
     let dialogueElement = dialogueNode.nodeElement;
-    dialogueElement.attr('data-character-id', dialogueNode.characterID);  // Adding character ID data attribute
+    dialogueElement.attr('data-character-id', nodeInfo.characterID);  // Adding character ID data attribute
     dialogueElement.attr('data-dialogue-id', dialogueNode.dialogueID);  // Adding dialogue ID data attribute
     dialogueElement.attr('data-hidechildren', dialogueNode.hideChildren);
     dialogueElement.get(0).id = `dialogue${dialogueNode.dialogueID}`;
