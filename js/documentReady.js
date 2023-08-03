@@ -29,7 +29,7 @@ $(document).ready(function () {
     drawDialogueMakerProject();
 
     //these make moving/dragging the canvas possible
-   /*  $("#mainArea").draggable({
+    $("#mainArea").draggable({
         drag: throttle(function (event, ui) {
             $(".conditionCircle").hide();
             updateAllLines(ui.helper);
@@ -46,7 +46,7 @@ $(document).ready(function () {
         }
 
 
-    }); */
+    });
     /* $("#mainArea").draggable(
         'enable'
     );

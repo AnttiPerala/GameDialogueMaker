@@ -329,7 +329,7 @@ jQuery(document).on('change keyup', '.characterName', function () {
 })
 
 //UPDATE THE MASTER OBJECT WHEN A TEXT FIELD IS CHANGED
-$(document).on('change keyup', 'textarea.dialogue', function () {
+$(document).on('change keyup', 'textarea.dialogueTextArea', function () {
 
 
     let updatedText = $(this).val();

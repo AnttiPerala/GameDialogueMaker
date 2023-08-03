@@ -2,6 +2,8 @@ let myObjectTest;
 
 function storeMasterObjectToLocalStorage() {
 
+    console.log('trying to store to local storage');
+
     
         // remove HTML element references from the master object (these should then be recreated by redrawing the entire object)
         for (let character of gameDialogueMakerProject.characters) {
