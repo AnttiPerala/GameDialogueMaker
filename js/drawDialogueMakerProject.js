@@ -320,21 +320,42 @@ function applyHideToElements() {
   });
 }
 
-function handleMouseDownOverTopConnectionSocket(event, myThis){
-
+function handleMouseDownOverTopConnectionSocket(event, myThis) {
   currentlyDrawnLineInfo = mousedownOverTopConnectionSocket(event, myThis); //globalvar
 
-  console.log('lineInfo', currentlyDrawnLineInfo);
+  // Check if currentlyDrawnLineInfo is defined and not null
+  if (currentlyDrawnLineInfo) {
+    console.log('lineInfo', currentlyDrawnLineInfo);
 
-  line = currentlyDrawnLineInfo.line;
+    // Check if properties exist on currentlyDrawnLineInfo before trying to access them
+    if ('line' in currentlyDrawnLineInfo) {
+      line = currentlyDrawnLineInfo.line;
+    } else {
+      console.error('Property "line" does not exist on currentlyDrawnLineInfo');
+    }
 
-  lineCharacterId = currentlyDrawnLineInfo.lineCharacterId; //lineCharacterId is defined in globalVars
+    if ('lineCharacterId' in currentlyDrawnLineInfo) {
+      lineCharacterId = currentlyDrawnLineInfo.lineCharacterId; //lineCharacterId is defined in globalVars
+    } else {
+      console.error('Property "lineCharacterId" does not exist on currentlyDrawnLineInfo');
+    }
 
-  lineFromNodeId = currentlyDrawnLineInfo.lineFromNodeId;
+    if ('lineFromNodeId' in currentlyDrawnLineInfo) {
+      lineFromNodeId = currentlyDrawnLineInfo.lineFromNodeId;
+    } else {
+      console.error('Property "lineFromNodeId" does not exist on currentlyDrawnLineInfo');
+    }
 
-  lineToNodeId = currentlyDrawnLineInfo.lineToNodeId;
-
+    if ('lineToNodeId' in currentlyDrawnLineInfo) {
+      lineToNodeId = currentlyDrawnLineInfo.lineToNodeId;
+    } else {
+      console.error('Property "lineToNodeId" does not exist on currentlyDrawnLineInfo');
+    }
+  } else {
+    console.error('currentlyDrawnLineInfo is undefined or null');
+  }
 };
+
 
 function handleDocumentMouseUp(event, myThis){
   console.log('handleDocumentMouseUp', event );
@@ -347,26 +368,7 @@ function handleDocumentMouseUp(event, myThis){
     // Get the jQuery object for the element under the cursor
     var $elementUnderCursor = $(elementUnderCursor);
 
-    //check if it was not over anything special and delete
-    if ($elementUnderCursor.is('body') || $elementUnderCursor.is('#mainArea')) {
-      // There's nothing specific under the cursor, do something
-      $(document).off('mousemove');
-      $(document).off('mouseup');
-
-      console.log('Preparing to delete line, currentlyDrawnLineInfo ', currentlyDrawnLineInfo);
-      //delete the line from the master object
-      let theLineInTheObject = deleteLineFromObject(gameDialogueMakerProject, currentlyDrawnLineInfo.lineCharacterId, lineFromNodeId, lineToNodeId); //globalvars
-
-      //console.log('socketElement', socketElement);
-      $(myThis).attr('data-hasline', 'false');
-
-      //delete the line, ...maybe redraw instead
-
-      clearCanvasBeforeReDraw();
-      drawDialogueMakerProject();
-    } else {
-      // There's an element under the cursor, do something else
-    }
+   //delete is handled in mouseDownOverTopConnectionSocket
 
     // Check if the element is a plus button and if its data-acceptclicks attribute is true
     if (

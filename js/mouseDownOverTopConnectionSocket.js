@@ -128,10 +128,16 @@ function mousedownOverTopConnectionSocket(event, elem){
                 //console.log('socketElement', socketElement);
                 $(socketElement).attr('data-hasline', 'false');
 
+                
+
                 //delete the line, ...maybe redraw instead
                 //line.remove(); //note this is leaderLines remove method not jQuery
-                clearCanvasBeforeReDraw();
-                drawDialogueMakerProject();
+
+                let theElem = getDialogueNodeById(disconnectedLineCharacterID, disconnectedLineToNodeID);
+
+                let theInfo = getInfoByPassingInDialogueNodeOrElement(theElem);
+
+                calculateNewPositionAfterElementParentChange(theElem, theInfo.characterNode.nodeElement);
 
             });
 
