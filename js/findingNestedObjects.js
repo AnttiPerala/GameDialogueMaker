@@ -433,7 +433,7 @@ function getInfoByPassingInDialogueNodeOrElement(input) {
     let isCharacter = false;
     let id, characterId;
 
-    //console.log('inside getInfoByPassingInDialogueNodeOrElement, input is: ', input);
+    console.log('inside getInfoByPassingInDialogueNodeOrElement, input is: ', input);
 
     // If the input is a jQuery object/DOM element
     if (input.jquery || input instanceof HTMLElement) {
@@ -443,14 +443,15 @@ function getInfoByPassingInDialogueNodeOrElement(input) {
         } else {
             // Otherwise, find the closest '.blockWrap' and get its id
             id = $(input).closest('.blockWrap').attr('id');
+            console.log('id is ', id);
         }
         isCharacter = id.startsWith("char");
 
         // Find the closest .characterRoot and get its id
-        if (!isCharacter) {
+        if (!isCharacter) { //the element is not a character root
             characterId = $(input).closest('.characterRoot').attr('id').replace('char', '');
         } else {
-            characterId = $(input).attr('id').replace('char', '');
+            characterId = id.replace('char', ''); //remove "char"
         }
 
         let strippedId = id.replace(/(char|dialogue)/, '');
