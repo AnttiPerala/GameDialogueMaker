@@ -10,7 +10,9 @@ function calculateNewPositionAfterElementParentChange(elem, newParentElem){
         var rectBefore = childElement.get(0).getBoundingClientRect();
 
         // Append the child to the wrap
-    wrapElement.get(0).appendChild(childElement.get(0));
+    //wrapElement.get(0).appendChild(childElement.get(0));
+    clearCanvasBeforeReDraw();
+    drawDialogueMakerProject();
 
         // Get the child's new position relative to the viewport
     var rectAfter = childElement.get(0).getBoundingClientRect();
@@ -24,8 +26,8 @@ function calculateNewPositionAfterElementParentChange(elem, newParentElem){
     theInfo.dialogueNode.dialogueNodeX = childElement.get(0).style.left = (childElement.get(0).offsetLeft - changeInLeft);
     theInfo.dialogueNode.dialogueNodeY = childElement.get(0).style.top = (childElement.get(0).offsetTop - changeInTop);
 
-        clearCanvasBeforeReDraw();
-        drawDialogueMakerProject();
+    clearCanvasBeforeReDraw();
+    drawDialogueMakerProject();
 
         // Adjust the child's position to cancel out the change
    /*      childElement.style.position = 'absolute';
