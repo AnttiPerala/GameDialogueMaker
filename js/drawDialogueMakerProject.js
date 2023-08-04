@@ -327,7 +327,9 @@ function applyHideToElements() {
 }
 
 function handleMouseDownOverTopConnectionSocket(event, myThis) {
+  console.log('going to ask for mousedownOverTopConnectionSocket using myThis: ', myThis );
   currentlyDrawnLineInfo = mousedownOverTopConnectionSocket(event, myThis); //globalvar
+  console.log('mousedownOverTopConnectionSocket call should be over now and it returned: ', currentlyDrawnLineInfo);
 
   // Check if currentlyDrawnLineInfo is defined and not null
   if (currentlyDrawnLineInfo) {
@@ -364,8 +366,8 @@ function handleMouseDownOverTopConnectionSocket(event, myThis) {
 
 
 function handleDocumentMouseUp(event, myThis){
-  console.log('handleDocumentMouseUp', event );
-  console.log('currentlyDrawingALine is: ', currentlyDrawingALine);
+  console.log('handleDocumentMouseUp from inside drawDialogueMakerProject', event );
+  //console.log('currentlyDrawingALine is: ', currentlyDrawingALine);
   if (currentlyDrawingALine) {
     // Get the element under the cursor
     
@@ -374,7 +376,7 @@ function handleDocumentMouseUp(event, myThis){
     // Get the jQuery object for the element under the cursor
     var $elementUnderCursor = $(elementUnderCursor);
 
-   //delete is handled in mouseDownOverTopConnectionSocket
+   //delete is handled in mouseDownOverTopConnectionSocket EDIT: that doesnt seem to be firing in all situations
 
     // Check if the element is a plus button and if its data-acceptclicks attribute is true
     if (

@@ -57,7 +57,7 @@ function mousedownOverTopConnectionSocket(event, elem){
             console.log(`THIS is the disconnecte line's disconnectedLineCharacterID ${disconnectedLineCharacterID} disconnectedLineFromNodeID ${disconnectedLineFromNodeID} disconnectedLineToNodeID ${disconnectedLineToNodeID}`);
 
 
-            $(myelement).remove(); //remove because we will redraw
+            //$(myelement).remove(); //remove because we will redraw
 
 
             //nah, let's try to get the actual element the original line is attached to 
@@ -76,7 +76,8 @@ function mousedownOverTopConnectionSocket(event, elem){
                 y: event.pageY
             };
 
-             line = new LeaderLine(
+                //is this really needed here since we create new lines onmousemove?
+             /* line = new LeaderLine(
                 originalFromNodeDomElem.get(0),
                 LeaderLine.pointAnchor(mousePoint),
                 {
@@ -88,20 +89,35 @@ function mousedownOverTopConnectionSocket(event, elem){
                     endSocket: "bottom",
                     endPlug: "disc",
                 }
-            );
+            ); */
 
 
 
             $(document).mousemove(function (event) {
-                // Update line end point on mousemove
-                line.remove();
+                if (currentlyDrawnLineInfo && currentlyDrawnLineInfo.line) {
+                    currentlyDrawnLineInfo.line.remove();
+                }
                 const endPoint = {
                     x: event.pageX,
                     y: event.pageY
                 };
+
+                const fromElement = originalFromNodeDomElem.get(0);
+                const toPoint = LeaderLine.pointAnchor(endPoint);
+
+                if (!fromElement || !document.body.contains(fromElement)) {
+                    console.error("From element is null, undefined, or not in the document");
+                    return;
+                }
+
+                if (!toPoint) {
+                    console.error("ToPoint is null or undefined");
+                    return;
+                }
+
                 line = new LeaderLine(
-                    originalFromNodeDomElem.get(0),
-                    LeaderLine.pointAnchor(endPoint),
+                    fromElement,
+                    toPoint,
                     {
                         color: "#0075ff",
                         size: 4,
@@ -112,7 +128,21 @@ function mousedownOverTopConnectionSocket(event, elem){
                         endPlug: "disc",
                     }
                 );
-            });
+            
+                lineInfo = {
+
+                    line: line,
+
+                    lineCharacterId: disconnectedLineCharacterID,
+
+                    lineFromNodeId: disconnectedLineFromNodeID,
+
+                    lineToNodeId: null
+                }
+
+                currentlyDrawnLineInfo = lineInfo;
+            
+            }); //end mousemove
 
             $(document).mouseup(function () {
                 // Stop updating line when mouse button is released
@@ -120,9 +150,9 @@ function mousedownOverTopConnectionSocket(event, elem){
                 $(document).off('mouseup');
 
                 console.log('mouseup, should del line now: ');
-                console.log('disconnectedLineCharacterID', disconnectedLineCharacterID);
-                console.log('disconnectedLineFromNodeID', disconnectedLineFromNodeID);
-                console.log('disconnectedLineToNodeID', disconnectedLineToNodeID);
+                console.log('disconnectedLineCharacterID: ', disconnectedLineCharacterID);
+                console.log('disconnectedLineFromNodeID: ', disconnectedLineFromNodeID);
+                console.log('disconnectedLineToNodeID: ', disconnectedLineToNodeID);
 
                 //delete the line from the master object
                 let theLineInTheObject = deleteLineFromObject(gameDialogueMakerProject, disconnectedLineCharacterID, disconnectedLineFromNodeID, disconnectedLineToNodeID);
@@ -141,6 +171,19 @@ function mousedownOverTopConnectionSocket(event, elem){
 
                 calculateNewPositionAfterElementParentChange(theElem, theInfo.characterNode.nodeElement);
 
+                lineInfo = {
+
+                    line: theLineInTheObject,
+
+                    lineCharacterId: disconnectedLineCharacterID,
+
+                    lineFromNodeId: disconnectedLineFromNodeID,
+
+                    lineToNodeId: null
+                }
+
+                currentlyDrawnLineInfo = lineInfo;
+
             });
 
 
@@ -152,6 +195,8 @@ function mousedownOverTopConnectionSocket(event, elem){
         $('svg.leader-line').each(function () {
             this.style.setProperty('pointer-events', 'none', 'important');
         });
+
+        
 
     } else { //draw a line because the socket was empty
 

@@ -1,6 +1,6 @@
 function updateElementPositionInObject(element){
 
-    console.log('Inside updateElementPositionInObject, element is: ', element);
+    //console.log('Inside updateElementPositionInObject, element is: ', element);
 
 //check if characterRoot or regular node:
     if (element.hasClass('characterRoot')) {

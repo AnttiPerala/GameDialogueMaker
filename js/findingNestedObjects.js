@@ -335,7 +335,7 @@ function getLineElemFromObject(gameDialogueMakerProject, characterId, fromNodeVa
 
 function deleteLineFromObject(gameDialogueMakerProject, characterId, fromNodeValue, toNodeValue) {
     // Search through the characters array
-    //console.log(`hello from getLineElemFromObject. characterId: ${characterId}`);
+    console.log(`hello from deleteLineFromObject. characterId: ${characterId} fromNodeValue: ${fromNodeValue} toNodeValue: ${toNodeValue }`);
 
     let character = gameDialogueMakerProject.characters.find(character => character.characterID == characterId);
 
@@ -353,7 +353,7 @@ function deleteLineFromObject(gameDialogueMakerProject, characterId, fromNodeVal
         // Remove the outgoingLine from the character's outgoingLines array
         const index = character.outgoingLines.indexOf(outgoingLine);
         character.outgoingLines.splice(index, 1);
-        //console.log(`removed outgoingLine`);
+        console.log(`removed outgoingLine from character. here's how it looks now: `, character);
     } else {
         // If not found in character's outgoingLines, search through each dialogueNodes
         for (let dialogueNode of character.dialogueNodes) {
@@ -440,7 +440,7 @@ function getInfoByPassingInDialogueNodeOrElement(input) {
     let isCharacter = false;
     let id, characterId;
 
-    console.log('inside getInfoByPassingInDialogueNodeOrElement, input is: ', input);
+    //console.log('inside getInfoByPassingInDialogueNodeOrElement, input is: ', input);
 
     // If the input is a jQuery object/DOM element
     if (input.jquery || input instanceof HTMLElement) {
