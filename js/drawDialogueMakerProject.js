@@ -255,6 +255,11 @@ function drawLines(sourceId, targetId, isCharacter, outgoingLine, characterId) {
         }
       );
 
+      LeaderLine.positionByWindowResize = false;
+
+
+      leaderLines.push(theLine);
+
       // Stores a reference to the actual line into the object
       outgoingLine.lineElem = theLine;
 

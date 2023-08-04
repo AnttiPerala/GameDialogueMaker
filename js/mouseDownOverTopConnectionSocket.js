@@ -126,8 +126,13 @@ function mousedownOverTopConnectionSocket(event, elem){
                         startSocket: "bottom",
                         endSocket: "bottom",
                         endPlug: "disc",
+                       
                     }
                 );
+
+                line.positionByWindowResize = false;
+ 
+                leaderLines.push(theLine);
             
                 lineInfo = {
 
@@ -223,8 +228,13 @@ function mousedownOverTopConnectionSocket(event, elem){
                 startSocket: "bottom",
                 endSocket: "bottom",
                 endPlug: "disc",
+                
             }
         );
+
+        line.positionByWindowResize = false;
+
+        leaderLines.push(theLine);
 
         //set the id also of the svg for easier selection
         const all_svgs = document.querySelectorAll("svg");

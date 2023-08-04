@@ -1,5 +1,6 @@
 let cloneMode = false;
 let eraseMode = false;
+let leaderLines = []; //let's see if storing all lines and clearing the on window resize helps get rid of error
 let currentlyDrawingALine = false;
 let currentlyDrawnLineInfo; //line:, lineCharacterId:, lineFromNodeId:, lineToNodeId: 
 let nodeIdFromWhichWeAreDrawing = 0;

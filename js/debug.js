@@ -73,9 +73,10 @@ console.log(_.isEqual(initialState, obj));  // This will return false
 console.log(diffObjects(initialState, obj));
 
 
-$(window).resize(function () {
+/* $(window).resize(function () {
     const differences = diffObjects(theMasterObjectInTheBeginning, gameDialogueMakerProject);
     
     differences.forEach(diff => console.log(`Property ${diff.path} changed from ${JSON.stringify(diff.oldValue)} to ${JSON.stringify(diff.newValue)}`));
 });
 
+ */
