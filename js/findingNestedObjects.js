@@ -2,8 +2,12 @@
 function getDialogueNodeById(charID, id) {
 
     //myLog(`(inside getDialogueNodeById and characterID is ${charID})`,0, fileInfo = getFileInfo());
-
-    const character = gameDialogueMakerProject.characters.find(char => char.characterID == charID);
+    let character;
+    if (id == 0){ //its a character node
+        character = gameDialogueMakerProject.characters.find(char => char.characterID == charID);
+        return character;
+    } else { //not 0
+         character = gameDialogueMakerProject.characters.find(char => char.characterID == charID);
     if (!character) {
         return null; // character not found
     }
@@ -14,6 +18,9 @@ function getDialogueNodeById(charID, id) {
         const char = getCharacterById(charID);
         return char;
     }
+    }
+
+     
     
 }
 

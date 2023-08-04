@@ -67,6 +67,8 @@ function mousedownOverTopConnectionSocket(event, elem){
 
             let originalFromNodeDomElem = originalFromNode.nodeElement;
 
+            console.log('originalFromNodeDomElem ', originalFromNodeDomElem);
+
             //console.log('originalFromNodeDomElem: ', originalFromNodeDomElem);
 
             const mousePoint = {

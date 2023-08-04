@@ -92,7 +92,7 @@ function drawDialogueMakerProject() {
 
   $(document).mousemove(function (e) {
     //console.log('mousemove, line is ', currentlyDrawnLineInfo);
-    console.log('currentlyDrawingALine ', currentlyDrawingALine );
+    //console.log('currentlyDrawingALine ', currentlyDrawingALine );
     if (currentlyDrawingALine) { 
       // Update the end position of the line to follow the mouse
       line.setOptions({
@@ -112,6 +112,8 @@ const draggableSettings = {
   drag: function (event, ui) {
     //console.log('dragging');
     updateLines(ui.helper); //called only when dragged
+    $('.conditionCircle').hide(); //hide the circles
+
   },
   stop: function (event, ui) {
     var position = ui.position;
@@ -174,6 +176,7 @@ function createCharacterNodeHTML(character){
 /* DRAWING THE LINES */
 
 function drawLines(sourceId, targetId, isCharacter, outgoingLine, characterId) {
+  
   let sourceElement, targetElement, plusButtonElem;
 
   
@@ -182,12 +185,15 @@ function drawLines(sourceId, targetId, isCharacter, outgoingLine, characterId) {
     // Select the source element based on characterId and sourceId
     sourceElement = $(`.characterRoot[data-character-id="${characterId}"]`);
     plusButtonElem = $(sourceElement).find(".blockPlusButton").eq(outgoingLine.fromSocket);
-
+    sourceId = 0; //the source node can be called 0 for characters
+    console.log('we got a character, plusButtonElem is: ', plusButtonElem);
   } else {
     // Select the source element based on characterId and sourceId
     sourceElement = $(`.blockWrap[data-dialogue-id="${sourceId}"][data-character-id="${characterId}"]`);
     plusButtonElem = $(sourceElement).find(".blockPlusButton").eq(outgoingLine.fromSocket);
   }
+
+  
 
   // Select the target element based on characterId and targetId
   targetElement = $(`.blockWrap[data-dialogue-id="${targetId}"][data-character-id="${characterId}"]`);
@@ -196,25 +202,25 @@ function drawLines(sourceId, targetId, isCharacter, outgoingLine, characterId) {
 
   // Find the character based on the characterId
   let character = gameDialogueMakerProject.characters.find(
-    (char) => char.characterID === characterId
+    (char) => char.characterID == characterId
   );
 
   if (character) {
     // Check if the target node belongs to the current character
     let targetNode = character.dialogueNodes.find(
-      (dialogueNode) => dialogueNode.dialogueID === targetId
+      (dialogueNode) => dialogueNode.dialogueID == targetId
     );
 
     // If the target node does not belong to the current character, find the character that owns it
     if (!targetNode) {
       let targetCharacter = gameDialogueMakerProject.characters.find((char) =>
-        char.dialogueNodes.some((node) => node.dialogueID === targetId)
+        char.dialogueNodes.some((node) => node.dialogueID == targetId)
       );
       if (targetCharacter) {
         // Change the character and find the node in the correct character
         character = targetCharacter;
         targetNode = targetCharacter.dialogueNodes.find(
-          (dialogueNode) => dialogueNode.dialogueID === targetId
+          (dialogueNode) => dialogueNode.dialogueID == targetId
         );
       }
     }
