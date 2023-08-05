@@ -3,26 +3,53 @@ $(document).on('click', '.eyeImage', function(event) {
 
     var currentImage = $(this).attr('src');
 
-    //console.log(` currentImage: ${currentImage}`);
+    //find out if we clicked on a character or individual dialogue node
 
-    let characterNodeInObject = getInfoByPassingInDialogueNodeOrElement(this).characterNode;
+    if ($(this).hasClass('dialogueNodeEye')){
+        //regular dialogue
+        console.log('regular dialogue eye');
+        let dialogueNodeInObject = getInfoByPassingInDialogueNodeOrElement(this).dialogueNode;
+
+        if (currentImage === 'img/iconmonstr-eye-off-filled-32.png') {
+            //$(this).attr('src', 'img/iconmonstr-eye-filled-32.png');
+            //$(this).closest('.blockWrap').find('.blockWrap').show(); //maybe drawing function is better
 
 
-    if (currentImage === 'img/iconmonstr-eye-off-filled-32.png') {
-        //$(this).attr('src', 'img/iconmonstr-eye-filled-32.png');
-        //$(this).closest('.blockWrap').find('.blockWrap').show(); //maybe drawing function is better
+            dialogueNodeInObject.hideChildren = false;
 
+        } else {
 
-        characterNodeInObject.hideChildren = false;
+            dialogueNodeInObject.hideChildren = true;
+
+        }
 
     } else {
+        //character
 
-        characterNodeInObject.hideChildren = true; 
+        //console.log(` currentImage: ${currentImage}`);
 
-        //$(this).attr('src', 'img/iconmonstr-eye-off-filled-32.png');
+        let characterNodeInObject = getInfoByPassingInDialogueNodeOrElement(this).characterNode;
 
-        //$(this).closest('.blockWrap').find('.blockWrap').hide(); //actually maybe just handle this from the drawing function
-    }
+
+        if (currentImage === 'img/iconmonstr-eye-off-filled-32.png') {
+            //$(this).attr('src', 'img/iconmonstr-eye-filled-32.png');
+            //$(this).closest('.blockWrap').find('.blockWrap').show(); //maybe drawing function is better
+
+
+            characterNodeInObject.hideChildren = false;
+
+        } else {
+
+            characterNodeInObject.hideChildren = true;
+
+            //$(this).attr('src', 'img/iconmonstr-eye-off-filled-32.png');
+
+            //$(this).closest('.blockWrap').find('.blockWrap').hide(); //actually maybe just handle this from the drawing function
+        }
+
+    } //end else character
+
+   
 
     clearCanvasBeforeReDraw();
     drawDialogueMakerProject();

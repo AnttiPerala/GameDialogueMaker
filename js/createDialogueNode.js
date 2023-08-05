@@ -94,6 +94,18 @@ function createDialogueHTMLElement(dialogueNode) {
 
     }
 
+    let eyeImageSource;
+    //closed or open eye:
+    if (dialogueNode.hideChildren == false) {
+
+        eyeImageSource = 'img/iconmonstr-eye-filled-32.png'
+
+    } else {
+
+        eyeImageSource = 'img/iconmonstr-eye-off-filled-32.png'
+
+    }
+
 
     //myLog(`dialogueIDSent: ${dialogueIDSent}`, 0, fileInfo = getFileInfo());
     let dialogueElement = dialogueNode.nodeElement;
@@ -112,6 +124,7 @@ function createDialogueHTMLElement(dialogueNode) {
                         <div style="text-align: left;">
                             <span style="width: 15%; display:inline-block; text-align: right;">ID:</span><input class="blockid"
                                 style="width: 15%; display:inline-block;" readonly type="number" value="${dialogueNode.dialogueID}">
+                                <img class="eyeImage dialogueNodeEye" src="${eyeImageSource}" alt="eye" width="24" height="24">
                         </div>
                         ${selectElementContentBasedOnParentBlockType}
                         <textarea class="dialogueTextArea" placeholder="${dialoguePlaceholderBasedOnParentBlockType}" data-autoresize>${dialogueNode.dialogueText}</textarea>
