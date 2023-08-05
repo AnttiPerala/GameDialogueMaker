@@ -43,7 +43,7 @@ function mousedownOverTopConnectionSocket(event, elem){
         }
 
         if (myelement && myelement.classList.contains('leader-line')) {
-            //console.log(`mouse over socket AND svg`);
+            console.log(`UNPLUG!`);
 
             //use the info on the clicked line to select the correct line from the master object
             disconnectedLineCharacterID = $(myelement).attr('data-character');
@@ -57,7 +57,7 @@ function mousedownOverTopConnectionSocket(event, elem){
             console.log(`THIS is the disconnecte line's disconnectedLineCharacterID ${disconnectedLineCharacterID} disconnectedLineFromNodeID ${disconnectedLineFromNodeID} disconnectedLineToNodeID ${disconnectedLineToNodeID}`);
 
 
-            //$(myelement).remove(); //remove because we will redraw
+            $(myelement).remove(); //remove because we will redraw
 
 
             //nah, let's try to get the actual element the original line is attached to 
@@ -77,7 +77,7 @@ function mousedownOverTopConnectionSocket(event, elem){
             };
 
                 //is this really needed here since we create new lines onmousemove?
-             /* line = new LeaderLine(
+        /*      line = new LeaderLine(
                 originalFromNodeDomElem.get(0),
                 LeaderLine.pointAnchor(mousePoint),
                 {
@@ -89,7 +89,7 @@ function mousedownOverTopConnectionSocket(event, elem){
                     endSocket: "bottom",
                     endPlug: "disc",
                 }
-            ); */
+            );  */
 
 
 
@@ -132,7 +132,7 @@ function mousedownOverTopConnectionSocket(event, elem){
 
                 line.positionByWindowResize = false;
  
-                leaderLines.push(theLine);
+                leaderLines.push(line);
             
                 lineInfo = {
 
@@ -194,6 +194,7 @@ function mousedownOverTopConnectionSocket(event, elem){
 
         } else {
             // Mouse is not over an svg element with class "leader-line"
+            console.log('Mouse is not over an svg element with class "leader-line"');
         }
 
         //turn svg pointer events back off
@@ -261,7 +262,7 @@ function mousedownOverTopConnectionSocket(event, elem){
 
     event.stopPropagation();
 
-   
+    console.log('returning lineInfo, which looks like this: ', lineInfo);
 
     return lineInfo;
 

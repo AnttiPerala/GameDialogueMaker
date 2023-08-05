@@ -348,28 +348,28 @@ function handleMouseDownOverTopConnectionSocket(event, myThis) {
     if ('line' in currentlyDrawnLineInfo) {
       line = currentlyDrawnLineInfo.line;
     } else {
-      console.error('Property "line" does not exist on currentlyDrawnLineInfo');
+      console.log('Property "line" does not exist on currentlyDrawnLineInfo');
     }
 
     if ('lineCharacterId' in currentlyDrawnLineInfo) {
       lineCharacterId = currentlyDrawnLineInfo.lineCharacterId; //lineCharacterId is defined in globalVars
     } else {
-      console.error('Property "lineCharacterId" does not exist on currentlyDrawnLineInfo');
+      console.log('Property "lineCharacterId" does not exist on currentlyDrawnLineInfo');
     }
 
     if ('lineFromNodeId' in currentlyDrawnLineInfo) {
       lineFromNodeId = currentlyDrawnLineInfo.lineFromNodeId;
     } else {
-      console.error('Property "lineFromNodeId" does not exist on currentlyDrawnLineInfo');
+      console.log('Property "lineFromNodeId" does not exist on currentlyDrawnLineInfo');
     }
 
     if ('lineToNodeId' in currentlyDrawnLineInfo) {
       lineToNodeId = currentlyDrawnLineInfo.lineToNodeId;
     } else {
-      console.error('Property "lineToNodeId" does not exist on currentlyDrawnLineInfo');
+      console.log('Property "lineToNodeId" does not exist on currentlyDrawnLineInfo');
     }
   } else {
-    console.error('currentlyDrawnLineInfo is undefined or null');
+    console.log('currentlyDrawnLineInfo is undefined or null');
   }
 };
 
