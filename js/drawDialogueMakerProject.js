@@ -486,3 +486,11 @@ function autoGrowTextArea(element) {
   element.style.height = "5px"; // Temporarily shrink to measure the real needed size
   element.style.height = (element.scrollHeight) + "px";
 }
+
+/* for logging all dom elements to console on a specific moment. pass in document.body */
+function logAllElements(element) {
+  console.log(element);
+  for (let i = 0; i < element.children.length; i++) {
+    logAllElements(element.children[i]);
+  }
+}

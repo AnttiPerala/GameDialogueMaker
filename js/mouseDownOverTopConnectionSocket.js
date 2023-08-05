@@ -65,6 +65,8 @@ function mousedownOverTopConnectionSocket(event, elem){
 
             let originalFromNode = getDialogueNodeById(disconnectedLineCharacterID, disconnectedLineFromNodeID);
 
+            console.log('originalFromNode gotten by getDialogueNodeById: ', originalFromNode);
+
             let originalFromNodeDomElem = originalFromNode.nodeElement;
 
             console.log('originalFromNodeDomElem ', originalFromNodeDomElem);
@@ -103,9 +105,16 @@ function mousedownOverTopConnectionSocket(event, elem){
                 };
 
                 const fromElement = originalFromNodeDomElem.get(0);
+
+                console.log(' originalFromNodeDomElem.get(0)', originalFromNodeDomElem.get(0));
+                console.log('document.body.contains(originalFromNodeDomElem.get(0))', document.body.contains(originalFromNodeDomElem.get(0)));
+                console.log('Contained in body:', document.body.contains(originalFromNodeDomElem.get(0)));
+
+                //logAllElements($('#mainArea')[0]);
+                const blockPlusButtonToConnect = $(fromElement).find('.blockPlusButton'); //TO DO: add detection for socketnumber
                 const toPoint = LeaderLine.pointAnchor(endPoint);
 
-                if (!fromElement || !document.body.contains(fromElement)) {
+               /*  if (!fromElement || !document.body.contains(fromElement)) {
                     console.error("From element is null, undefined, or not in the document");
                     return;
                 }
@@ -113,10 +122,10 @@ function mousedownOverTopConnectionSocket(event, elem){
                 if (!toPoint) {
                     console.error("ToPoint is null or undefined");
                     return;
-                }
+                } */
 
                 line = new LeaderLine(
-                    fromElement,
+                    blockPlusButtonToConnect.get(0),
                     toPoint,
                     {
                         color: "#0075ff",
