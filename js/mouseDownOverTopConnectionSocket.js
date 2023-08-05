@@ -94,9 +94,6 @@ function mousedownOverTopConnectionSocket(event, elem){
 
 
             $(document).mousemove(function (event) {
-                if (currentlyDrawnLineInfo && currentlyDrawnLineInfo.line) {
-                    currentlyDrawnLineInfo.line.remove();
-                }
                 const endPoint = {
                     x: event.pageX,
                     y: event.pageY
@@ -115,7 +112,11 @@ function mousedownOverTopConnectionSocket(event, elem){
                     return;
                 }
 
-                line = new LeaderLine(
+                if (currentlyDrawnLineInfo && currentlyDrawnLineInfo.line) {
+                    currentlyDrawnLineInfo.line.remove();
+                }
+
+                const line = new LeaderLine(
                     fromElement,
                     toPoint,
                     {
@@ -126,28 +127,23 @@ function mousedownOverTopConnectionSocket(event, elem){
                         startSocket: "bottom",
                         endSocket: "bottom",
                         endPlug: "disc",
-                       
                     }
                 );
 
                 line.positionByWindowResize = false;
- 
-                leaderLines.push(theLine);
-            
-                lineInfo = {
 
+                leaderLines.push(line); // Changed from theLine to line
+
+                const lineInfo = {
                     line: line,
-
                     lineCharacterId: disconnectedLineCharacterID,
-
                     lineFromNodeId: disconnectedLineFromNodeID,
-
                     lineToNodeId: null
                 }
 
                 currentlyDrawnLineInfo = lineInfo;
-            
             }); //end mousemove
+
 
             $(document).mouseup(function () {
                 // Stop updating line when mouse button is released

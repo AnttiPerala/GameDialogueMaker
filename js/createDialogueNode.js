@@ -114,7 +114,7 @@ function createDialogueHTMLElement(dialogueNode) {
                                 style="width: 15%; display:inline-block;" readonly type="number" value="${dialogueNode.dialogueID}">
                         </div>
                         ${selectElementContentBasedOnParentBlockType}
-                        <textarea class="dialogueTextArea" placeholder="${dialoguePlaceholderBasedOnParentBlockType}" data-autoresize>${dialogueNode.dialogueText}</textarea>
+                        <textarea class="dialogueTextArea" placeholder="${dialoguePlaceholderBasedOnParentBlockType}">${dialogueNode.dialogueText}</textarea>
                         <div>
                         <div class="optionsUnderDialogue" style="text-align: right;">
                             <div class="option1">${blockOptionsOption1}</div>
