@@ -338,6 +338,8 @@ $(document).on('change keyup', 'textarea.dialogueTextArea', function () {
 
     nodeToUpdate.dialogueText = updatedText;
 
+    autoGrowTextArea(this);
+
     
 
 })

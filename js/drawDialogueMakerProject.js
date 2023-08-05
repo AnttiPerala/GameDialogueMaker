@@ -62,6 +62,10 @@ function drawDialogueMakerProject() {
 
   applyHideToElements();
 
+  $('.dialogueTextArea').each(function(){
+    autoGrowTextArea(this);
+  })
+
 
 /* A SECOND ITERATION FOR DRAWING THE LINES IS NEEDED, BECAUSE THEY DIALOGUES NEED TO ALREADY BE IN THE DOM WHEN THE LINES ARE CREATED */
 
@@ -255,7 +259,7 @@ function drawLines(sourceId, targetId, isCharacter, outgoingLine, characterId) {
         }
       );
 
-      LeaderLine.positionByWindowResize = false;
+      LeaderLine.positionByWindowResize = false; //this seems to be a global setting that will stop the disconnected element was passed error because leaderLine wont try to update lines anymore
 
 
       leaderLines.push(theLine);
@@ -477,3 +481,8 @@ function handleDocumentMouseUp(event, myThis){
   }
 
 };
+
+function autoGrowTextArea(element) {
+  element.style.height = "5px"; // Temporarily shrink to measure the real needed size
+  element.style.height = (element.scrollHeight) + "px";
+}

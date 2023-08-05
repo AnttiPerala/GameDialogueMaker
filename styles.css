@@ -290,6 +290,8 @@ textarea {
     box-sizing: border-box;
     resize: none;
     display: block;
+    overflow-y: hidden; /* Prevent scrollbar flash */
+    min-height: 50px; /* Minimum height */
 }
 
 .elementInfoField {
