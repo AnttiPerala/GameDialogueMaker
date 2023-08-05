@@ -235,7 +235,7 @@ function mousedownOverTopConnectionSocket(event, elem){
 
         line.positionByWindowResize = false;
 
-        leaderLines.push(theLine);
+        leaderLines.push(line);
 
         //set the id also of the svg for easier selection
         const all_svgs = document.querySelectorAll("svg");
