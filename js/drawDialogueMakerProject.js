@@ -376,8 +376,7 @@ function handleMouseDownOverTopConnectionSocket(event, myThis) {
 
 function handleDocumentMouseUp(event, myThis){
   console.log('handleDocumentMouseUp from inside drawDialogueMakerProject', event );
-  console.log('currentlyDrawingALine is: ', currentlyDrawingALine);
-  console.log('lineInformation', lineInformation);
+  //console.log('currentlyDrawingALine is: ', currentlyDrawingALine);
   if (currentlyDrawingALine) {
     // Get the element under the cursor
     
@@ -387,20 +386,6 @@ function handleDocumentMouseUp(event, myThis){
     var $elementUnderCursor = $(elementUnderCursor);
 
    //delete is handled in mouseDownOverTopConnectionSocket EDIT: that doesnt seem to be firing in all situations
-    // Check if the element under the cursor is #mainArea itself or a descendant of #mainArea
-    if ($elementUnderCursor.is("#mainArea") || $elementUnderCursor.closest("#mainArea").length > 0) {
-       //If over #mainArea or its descendants, consider it as an empty area
-       console.log('empty area mouse release delete line now');
-
-      console.log(`lineInformation.lineCharacterId: ${lineInformation.lineCharacterId} lineFromNodeId: ${lineFromNodeId} lineToNodeId: ${lineToNodeId}`);
-
-      //delete the line from the master object
-      let theLineInTheObject = deleteLineFromObject(gameDialogueMakerProject, lineInformation.lineCharacterId, lineInformation.lineFromNodeId, lineInformation.lineToNodeId);
-       
-    }
-
-  
-
 
     // Check if the element is a plus button and if its data-acceptclicks attribute is true
     if (
@@ -409,7 +394,7 @@ function handleDocumentMouseUp(event, myThis){
       currentlyDrawingALine == true
     ) {
       // The line is over the target div and the div accepts clicks, do stuff
-      console.log("Line is over the target div and it accepts clicks");
+      //console.log("Line is over the target div and it accepts clicks");
 
       //now we should update the master object structure accordingly and then redraw
       //start by detecting to which node the plus buttons belongs to

@@ -1,54 +1,84 @@
-function mousedownOverTopConnectionSocket(event, elem) {
+function mousedownOverTopConnectionSocket(event, elem){
+
+    console.log('mousedownOverTopConnectionSocket, event was: ', event);
+    console.log('elem was: ', elem);
+
     var socketElement = $(elem);
+
+    let lineInfo;
+
     let line;
-    let socketElementCharacterID = findCharacterIDByPassingInDialogueNode(elem);
-    var lineIndex;
-    currentlyDrawingALine = true;
-   
 
+    //let lineCharacterId; //already define in globalVars
 
+    //let lineFromNodeId; //already define in globalVars
+
+    //let lineToNodeId; //already define in globalVars
+
+    let socketElementCharacterID = getInfoByPassingInDialogueNodeOrElement(elem).characterID;
+
+    console.log('inside mousedownOverTopConnectionSocket, socketElement is: ', socketElement);
+    console.log('socketElementCharacterID ', socketElementCharacterID);
+
+    //the socket has a line so we should unplug:
     if ($(socketElement).attr("data-hasline") == 'true') {
+        //hide the socket to help elementFromPoint
+
+        //need to temporarily enable svg pointer events for proper detections
         $('svg.leader-line').each(function () {
             this.style.setProperty('pointer-events', 'auto', 'important');
         });
 
+
+        //first select the line
         var x = event.clientX,
             y = event.clientY,
             myelement = document.elementFromPoint(x, y);
 
+        console.log(`myelement was`, myelement);
+
+        // climb up the DOM tree to the root svg
         while (myelement && !(myelement instanceof SVGSVGElement)) {
             myelement = myelement.ownerSVGElement;
         }
 
         if (myelement && myelement.classList.contains('leader-line')) {
-            lineCharacterId = $(myelement).attr('data-character');
-            lineFromNodeId = $(myelement).attr('data-fromnode');
-            lineToNodeId = $(myelement).attr('data-tonode');
-            $(myelement).remove();
-            let originalFromNode = getDialogueNodeById(lineCharacterId, lineFromNodeId);
+            //console.log(`mouse over socket AND svg`);
+
+            //use the info on the clicked line to select the correct line from the master object
+            disconnectedLineCharacterID = $(myelement).attr('data-character');
+
+            disconnectedLineFromNodeID = $(myelement).attr('data-fromnode');
+
+            disconnectedLineToNodeID = $(myelement).attr('data-tonode');
+
+ 
+
+            console.log(`THIS is the disconnecte line's disconnectedLineCharacterID ${disconnectedLineCharacterID} disconnectedLineFromNodeID ${disconnectedLineFromNodeID} disconnectedLineToNodeID ${disconnectedLineToNodeID}`);
+
+
+            //$(myelement).remove(); //remove because we will redraw
+
+
+            //nah, let's try to get the actual element the original line is attached to 
+            //we can start by finding the correct fromNode
+
+            let originalFromNode = getDialogueNodeById(disconnectedLineCharacterID, disconnectedLineFromNodeID);
+
             let originalFromNodeDomElem = originalFromNode.nodeElement;
+
+            console.log('originalFromNodeDomElem ', originalFromNodeDomElem);
+
+            //console.log('originalFromNodeDomElem: ', originalFromNodeDomElem);
+
             const mousePoint = {
                 x: event.pageX,
                 y: event.pageY
             };
 
-            //get the connection socket number
-            let myLine = originalFromNode.outgoingLines.find(line => line.fromNode == lineFromNodeId && line.toNode == lineToNodeId);
-            let mySocketNumber = myLine.fromSocket;
-
-            //get button based on button number
-            let theRightButtonElement = originalFromNodeDomElem.find('[data-buttonindex="' + mySocketNumber + '"]');
-
-            if (theRightButtonElement.length > 0) {
-                console.log(`Found matching theRightButtonElement: `, theRightButtonElement);
-            } else {
-                console.log(`No matching theRightButtonElement found`);
-            }
-
-            console.log('theRightButtonElement:', theRightButtonElement);
-
-            line = new LeaderLine(
-                theRightButtonElement.get(0),
+                //is this really needed here since we create new lines onmousemove?
+             /* line = new LeaderLine(
+                originalFromNodeDomElem.get(0),
                 LeaderLine.pointAnchor(mousePoint),
                 {
                     color: "#0075ff",
@@ -59,85 +89,181 @@ function mousedownOverTopConnectionSocket(event, elem) {
                     endSocket: "bottom",
                     endPlug: "disc",
                 }
-            );
+            ); */
 
-            leaderLines.push(line);
-            lineIndex = leaderLines.length - 1;
 
-            lineInformation = { 
-                line: line,
-                lineCharacterId: lineCharacterId, 
-                lineFromNodeId: lineFromNodeId, 
-                lineToNodeId: lineToNodeId 
-            }
 
-            console.log('before mouseup call, lineInformation is: ', lineInformation);
+            $(document).mousemove(function (event) {
+                if (currentlyDrawnLineInfo && currentlyDrawnLineInfo.line) {
+                    currentlyDrawnLineInfo.line.remove();
+                }
+                const endPoint = {
+                    x: event.pageX,
+                    y: event.pageY
+                };
 
-            $(document).mousemove(handleMouseMove);
-            $(document).mouseup(function (mouseupEvent) {
-                handleDocumentMouseUp(mouseupEvent, this)
+                const fromElement = originalFromNodeDomElem.get(0);
+                const toPoint = LeaderLine.pointAnchor(endPoint);
+
+                if (!fromElement || !document.body.contains(fromElement)) {
+                    console.error("From element is null, undefined, or not in the document");
+                    return;
+                }
+
+                if (!toPoint) {
+                    console.error("ToPoint is null or undefined");
+                    return;
+                }
+
+                line = new LeaderLine(
+                    fromElement,
+                    toPoint,
+                    {
+                        color: "#0075ff",
+                        size: 4,
+                        dash: false,
+                        path: "straight",
+                        startSocket: "bottom",
+                        endSocket: "bottom",
+                        endPlug: "disc",
+                       
+                    }
+                );
+
+                line.positionByWindowResize = false;
+ 
+                leaderLines.push(theLine);
+            
+                lineInfo = {
+
+                    line: line,
+
+                    lineCharacterId: disconnectedLineCharacterID,
+
+                    lineFromNodeId: disconnectedLineFromNodeID,
+
+                    lineToNodeId: null
+                }
+
+                currentlyDrawnLineInfo = lineInfo;
+            
+            }); //end mousemove
+
+            $(document).mouseup(function () {
+                // Stop updating line when mouse button is released
+                $(document).off('mousemove');
+                $(document).off('mouseup');
+
+                console.log('mouseup, should del line now: ');
+                console.log('disconnectedLineCharacterID: ', disconnectedLineCharacterID);
+                console.log('disconnectedLineFromNodeID: ', disconnectedLineFromNodeID);
+                console.log('disconnectedLineToNodeID: ', disconnectedLineToNodeID);
+
+                //delete the line from the master object
+                let theLineInTheObject = deleteLineFromObject(gameDialogueMakerProject, disconnectedLineCharacterID, disconnectedLineFromNodeID, disconnectedLineToNodeID);
+
+                //console.log('socketElement', socketElement);
+                $(socketElement).attr('data-hasline', 'false');
+
+                
+
+                //delete the line, ...maybe redraw instead
+                //line.remove(); //note this is leaderLines remove method not jQuery
+
+                let theElem = getDialogueNodeById(disconnectedLineCharacterID, disconnectedLineToNodeID);
+
+                let theInfo = getInfoByPassingInDialogueNodeOrElement(theElem);
+
+                calculateNewPositionAfterElementParentChange(theElem, theInfo.characterNode.nodeElement);
+
+                lineInfo = {
+
+                    line: theLineInTheObject,
+
+                    lineCharacterId: disconnectedLineCharacterID,
+
+                    lineFromNodeId: disconnectedLineFromNodeID,
+
+                    lineToNodeId: null
+                }
+
+                currentlyDrawnLineInfo = lineInfo;
+
             });
+
+
+        } else {
+            // Mouse is not over an svg element with class "leader-line"
         }
 
+        //turn svg pointer events back off
         $('svg.leader-line').each(function () {
             this.style.setProperty('pointer-events', 'none', 'important');
         });
-    } else { //the socket did not have a line so we will start one from it now
 
-        objectNodeFromWhichWeAreDrawing = findDialogueObjectBasedOnPassedInHtmlElement($(elem).closest(".blockWrap").find(".blockid"));
-        nodeIdFromWhichWeAreDrawing = $(elem).closest(".blockWrap").find(".block").attr("id").replace(/\D/g, "");
-        characterNameFromWhichWeAreDrawing = $(elem).closest(".characterRoot").find(".characterName").val();
+        
+
+    } else { //draw a line because the socket was empty
+
+        currentlyDrawingALine = true;
+
+        let currentNodeInfo = getInfoByPassingInDialogueNodeOrElement($(elem).closest(".blockWrap"));
+
+        objectNodeFromWhichWeAreDrawing = currentNodeInfo.dialogueNode;
+
+        nodeIdFromWhichWeAreDrawing = currentNodeInfo.dialogueID;
+
+        characterIDFromWhichWeAreDrawing = currentNodeInfo.characterID;
+
+        console.log('currentNodeInfo.characterID!!!!!!!!!', currentNodeInfo.characterID);
 
         line = new LeaderLine(
-            socketElement[0],
-            LeaderLine.pointAnchor({ x: event.pageX, y: event.pageY }),
+            socketElement[0], // Start of the line
+            LeaderLine.pointAnchor({ x: event.pageX, y: event.pageY }), // End of the line
             {
                 color: "#0075ff",
                 size: 4,
                 dash: false,
-                path: "straight",
+                path: "straight", //deafult is straight, arc, fluid, magnet, grid
                 startSocket: "bottom",
                 endSocket: "bottom",
                 endPlug: "disc",
+                
             }
         );
 
-        leaderLines.push(line);
-        lineIndex = leaderLines.length - 1;
+        line.positionByWindowResize = false;
 
+        leaderLines.push(theLine);
+
+        //set the id also of the svg for easier selection
         const all_svgs = document.querySelectorAll("svg");
-        const this_svg = all_svgs[all_svgs.length - 1];
-        this_svg.setAttribute("data-character", socketElementCharacterID);
-    }
+        const this_svg = all_svgs[all_svgs.length - 1]; //this will select the latest svg
+        this_svg.setAttribute(
+            "data-character",
+            characterIDFromWhichWeAreDrawing
+        );
+
+         lineInfo = {
+
+            line: line,
+
+             lineCharacterId: characterIDFromWhichWeAreDrawing,
+
+             lineFromNodeId: nodeIdFromWhichWeAreDrawing,
+
+            lineToNodeId: null
+        }
+
+        currentlyDrawnLineInfo = lineInfo;
+
+    } //end else for if ($(socketElement).attr('data-hasline') == 'true')
 
     event.stopPropagation();
 
-    let lineInfo = {
-        line: line,
-        lineCharacterId: socketElementCharacterID,
-        lineFromNodeId: lineFromNodeId,
-        lineToNodeId: lineToNodeId
-    }
+   
 
     return lineInfo;
 
-    function handleMouseMove(event) {
-        console.log('lineInformation.line', lineInformation.line);
-        lineInformation.line.setOptions({
-            end: LeaderLine.pointAnchor({ x: event.pageX, y: event.pageY }),
-        });
-    }
-
-    /* function handleMouseUp() {
-        $(document).off('mousemove', handleMouseMove);
-        $(document).off('mouseup', handleMouseUp);
-        deleteLineFromObject(gameDialogueMakerProject, lineCharacterId, lineFromNodeId, lineToNodeId);
-        $(socketElement).attr('data-hasline', 'false');
-        leaderLines.splice(lineIndex, 1);
-        clearCanvasBeforeReDraw();
-        drawDialogueMakerProject();
-    } */
-}
-
-/* end mousedownOverTopConnectionSocket */
+}/* end mousedownOverTopConnectionSocket */
 

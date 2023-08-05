@@ -335,17 +335,16 @@ function getLineElemFromObject(gameDialogueMakerProject, characterId, fromNodeVa
 
 function deleteLineFromObject(gameDialogueMakerProject, characterId, fromNodeValue, toNodeValue) {
     // Search through the characters array
-    console.log(`hello from deleteLineFromObject. characterId: ${characterId} fromNodeValue: ${fromNodeValue} toNodeValue: ${toNodeValue}`);
+    console.log(`hello from deleteLineFromObject. characterId: ${characterId} fromNodeValue: ${fromNodeValue} toNodeValue: ${toNodeValue }`);
 
     let character = gameDialogueMakerProject.characters.find(character => character.characterID == characterId);
 
     if (!character) {
-        console.log(`No character found with the given ID: ${characterId}`);
+        //console.log(`no character found`);
         return null; // No character found with the given ID
     }
 
-    console.log(`Character found with the given ID: ${characterId}`);
-    console.log('heres the contents of the character at the moment', character );
+    //console.log(`character match`);
 
     // Search through the character's outgoingLines array
     let outgoingLine = character.outgoingLines.find(line => line.fromNode == fromNodeValue && line.toNode == toNodeValue);
@@ -354,9 +353,8 @@ function deleteLineFromObject(gameDialogueMakerProject, characterId, fromNodeVal
         // Remove the outgoingLine from the character's outgoingLines array
         const index = character.outgoingLines.indexOf(outgoingLine);
         character.outgoingLines.splice(index, 1);
-        console.log(`Removed outgoingLine from character. Here's how it looks now: `, character);
+        console.log(`removed outgoingLine from character. here's how it looks now: `, character);
     } else {
-        console.log(`No outgoing line found in the character's outgoingLines array. Here's what's inside: `, character.outgoingLines);
         // If not found in character's outgoingLines, search through each dialogueNodes
         for (let dialogueNode of character.dialogueNodes) {
             outgoingLine = dialogueNode.outgoingLines.find(line => line.fromNode == fromNodeValue && line.toNode == toNodeValue);
@@ -364,22 +362,14 @@ function deleteLineFromObject(gameDialogueMakerProject, characterId, fromNodeVal
                 // Remove the outgoingLine from the dialogueNode's outgoingLines array
                 const index = dialogueNode.outgoingLines.indexOf(outgoingLine);
                 dialogueNode.outgoingLines.splice(index, 1);
-                console.log(`Removed outgoingLine from dialogueNode`);
+                //console.log(`removed outgoingLine from dialogueNode`);
                 break; // Found a matching outgoingLine, so break out of the loop
-            } else {
-                console.log(`No outgoing line found in the dialogueNode's outgoingLines array. Here's what's inside: `, dialogueNode.outgoingLines);
             }
         }
     }
 
-    if (!outgoingLine) {
-        console.log(`No outgoing line found in the dialogueNode or character's outgoingLines array`);
-    }
-
     return outgoingLine ? outgoingLine.lineElem : null; // Return the lineElem or null if not found
 }
-/* end deleteLine */
-
 
 //TRAVERSE ALL NODES CONNECTED TO A NODE WITH LINES
 //i think at the moment this only takes dialogueNodes and trying to add characterNode detection broke things
