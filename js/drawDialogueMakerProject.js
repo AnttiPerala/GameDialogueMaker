@@ -377,6 +377,7 @@ function handleMouseDownOverTopConnectionSocket(event, myThis) {
 function handleDocumentMouseUp(event, myThis){
   console.log('handleDocumentMouseUp from inside drawDialogueMakerProject', event );
   console.log('currentlyDrawingALine is: ', currentlyDrawingALine);
+  console.log('lineInformation', lineInformation);
   if (currentlyDrawingALine) {
     // Get the element under the cursor
     
@@ -389,6 +390,12 @@ function handleDocumentMouseUp(event, myThis){
     // Check if the element under the cursor is #mainArea itself or a descendant of #mainArea
     if ($elementUnderCursor.is("#mainArea") || $elementUnderCursor.closest("#mainArea").length > 0) {
        //If over #mainArea or its descendants, consider it as an empty area
+       console.log('empty area mouse release delete line now');
+
+      console.log(`lineInformation.lineCharacterId: ${lineInformation.lineCharacterId} lineFromNodeId: ${lineFromNodeId} lineToNodeId: ${lineToNodeId}`);
+
+      //delete the line from the master object
+      let theLineInTheObject = deleteLineFromObject(gameDialogueMakerProject, lineInformation.lineCharacterId, lineInformation.lineFromNodeId, lineInformation.lineToNodeId);
        
     }
 

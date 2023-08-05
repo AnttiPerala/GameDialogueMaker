@@ -3,6 +3,9 @@ function mousedownOverTopConnectionSocket(event, elem) {
     let line;
     let socketElementCharacterID = findCharacterIDByPassingInDialogueNode(elem);
     var lineIndex;
+    currentlyDrawingALine = true;
+   
+
 
     if ($(socketElement).attr("data-hasline") == 'true') {
         $('svg.leader-line').each(function () {
@@ -29,8 +32,23 @@ function mousedownOverTopConnectionSocket(event, elem) {
                 y: event.pageY
             };
 
+            //get the connection socket number
+            let myLine = originalFromNode.outgoingLines.find(line => line.fromNode == lineFromNodeId && line.toNode == lineToNodeId);
+            let mySocketNumber = myLine.fromSocket;
+
+            //get button based on button number
+            let theRightButtonElement = originalFromNodeDomElem.find('[data-buttonindex="' + mySocketNumber + '"]');
+
+            if (theRightButtonElement.length > 0) {
+                console.log(`Found matching theRightButtonElement: `, theRightButtonElement);
+            } else {
+                console.log(`No matching theRightButtonElement found`);
+            }
+
+            console.log('theRightButtonElement:', theRightButtonElement);
+
             line = new LeaderLine(
-                originalFromNodeDomElem.get(0),
+                theRightButtonElement.get(0),
                 LeaderLine.pointAnchor(mousePoint),
                 {
                     color: "#0075ff",
@@ -46,15 +64,26 @@ function mousedownOverTopConnectionSocket(event, elem) {
             leaderLines.push(line);
             lineIndex = leaderLines.length - 1;
 
+            lineInformation = { 
+                line: line,
+                lineCharacterId: lineCharacterId, 
+                lineFromNodeId: lineFromNodeId, 
+                lineToNodeId: lineToNodeId 
+            }
+
+            console.log('before mouseup call, lineInformation is: ', lineInformation);
+
             $(document).mousemove(handleMouseMove);
-            $(document).mouseup(handleDocumentMouseUp);
+            $(document).mouseup(function (mouseupEvent) {
+                handleDocumentMouseUp(mouseupEvent, this)
+            });
         }
 
         $('svg.leader-line').each(function () {
             this.style.setProperty('pointer-events', 'none', 'important');
         });
-    } else {
-        currentlyDrawingALine = true;
+    } else { //the socket did not have a line so we will start one from it now
+
         objectNodeFromWhichWeAreDrawing = findDialogueObjectBasedOnPassedInHtmlElement($(elem).closest(".blockWrap").find(".blockid"));
         nodeIdFromWhichWeAreDrawing = $(elem).closest(".blockWrap").find(".block").attr("id").replace(/\D/g, "");
         characterNameFromWhichWeAreDrawing = $(elem).closest(".characterRoot").find(".characterName").val();
@@ -93,7 +122,8 @@ function mousedownOverTopConnectionSocket(event, elem) {
     return lineInfo;
 
     function handleMouseMove(event) {
-        leaderLines[lineIndex].setOptions({
+        console.log('lineInformation.line', lineInformation.line);
+        lineInformation.line.setOptions({
             end: LeaderLine.pointAnchor({ x: event.pageX, y: event.pageY }),
         });
     }

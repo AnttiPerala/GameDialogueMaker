@@ -3,6 +3,7 @@ let eraseMode = false;
 let leaderLines = []; //let's see if storing all lines and clearing the on window resize helps get rid of error
 let currentlyDrawingALine = false;
 let currentlyDrawnLineInfo; //line:, lineCharacterId:, lineFromNodeId:, lineToNodeId: 
+let lineInformation = null; //only used for when a line is unplugged
 let nodeIdFromWhichWeAreDrawing = 0;
 let objectNodeFromWhichWeAreDrawing='';
 let characterNameFromWhichWeAreDrawing = '';
