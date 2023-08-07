@@ -184,6 +184,10 @@ body {
  
 }
 
+.dialoguNodeTopRow{
+    display: flex;
+}
+
 .eyeImage {
     margin-left: auto; /* needs flex in parent */
 }

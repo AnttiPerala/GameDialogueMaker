@@ -121,7 +121,7 @@ function createDialogueHTMLElement(dialogueNode) {
                     <div class="topConnectionSocket" data-hasline="false"><div class="roundSocket"></div></div>
                 </div>
                     <div id="id${dialogueNode.dialogueID}" class="block" style="background-color: ${dialogueNode.bgColor};">
-                        <div style="text-align: left;">
+                        <div class="dialoguNodeTopRow" style="text-align: left;">
                             <span style="width: 15%; display:inline-block; text-align: right;">ID:</span><input class="blockid"
                                 style="width: 15%; display:inline-block;" readonly type="number" value="${dialogueNode.dialogueID}">
                                 <img class="eyeImage dialogueNodeEye" src="${eyeImageSource}" alt="eye" width="24" height="24">
