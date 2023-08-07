@@ -412,53 +412,93 @@ function handleDocumentMouseUp(event, myThis){
 
       if (nodeInfo.isCharacter){
 
+        if (nodeInfo.characterID == currentlyDrawnLineInfo.lineCharacterId) {
+          //no change in parent
+          nodeInfo.characterNode.outgoingLines.push({
+            fromNode: 0,
+            fromSocket: plusButtonIndexToAttachTo,
+            toNode: nodeIdFromWhichWeAreDrawing,
+            lineElem: "",
+            transitionConditions: [],
+          });
+
+        } else {
+          //change in parent
+
+          console.log('Change in parent, currentlyDrawnLineInfo.lineCharacterId ', currentlyDrawnLineInfo.lineCharacterId);
+
+          let highestIdInNewParent = getMaxDialogueNodeId(gameDialogueMakerProject.characters[newParentCharacterID - 1]);
+          //console.log(`highestIdInNewParent was: ${highestIdInNewParent}`);
+
+          console.log('calling reparent function with these arguments: ');
+          console.log('objectNodeFromWhichWeAreDrawing ', objectNodeFromWhichWeAreDrawing);
+          console.log('currentlyDrawnLineInfo.lineCharacterId ', currentlyDrawnLineInfo.lineCharacterId);
+          console.log('newParentCharacterID ', newParentCharacterID);
+          console.log('highestIdInNewParent + 1 ', highestIdInNewParent + 1);
+          console.log('gameDialogueMakerProject ', gameDialogueMakerProject);
+
+          reparentNodeAndDescendants(objectNodeFromWhichWeAreDrawing, currentlyDrawnLineInfo.lineCharacterId, newParentCharacterID, highestIdInNewParent + 1, gameDialogueMakerProject);
+
+          nodeInfo.nodeElement.outgoingLines.push({
+            fromNode: 0,
+            fromSocket: plusButtonIndexToAttachTo,
+            toNode: objectNodeFromWhichWeAreDrawing.dialogueID,
+            lineElem: "",
+            transitionConditions: [],
+          });
+
+
+
+        } //end else (change in parent)
+
       } else {//end is character
         //not a character
 
+
+        //we need to check if the root character changes and if it does then we need to remove the dialogue object from the old character in the object and add it to the new one
+
+        console.log('nodeInfo.dialogueNode ', nodeInfo.dialogueNode);
+
+        if (nodeInfo.characterID == currentlyDrawnLineInfo.lineCharacterId) {
+          //no change in parent
+            nodeInfo.dialogueNode.outgoingLines.push({
+            fromNode: nodeInfo.dialogueNode.dialogueID || 0,
+            fromSocket: plusButtonIndexToAttachTo,
+            toNode: nodeIdFromWhichWeAreDrawing,
+            lineElem: "",
+            transitionConditions: [],
+          });
+
+        } else {
+          //change in parent
+
+          console.log('Change in parent, currentlyDrawnLineInfo.lineCharacterId ', currentlyDrawnLineInfo.lineCharacterId);
+
+          let highestIdInNewParent = getMaxDialogueNodeId(gameDialogueMakerProject.characters[newParentCharacterID - 1]);
+          //console.log(`highestIdInNewParent was: ${highestIdInNewParent}`);
+
+          console.log('calling reparent function with these arguments: ');
+          console.log('objectNodeFromWhichWeAreDrawing ', objectNodeFromWhichWeAreDrawing);
+          console.log('currentlyDrawnLineInfo.lineCharacterId ', currentlyDrawnLineInfo.lineCharacterId);
+          console.log('newParentCharacterID ', newParentCharacterID);
+          console.log('highestIdInNewParent + 1 ', highestIdInNewParent + 1);
+          console.log('gameDialogueMakerProject ', gameDialogueMakerProject);
+
+          reparentNodeAndDescendants(objectNodeFromWhichWeAreDrawing, currentlyDrawnLineInfo.lineCharacterId, newParentCharacterID, highestIdInNewParent + 1, gameDialogueMakerProject);
+
+          nodeInfo.nodeElement.outgoingLines.push({
+            fromNode: nodeInfo.nodeElement.dialogueID || 0,
+            fromSocket: plusButtonIndexToAttachTo,
+            toNode: objectNodeFromWhichWeAreDrawing.dialogueID,
+            lineElem: "",
+            transitionConditions: [],
+          });
+
+
+
+        } //end else (change in parent)
       }
 
-      //we need to check if the root character changes and if it does then we need to remove the dialogue object from the old character in the object and add it to the new one
-     
-      console.log('nodeInfo.nodeElement ', nodeInfo.nodeElement);
-
-      if (nodeInfo.characterID == currentlyDrawnLineInfo.lineCharacterId) {
-        //no change in parent
-        nodeInfo.nodeElement.outgoingLines.push({
-          fromNode:  nodeInfo.nodeElement.dialogueID || 0,
-          fromSocket: plusButtonIndexToAttachTo,
-          toNode: nodeIdFromWhichWeAreDrawing,
-          lineElem: "",
-          transitionConditions: [],
-        });
-
-      } else {
-        //change in parent
-
-        console.log('Change in parent, currentlyDrawnLineInfo.lineCharacterId ', currentlyDrawnLineInfo.lineCharacterId);
-
-        let highestIdInNewParent = getMaxDialogueNodeId(gameDialogueMakerProject.characters[newParentCharacterID - 1]);
-        //console.log(`highestIdInNewParent was: ${highestIdInNewParent}`);
-
-        console.log('calling reparent function with these arguments: ');
-        console.log('objectNodeFromWhichWeAreDrawing ', objectNodeFromWhichWeAreDrawing);
-        console.log('currentlyDrawnLineInfo.lineCharacterId ', currentlyDrawnLineInfo.lineCharacterId);
-        console.log('newParentCharacterID ', newParentCharacterID);
-        console.log('highestIdInNewParent + 1 ', highestIdInNewParent + 1);
-        console.log('gameDialogueMakerProject ', gameDialogueMakerProject);
-
-        reparentNodeAndDescendants(objectNodeFromWhichWeAreDrawing, currentlyDrawnLineInfo.lineCharacterId, newParentCharacterID, highestIdInNewParent + 1, gameDialogueMakerProject);
-
-        nodeInfo.nodeElement.outgoingLines.push({
-          fromNode: nodeInfo.nodeElement.dialogueID || 0,
-          fromSocket: plusButtonIndexToAttachTo,
-          toNode: objectNodeFromWhichWeAreDrawing.dialogueID,
-          lineElem: "",
-          transitionConditions: [],
-        });
-
-
-
-      } //end else (change in parent)
     }//end if (line)
 
     // Stop updating the line
