@@ -172,6 +172,8 @@ function createCharacterNodeHTML(character){
     top: character.characterNodeY,
   });
 
+  character.nodeElement = characterNodeHTML;
+
   return characterNodeHTML;
 
 }/*End createCharacterNodeHTML  */
