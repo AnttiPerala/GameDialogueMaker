@@ -144,6 +144,16 @@ function createCharacterNodeHTML(character){
 
   }
 
+  let acceptclicksValue = false;
+
+  //check for acceptclicks (note that there is also a function for this but it might be more efficient to do it here)
+
+  if (character.outgoingLines.length < 1){
+
+    acceptclicksValue = true;
+
+  }
+
   let characterNodeHTML = $(`
           <div class="blockWrap characterRoot" data-character-id="${character.characterID}" id="char${character.characterID}" data-hidechildren="${character.hideChildren}">
             <div class="contentWrap">
@@ -160,7 +170,7 @@ function createCharacterNodeHTML(character){
               
                     </div>
                     <div class="plusButtonContainer" style="display: flex; align-items: end; justify-content: center;">
-                        <div class="blockPlusButton" data-buttonindex=0 data-acceptclicks=true>+</div>
+                        <div class="blockPlusButton" data-buttonindex=0 data-acceptclicks=${acceptclicksValue}>+</div>
                     </div>
             </div>
           </div>
