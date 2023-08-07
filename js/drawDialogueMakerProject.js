@@ -406,15 +406,25 @@ function handleDocumentMouseUp(event, myThis){
 
       let nodeInfo = getInfoByPassingInDialogueNodeOrElement($elementUnderCursor);
 
+      console.log('nodeInfo ', nodeInfo);
+
+      //check if it is a character:
+
+      if (nodeInfo.isCharacter){
+
+      } else {//end is character
+        //not a character
+
+      }
 
       //we need to check if the root character changes and if it does then we need to remove the dialogue object from the old character in the object and add it to the new one
      
-
+      console.log('nodeInfo.nodeElement ', nodeInfo.nodeElement);
 
       if (nodeInfo.characterID == currentlyDrawnLineInfo.lineCharacterId) {
         //no change in parent
         nodeInfo.nodeElement.outgoingLines.push({
-          fromNode:  nodeInfo.nodeElement.dialogueID || nodeInfo.nodeElement.characterID,
+          fromNode:  nodeInfo.nodeElement.dialogueID || 0,
           fromSocket: plusButtonIndexToAttachTo,
           toNode: nodeIdFromWhichWeAreDrawing,
           lineElem: "",
@@ -439,7 +449,7 @@ function handleDocumentMouseUp(event, myThis){
         reparentNodeAndDescendants(objectNodeFromWhichWeAreDrawing, currentlyDrawnLineInfo.lineCharacterId, newParentCharacterID, highestIdInNewParent + 1, gameDialogueMakerProject);
 
         nodeInfo.nodeElement.outgoingLines.push({
-          fromNode: nodeInfo.nodeElement.dialogueID || nodeInfo.nodeElement.characterID,
+          fromNode: nodeInfo.nodeElement.dialogueID || 0,
           fromSocket: plusButtonIndexToAttachTo,
           toNode: objectNodeFromWhichWeAreDrawing.dialogueID,
           lineElem: "",
