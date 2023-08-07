@@ -1,5 +1,22 @@
 function checkIfPlusButtonShouldBeTurnedOff(theButton){
 
+
+  //start by checking if the button is a child of a characterRoot or dialogueNode
+
+  let closestBlockWrap = $(theButton).closest('.blockWrap');
+
+  if ($(closestBlockWrap).hasClass('characterRoot')){
+
+    let characterNodeInfo = getInfoByPassingInDialogueNodeOrElement(closestBlockWrap);
+
+    if (characterNodeInfo.characterNode.outgoingLines.length < 1){
+
+      //no outgoing lines
+      closestBlockWrap.find('.blockPlusButton').attr("data-acceptclicks", true);
+
+    }
+
+  } else {
     let theDialogueIdToGet = $(theButton)
     .closest(".blockWrap")
     .attr("id")
@@ -38,6 +55,10 @@ if (dialogueNodeInMaster) {
 } else {
   //console.log('dialogueNodeInMaster does not exist.');
 } //end if dialogueNodeInMaster
+  }
+
+
+
 
 
   if ($(theButton).attr("data-acceptclicks") == "false") {
