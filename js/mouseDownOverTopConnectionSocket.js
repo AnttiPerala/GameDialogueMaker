@@ -108,9 +108,9 @@ function mousedownOverTopConnectionSocket(event, elem){
 
                 const fromElement = originalFromNodeDomElem.get(0);
 
-                console.log(' originalFromNodeDomElem.get(0)', originalFromNodeDomElem.get(0));
-                console.log('document.body.contains(originalFromNodeDomElem.get(0))', document.body.contains(originalFromNodeDomElem.get(0)));
-                console.log('Contained in body:', document.body.contains(originalFromNodeDomElem.get(0)));
+                //console.log(' originalFromNodeDomElem.get(0)', originalFromNodeDomElem.get(0));
+                //console.log('document.body.contains(originalFromNodeDomElem.get(0))', document.body.contains(originalFromNodeDomElem.get(0)));
+                //console.log('Contained in body:', document.body.contains(originalFromNodeDomElem.get(0)));
 
                 //logAllElements($('#mainArea')[0]);
                 const blockPlusButtonToConnect = $(fromElement).find('.blockPlusButton'); //TO DO: add detection for socketnumber
@@ -262,11 +262,11 @@ function mousedownOverTopConnectionSocket(event, elem){
 
             line: line,
 
-             lineCharacterId: characterIDFromWhichWeAreDrawing, //IS THIS WRONG ?
+             lineCharacterId: characterIDFromWhichWeAreDrawing,
 
-             lineFromNodeId: nodeIdFromWhichWeAreDrawing,
+             lineFromNodeId: null,
 
-            lineToNodeId: null
+             lineToNodeId: nodeIdFromWhichWeAreDrawing
         }
 
         currentlyDrawnLineInfo = lineInfo;

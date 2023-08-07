@@ -202,7 +202,7 @@ function drawLines(sourceId, targetId, isCharacter, outgoingLine, characterId) {
     sourceElement = $(`.characterRoot[data-character-id="${characterId}"]`);
     plusButtonElem = $(sourceElement).find(".blockPlusButton").eq(outgoingLine.fromSocket);
     sourceId = 0; //the source node can be called 0 for characters
-    console.log('we got a character, plusButtonElem is: ', plusButtonElem);
+    //console.log('we got a character, plusButtonElem is: ', plusButtonElem);
   } else {
     // Select the source element based on characterId and sourceId
     sourceElement = $(`.blockWrap[data-dialogue-id="${sourceId}"][data-character-id="${characterId}"]`);
@@ -250,6 +250,8 @@ function drawLines(sourceId, targetId, isCharacter, outgoingLine, characterId) {
 
       // Set the socket to contain a line
       $(lineEndElementTopSocket).attr('data-hasline', 'true');
+
+      console.log('lineEndElementTopSocket', lineEndElementTopSocket);
 
       // Create a new point anchor
       var endPointAnchor = LeaderLine.pointAnchor(
@@ -412,11 +414,15 @@ function handleDocumentMouseUp(event, myThis){
       //start by detecting to which node the plus buttons belongs to
       //let blockToAttachTo = $($elementUnderCursor).closest('.block');
 
+      console.log('CONNECT!');
+
       let plusButtonIndexToAttachTo = $elementUnderCursor.data("buttonindex");
 
       let nodeInfo = getInfoByPassingInDialogueNodeOrElement($elementUnderCursor);
 
       console.log('nodeInfo ', nodeInfo);
+    
+      console.log('currentlyDrawnLineInfo.lineCharacterId ', currentlyDrawnLineInfo.lineCharacterId );
 
       //check if it is a character:
 
@@ -437,19 +443,19 @@ function handleDocumentMouseUp(event, myThis){
 
           console.log('Change in parent, currentlyDrawnLineInfo.lineCharacterId ', currentlyDrawnLineInfo.lineCharacterId);
 
-          let highestIdInNewParent = getMaxDialogueNodeId(gameDialogueMakerProject.characters[newParentCharacterID - 1]);
+          let highestIdInNewParent = getMaxDialogueNodeId(gameDialogueMakerProject.characters[nodeInfo.characterID - 1]);
           //console.log(`highestIdInNewParent was: ${highestIdInNewParent}`);
 
           console.log('calling reparent function with these arguments: ');
           console.log('objectNodeFromWhichWeAreDrawing ', objectNodeFromWhichWeAreDrawing);
           console.log('currentlyDrawnLineInfo.lineCharacterId ', currentlyDrawnLineInfo.lineCharacterId);
-          console.log('newParentCharacterID ', newParentCharacterID);
+          console.log('nodeInfo.characterID ', nodeInfo.characterID);
           console.log('highestIdInNewParent + 1 ', highestIdInNewParent + 1);
           console.log('gameDialogueMakerProject ', gameDialogueMakerProject);
 
-          reparentNodeAndDescendants(objectNodeFromWhichWeAreDrawing, currentlyDrawnLineInfo.lineCharacterId, newParentCharacterID, highestIdInNewParent + 1, gameDialogueMakerProject);
+          reparentNodeAndDescendants(objectNodeFromWhichWeAreDrawing, currentlyDrawnLineInfo.lineCharacterId, nodeInfo.characterID, highestIdInNewParent + 1, gameDialogueMakerProject);
 
-          nodeInfo.nodeElement.outgoingLines.push({
+          nodeInfo.characterNode.outgoingLines.push({
             fromNode: 0,
             fromSocket: plusButtonIndexToAttachTo,
             toNode: objectNodeFromWhichWeAreDrawing.dialogueID,
@@ -472,7 +478,7 @@ function handleDocumentMouseUp(event, myThis){
         if (nodeInfo.characterID == currentlyDrawnLineInfo.lineCharacterId) {
           //no change in parent
             nodeInfo.dialogueNode.outgoingLines.push({
-            fromNode: nodeInfo.dialogueNode.dialogueID || 0,
+            fromNode: nodeInfo.dialogueNode.dialogueID,
             fromSocket: plusButtonIndexToAttachTo,
             toNode: nodeIdFromWhichWeAreDrawing,
             lineElem: "",
@@ -482,22 +488,24 @@ function handleDocumentMouseUp(event, myThis){
         } else {
           //change in parent
 
-          console.log('Change in parent, currentlyDrawnLineInfo.lineCharacterId ', currentlyDrawnLineInfo.lineCharacterId);
+          console.log('Change in parent, old character was currentlyDrawnLineInfo.lineCharacterId ', currentlyDrawnLineInfo.lineCharacterId);
+          console.log('new character is nodeInfo.characterID ', nodeInfo.characterID);
 
-          let highestIdInNewParent = getMaxDialogueNodeId(gameDialogueMakerProject.characters[newParentCharacterID - 1]);
+          let highestIdInNewParent = getMaxDialogueNodeId(gameDialogueMakerProject.characters[nodeInfo.characterID - 1]);
           //console.log(`highestIdInNewParent was: ${highestIdInNewParent}`);
 
           console.log('calling reparent function with these arguments: ');
           console.log('objectNodeFromWhichWeAreDrawing ', objectNodeFromWhichWeAreDrawing);
           console.log('currentlyDrawnLineInfo.lineCharacterId ', currentlyDrawnLineInfo.lineCharacterId);
-          console.log('newParentCharacterID ', newParentCharacterID);
-          console.log('highestIdInNewParent + 1 ', highestIdInNewParent + 1);
+          console.log('nodeInfo.characterID ', nodeInfo.characterID);
+          console.log('highestIdInNewParent + 1: ', highestIdInNewParent + 1);
           console.log('gameDialogueMakerProject ', gameDialogueMakerProject);
 
-          reparentNodeAndDescendants(objectNodeFromWhichWeAreDrawing, currentlyDrawnLineInfo.lineCharacterId, newParentCharacterID, highestIdInNewParent + 1, gameDialogueMakerProject);
+          console.log('calling reparent node and descendants');
+          reparentNodeAndDescendants(objectNodeFromWhichWeAreDrawing, currentlyDrawnLineInfo.lineCharacterId, nodeInfo.characterID, highestIdInNewParent + 1, gameDialogueMakerProject);
 
-          nodeInfo.nodeElement.outgoingLines.push({
-            fromNode: nodeInfo.nodeElement.dialogueID || 0,
+          nodeInfo.dialogueNode.outgoingLines.push({
+            fromNode: nodeInfo.dialogueNode.dialogueID,
             fromSocket: plusButtonIndexToAttachTo,
             toNode: objectNodeFromWhichWeAreDrawing.dialogueID,
             lineElem: "",

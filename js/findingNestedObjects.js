@@ -583,6 +583,8 @@ jQuery.fn.findWithDepth = function(selector, maxDepth) {
     return elements;
 };
 
+
+
 function reparentNodeAndDescendants(startNode, oldParentId, newParentId, nextId, gameDialogueMakerProject) {
     // This will hold the mapping from old IDs to new IDs
     const oldToNewIds = {};
@@ -602,8 +604,23 @@ function reparentNodeAndDescendants(startNode, oldParentId, newParentId, nextId,
 
     // First, generate new IDs for all the nodes and build the oldToNewIds mapping
     for (let dialogueNode of iterateConnectedNodes(startNode, oldParentId)) {
-        // Remove the node from the old parent's dialogueNodes array
+        // 1. Check if the dialogueNode with the given dialogueID exists in the oldParent.dialogueNodes array.
+        const nodeExistsBefore = oldParent.dialogueNodes.some(node => node.dialogueID === dialogueNode.dialogueID);
+
+        // 2. Perform the filtering operation.
         oldParent.dialogueNodes = oldParent.dialogueNodes.filter(node => node.dialogueID !== dialogueNode.dialogueID);
+
+        // 3. Check if the dialogueNode with the given dialogueID still exists in the oldParent.dialogueNodes array after filtering.
+        const nodeExistsAfter = oldParent.dialogueNodes.some(node => node.dialogueID === dialogueNode.dialogueID);
+
+        // 4. Log the result based on these checks.
+        if (nodeExistsBefore && !nodeExistsAfter) {
+            console.log('Operation was successful. Node with dialogueID:', dialogueNode.dialogueID, 'was removed.');
+        } else if (nodeExistsBefore && nodeExistsAfter) {
+            console.log('Operation failed. Node with dialogueID:', dialogueNode.dialogueID, 'still exists.');
+        } else {
+            console.log('Node with dialogueID:', dialogueNode.dialogueID, 'did not exist in the first place.');
+        }
 
         // Assign a new ID to the node and save the mapping from the old ID to the new ID
         let oldId = dialogueNode.dialogueID;
@@ -612,6 +629,8 @@ function reparentNodeAndDescendants(startNode, oldParentId, newParentId, nextId,
 
         // Push the node to the tempArray
         tempArray.push(dialogueNode);
+        console.log(`Inside reparent function, temparray holds all the nodes to be mover from oldparent: ${oldParent.characterID} to newparent:  ${newParent.characterID}`);
+        console.log('temparray', tempArray );
     }
 
     // Now, go through the nodes again and update their IDs and their outgoing lines
@@ -630,9 +649,35 @@ function reparentNodeAndDescendants(startNode, oldParentId, newParentId, nextId,
         }
     }
 
+    console.log('the numbers of the nodes in the temparray should have been changed now and temparray looks like this ', tempArray);
+    console.log('before concat: oldParent.dialogueNodes ', oldParent.dialogueNodes);
+    console.log('before concat: newParent.dialogueNodes ', newParent.dialogueNodes);
+    
+
     // Finally, append the nodes to the new parent's dialogueNodes
+    // 1. Get the initial length of newParent.dialogueNodes.
+    const initialLength = newParent.dialogueNodes.length;
+
+    // 2. Perform the concatenation operation.
     newParent.dialogueNodes = newParent.dialogueNodes.concat(tempArray);
+
+    // 3. Compare the final length with the sum of the initial length and tempArray length.
+    const expectedLength = initialLength + tempArray.length;
+
+    // 4. Log the result based on this comparison.
+    if (newParent.dialogueNodes.length === expectedLength) {
+        console.log('Operation was successful. Nodes from tempArray were added to newParent.dialogueNodes.');
+    } else {
+        console.log('Operation failed. The final count of nodes in newParent.dialogueNodes does not match the expected count.');
+    }
+
+    
+    console.log('after concat: oldParent.dialogueNodes ', oldParent.dialogueNodes);
+    console.log('after concat: newParent.dialogueNodes ', newParent.dialogueNodes);
 }
+
+
+
 
 
 /* GET ALL LINES OF A NODE RECURSIVELY DOWNSTREAM FOR UPDATING THE LINES LATER */
