@@ -42,6 +42,8 @@ function mousedownOverTopConnectionSocket(event, elem){
             myelement = myelement.ownerSVGElement;
         }
 
+        //UNPLUG!!!!!
+
         if (myelement && myelement.classList.contains('leader-line')) {
             console.log(`UNPLUG!`);
 
@@ -213,6 +215,8 @@ function mousedownOverTopConnectionSocket(event, elem){
 
         
 
+        //DRAW NEW  LINE FROM EMPTY SOCKET
+
     } else { //draw a line because the socket was empty
 
         currentlyDrawingALine = true;
@@ -258,7 +262,7 @@ function mousedownOverTopConnectionSocket(event, elem){
 
             line: line,
 
-             lineCharacterId: characterIDFromWhichWeAreDrawing,
+             lineCharacterId: characterIDFromWhichWeAreDrawing, //IS THIS WRONG ?
 
              lineFromNodeId: nodeIdFromWhichWeAreDrawing,
 

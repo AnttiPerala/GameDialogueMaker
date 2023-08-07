@@ -404,39 +404,17 @@ function handleDocumentMouseUp(event, myThis){
 
       let plusButtonIndexToAttachTo = $elementUnderCursor.data("buttonindex");
 
-      let childElementForPassingToFindDialogue = $($elementUnderCursor)
-        .closest(".blockWrap")
-        .find(".blockid");
-
-      //this is the dialogueNode of the plus button block
-      let dialogueFromNodeInObject =
-        findDialogueObjectBasedOnPassedInHtmlElement(
-          childElementForPassingToFindDialogue
-        );
+      let nodeInfo = getInfoByPassingInDialogueNodeOrElement($elementUnderCursor);
 
 
       //we need to check if the root character changes and if it does then we need to remove the dialogue object from the old character in the object and add it to the new one
-      //what should then happen with the numbering to avoid clashes?
-      //should also check if its an answer, because answer should only connect to questions
-
-      //console.log(`dialogueFromNodeInOnbject: `, dialogueFromNodeInObject);
-
-      let newParentCharacterID = findCharacterIDByPassingInDialogueNode(
-        dialogueFromNodeInObject
-      );
-
-      /* console.log(
-          "newParentCharacterID: " +
-          newParentCharacterID +
-          " lineCharacterId: " +
-          lineCharacterId
-      ); */
+     
 
 
-      if (newParentCharacterID == currentlyDrawnLineInfo.lineCharacterId) {
+      if (nodeInfo.characterID == currentlyDrawnLineInfo.lineCharacterId) {
         //no change in parent
-        dialogueFromNodeInObject.outgoingLines.push({
-          fromNode: dialogueFromNodeInObject.dialogueID,
+        nodeInfo.nodeElement.outgoingLines.push({
+          fromNode:  nodeInfo.nodeElement.dialogueID || nodeInfo.nodeElement.characterID,
           fromSocket: plusButtonIndexToAttachTo,
           toNode: nodeIdFromWhichWeAreDrawing,
           lineElem: "",
@@ -460,8 +438,8 @@ function handleDocumentMouseUp(event, myThis){
 
         reparentNodeAndDescendants(objectNodeFromWhichWeAreDrawing, currentlyDrawnLineInfo.lineCharacterId, newParentCharacterID, highestIdInNewParent + 1, gameDialogueMakerProject);
 
-        dialogueFromNodeInObject.outgoingLines.push({
-          fromNode: dialogueFromNodeInObject.dialogueID,
+        nodeInfo.nodeElement.outgoingLines.push({
+          fromNode: nodeInfo.nodeElement.dialogueID || nodeInfo.nodeElement.characterID,
           fromSocket: plusButtonIndexToAttachTo,
           toNode: objectNodeFromWhichWeAreDrawing.dialogueID,
           lineElem: "",
