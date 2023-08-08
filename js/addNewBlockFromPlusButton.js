@@ -96,7 +96,7 @@ $('body').on('click', '.blockPlusButton', function () {
             )
 
 
-            if (parentBlockType == "line" || parentBlockType == "answer") {
+            if (parentBlockType == "line" || parentBlockType == "answer" || parentBlockType == "fight") {
 
 
                 let newDialogueNode = {

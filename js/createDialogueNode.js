@@ -12,6 +12,7 @@ function createDialogueHTMLElement(dialogueNode) {
     let storyIdToAssignBasedOnBlockType;
     //Dialogue box placeholder is also depending on the type
     let dialoguePlaceholderBasedOnParentBlockType = ``;
+    let textAreaPlaceHolder = "";
     let blockOptionsOption1 = "";
     let blockOptionsOption2 = "";
     let blockOptionsOption3 = `<span style="text-align: right;" title="Optional value. Use this if you want to take the conversation to some other node from here.">Next:</span><input class="next"
@@ -33,7 +34,7 @@ function createDialogueHTMLElement(dialogueNode) {
             <option value="fight">Fight</option>
         </select>
         `
-        dialoguePlaceholderBasedOnParentBlockType = "Type the dialogue here";
+        textAreaPlaceHolder = `<textarea class="dialogueTextArea" placeholder="Type dialogue line here" data-autoresize>${dialogueNode.dialogueText}</textarea>`;
 
 
         //console.log(`inside line and storyIdToAssignBasedOnBlockType: ${storyIdToAssignBasedOnBlockType} the storyId was:  ${storyId}`);
@@ -52,6 +53,7 @@ function createDialogueHTMLElement(dialogueNode) {
         </select>
 
         `
+        textAreaPlaceHolder = `<textarea class="dialogueTextArea" placeholder="Type question here" data-autoresize>${dialogueNode.dialogueText}</textarea>`;
 
         blockOptionsOption1 =
 
@@ -75,8 +77,8 @@ function createDialogueHTMLElement(dialogueNode) {
             <option value="answer">answer</option>
         </select>
         `
+        textAreaPlaceHolder = `<textarea class="dialogueTextArea" placeholder="Type the answer option here" data-autoresize>${dialogueNode.dialogueText}</textarea>`;
 
-        dialoguePlaceholderBasedOnParentBlockType = "Type the answer option here";
 
 
     } else if (dialogueNode.dialogueType == "fight") {
@@ -90,7 +92,9 @@ function createDialogueHTMLElement(dialogueNode) {
         <option value="fight">Fight</option>
     </select>
     `
-        dialoguePlaceholderBasedOnParentBlockType = "Type the fight name here";
+        textAreaPlaceHolder = `<div class="fightIDWrap>">Fight ID: <input class="fightID" placeholder="Give the fight an ID here"></div>`;
+
+        plusButtons = `<div class="blockPlusButton fightWin" title="If fight was won">+</div><div class="blockPlusButton fightLose" title="If fight was lost">+</div></div>`;
 
     }
 
