@@ -96,6 +96,9 @@ function createDialogueHTMLElement(dialogueNode) {
 
     let eyeImageSource;
     //closed or open eye:
+    if (!('hideChildren' in dialogueNode)) { //in case the property is missing
+        dialogueNode.hideChildren = false;
+    }
     if (dialogueNode.hideChildren == false) {
 
         eyeImageSource = 'img/iconmonstr-eye-filled-32.png'

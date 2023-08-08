@@ -638,13 +638,20 @@ function reparentNodeAndDescendants(startNode, oldParentId, newParentId, nextId,
         // Update the node's ID
         dialogueNode.dialogueID = oldToNewIds[dialogueNode.dialogueID];
 
+        
+
         // Update the node's outgoing lines
         for (let line of dialogueNode.outgoingLines) {
+            console.log('should work on lines now if oldToNewIds.hasOwnProperty(line.fromNode):', oldToNewIds.hasOwnProperty(line.fromNode));
             if (oldToNewIds.hasOwnProperty(line.fromNode)) {
+                console.log('old line fromNode is ', line.fromNode);
                 line.fromNode = oldToNewIds[line.fromNode];
+                console.log('new line fromNode is ', line.fromNode);
             }
             if (oldToNewIds.hasOwnProperty(line.toNode)) {
+                console.log('old line toNode is ', line.toNode);
                 line.toNode = oldToNewIds[line.toNode];
+                console.log('new line toNode is ', line.toNode);
             }
         }
     }

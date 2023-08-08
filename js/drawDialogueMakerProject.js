@@ -12,10 +12,12 @@ function drawDialogueMakerProject() {
 
     // Create a map of dialogue nodes for easy lookup
     let dialogueNodeMap = character.dialogueNodes.reduce((map, node) => {
-      node.children = [];
       map[node.dialogueID] = node;
       return map;
     }, {});
+
+    // Create a separate map to manage the children without modifying the original object
+    let childrenMap = {};
 
     // Initialize a Set to store dialogue nodes that are referenced by any outgoingLines
     let childNodeIds = new Set();
@@ -25,7 +27,10 @@ function drawDialogueMakerProject() {
       dialogueNode.outgoingLines.forEach((outgoingLine) => {
         let targetNode = dialogueNodeMap[outgoingLine.toNode];
         if (targetNode) {
-          dialogueNode.children.push(targetNode);
+          if (!childrenMap[dialogueNode.dialogueID]) {
+            childrenMap[dialogueNode.dialogueID] = [];
+          }
+          childrenMap[dialogueNode.dialogueID].push(targetNode);
           childNodeIds.add(targetNode.dialogueID); // stores all the dialogue node ids that are children of other dialogue nodes
         }
       });
@@ -37,24 +42,22 @@ function drawDialogueMakerProject() {
         let dialogueElem = createDialogueHTMLElement(dialogueNode);
         dialogueElem.css({ top: dialogueNode.dialogueNodeY + "px", left: dialogueNode.dialogueNodeX + "px" }); // Setting position here
         characterElem.append(dialogueElem);
-        appendChildren(dialogueElem, dialogueNode);
+        appendChildren(dialogueElem, dialogueNode, childrenMap);
       }
     });
 
-    function appendChildren(element, node) {
-      node.children.forEach((childNode) => {
+    function appendChildren(element, node, childrenMap) {
+      (childrenMap[node.dialogueID] || []).forEach((childNode) => {
         let childElem = createDialogueHTMLElement(childNode);
         childElem.css({ top: childNode.dialogueNodeY + "px", left: childNode.dialogueNodeX + "px" }); // Setting position here
         element.append(childElem);
-        appendChildren(childElem, childNode);
+        appendChildren(childElem, childNode, childrenMap);
       });
     }
-
-
-
   });
 
   $('#mainArea').html(wrapper);
+
 
   $('.characterRoot').draggable(draggableSettings).css({ position: "absolute" });
 
