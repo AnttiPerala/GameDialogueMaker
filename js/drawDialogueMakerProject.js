@@ -82,6 +82,60 @@ function drawDialogueMakerProject() {
   });
 
   function drawOutgoingLines(node, isCharacter, characterId) {
+
+    let nodeInfo = getInfoByPassingInDialogueNodeOrElement(node);
+
+    //check if the node has a next value, if so, draw that line and return
+    //check if the dialogueNode object in the master has a positive next value
+    let nextNodeValue = node.nextNode;
+
+    console.log('inside drawOutgoingLines,  nextNodeValue is ', nextNodeValue);
+
+    if (nextNodeValue > 0) {
+      //get the from node
+      let lineStart = node.nodeElement;
+
+      //get the next target node
+      let lineEndNode = getDialogueNodeById(
+        nodeInfo.characterID,
+        nextNodeValue
+      );
+
+      let lineEndNodeElem = lineEndNode.nodeElement;
+
+      let lineEndElementTopSocket = lineEndNodeElem.find(
+        ".topConnectionSocket"
+      );
+
+
+      // Create a new point anchor
+      var endPointAnchor = LeaderLine.pointAnchor(
+        lineEndElementTopSocket.get(0),
+        { x: 8, y: 8 }
+      );
+
+      //draw dotted lines from nodes with a positive next value
+
+      let theLine = new LeaderLine(
+        //find the next-input in the node where the line should start
+        lineStart.find(".next").get(0), //get(0) converts jQuery object to regular dom object
+        endPointAnchor,
+        {
+          color: "gray",
+          size: 4,
+          dash: true,
+          path: "arc", //deafult is straight, arc, fluid, magnet, grid
+          startSocket: "right",
+          endSocket: "bottom",
+          endPlug: "disc",
+        }
+      );
+
+      node.nextNodeLineElem = theLine;
+
+    } //end if nextnodevalue
+
+
     node.outgoingLines.forEach((outgoingLine) => {
       drawLines((node.dialogueID || node.characterID), outgoingLine.toNode, isCharacter, outgoingLine, characterId);
     });
@@ -201,6 +255,7 @@ function drawLines(sourceId, targetId, isCharacter, outgoingLine, characterId) {
   
   let sourceElement, targetElement, plusButtonElem;
 
+ 
   
 
   if (isCharacter) {
