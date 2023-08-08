@@ -137,6 +137,9 @@ function createCharacterNodeHTML(character){
 
   let eyeImageSource;
   //closed or open eye:
+  if (!('hideChildren' in character)) { //in case the property is missing
+    character.hideChildren = false;
+  }
   if (character.hideChildren == false) {
 
     eyeImageSource = 'img/iconmonstr-eye-filled-32.png'

@@ -61,10 +61,22 @@ $('body').on('mousedown', '.block', function (event) {
 
 })
 
+//REMOVE SELECTED CLASS IF CLICKED ON MAINAREA
+// Click event on #mainarea
+$('#mainArea').click(function (event) {
+    if (event.target === this) {
+        console.log("#mainarea itself was clicked and not its children.");
+        $('.block').removeClass('selected');
+    } else {
+        console.log("A child element inside #mainarea was clicked.");
+    }
+
+});
+
 
 //SELECT LINES BY CLICKING ON THEM
 
-$('body').on('mousedown', '.line', function () {
+$('body').on('mousedown', '.line', function (event) {
 
     // Check if the clicked element is the line itself or a child of the line.
     if (!$(event.target).is('.conditionCircle')) {
