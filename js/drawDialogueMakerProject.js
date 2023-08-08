@@ -38,6 +38,7 @@ function drawDialogueMakerProject() {
 
     // Append to the character element only the dialogue nodes that are not in the Set of child node ids
     character.dialogueNodes.forEach((dialogueNode) => {
+      console.log('dialogueNode for checking position coordinates: ', dialogueNode);
       if (!childNodeIds.has(dialogueNode.dialogueID)) {
         let dialogueElem = createDialogueHTMLElement(dialogueNode);
         dialogueElem.css({ top: dialogueNode.dialogueNodeY + "px", left: dialogueNode.dialogueNodeX + "px" }); // Setting position here
@@ -132,6 +133,11 @@ function drawDialogueMakerProject() {
       );
 
       node.nextNodeLineElem = theLine;
+
+      const all_svgs = document.querySelectorAll("svg");
+      const this_svg = all_svgs[all_svgs.length - 1]; //this will select the latest svg
+
+      $(this_svg).addClass('dottedline'); //for separating between dotted lines
 
     } //end if nextnodevalue
 
@@ -348,6 +354,9 @@ function drawLines(sourceId, targetId, isCharacter, outgoingLine, characterId) {
       this_svg.setAttribute("data-character", characterId);
       this_svg.setAttribute("data-fromnode", sourceId);
       this_svg.setAttribute("data-tonode", targetId);
+      $(this_svg).addClass('blueline'); //for separating between dotted lines
+
+   
 
       let selectTheSVGInDOM = $(
         'svg[data-fromnode="' +
@@ -479,19 +488,20 @@ function handleDocumentMouseUp(event, myThis){
 
       let plusButtonIndexToAttachTo = $elementUnderCursor.data("buttonindex");
 
-      let nodeInfo = getInfoByPassingInDialogueNodeOrElement($elementUnderCursor);
+      let nodeInfoForFromNode = getInfoByPassingInDialogueNodeOrElement($elementUnderCursor);
 
-      console.log('nodeInfo ', nodeInfo);
+      console.log('nodeInfoForFromNode ', nodeInfoForFromNode);
     
       console.log('currentlyDrawnLineInfo.lineCharacterId ', currentlyDrawnLineInfo.lineCharacterId );
 
       //check if it is a character:
 
-      if (nodeInfo.isCharacter){
+      if (nodeInfoForFromNode.isCharacter){
 
-        if (nodeInfo.characterID == currentlyDrawnLineInfo.lineCharacterId) {
-          //no change in parent
-          nodeInfo.characterNode.outgoingLines.push({
+        if (nodeInfoForFromNode.characterID == currentlyDrawnLineInfo.lineCharacterId) {
+          //no change in parent NOTE: this seems to only think a change in parent is a change between characters.. which it is in the sense that only then do we need to renumber nodes
+
+          nodeInfoForFromNode.characterNode.outgoingLines.push({
             fromNode: 0,
             fromSocket: plusButtonIndexToAttachTo,
             toNode: nodeIdFromWhichWeAreDrawing,
@@ -499,7 +509,11 @@ function handleDocumentMouseUp(event, myThis){
             transitionConditions: [],
           });
 
+        
+          
+
         } else {
+          //still handling character
           //change in parent
 
           console.log('Change in parent, currentlyDrawnLineInfo.lineCharacterId ', currentlyDrawnLineInfo.lineCharacterId);
@@ -510,13 +524,13 @@ function handleDocumentMouseUp(event, myThis){
           console.log('calling reparent function with these arguments: ');
           console.log('objectNodeFromWhichWeAreDrawing ', objectNodeFromWhichWeAreDrawing);
           console.log('currentlyDrawnLineInfo.lineCharacterId ', currentlyDrawnLineInfo.lineCharacterId);
-          console.log('nodeInfo.characterID ', nodeInfo.characterID);
+          console.log('nodeInfo.characterID ', nodeInfoForFromNode.characterID);
           console.log('highestIdInNewParent + 1 ', highestIdInNewParent + 1);
           console.log('gameDialogueMakerProject ', gameDialogueMakerProject);
 
-          reparentNodeAndDescendants(objectNodeFromWhichWeAreDrawing, currentlyDrawnLineInfo.lineCharacterId, nodeInfo.characterID, highestIdInNewParent + 1, gameDialogueMakerProject);
+          reparentNodeAndDescendants(objectNodeFromWhichWeAreDrawing, currentlyDrawnLineInfo.lineCharacterId, nodeInfoForFromNode.characterID, highestIdInNewParent + 1, gameDialogueMakerProject);
 
-          nodeInfo.characterNode.outgoingLines.push({
+          nodeInfoForFromNode.characterNode.outgoingLines.push({
             fromNode: 0,
             fromSocket: plusButtonIndexToAttachTo,
             toNode: objectNodeFromWhichWeAreDrawing.dialogueID,
@@ -534,39 +548,48 @@ function handleDocumentMouseUp(event, myThis){
 
         //we need to check if the root character changes and if it does then we need to remove the dialogue object from the old character in the object and add it to the new one
 
-        console.log('nodeInfo.dialogueNode ', nodeInfo.dialogueNode);
+        console.log('nodeInfo.dialogueNode ', nodeInfoForFromNode.dialogueNode);
 
-        if (nodeInfo.characterID == currentlyDrawnLineInfo.lineCharacterId) {
+        if (nodeInfoForFromNode.characterID == currentlyDrawnLineInfo.lineCharacterId) {
           //no change in parent
-            nodeInfo.dialogueNode.outgoingLines.push({
-            fromNode: nodeInfo.dialogueNode.dialogueID,
+          nodeInfoForFromNode.dialogueNode.outgoingLines.push({
+            fromNode: nodeInfoForFromNode.dialogueNode.dialogueID,
             fromSocket: plusButtonIndexToAttachTo,
             toNode: nodeIdFromWhichWeAreDrawing,
             lineElem: "",
             transitionConditions: [],
           });
 
+          //reset x and y
+          objectNodeFromWhichWeAreDrawing.dialogueNodeX = 0;
+          objectNodeFromWhichWeAreDrawing.dialogueNodeY = 250;
+
         } else {
+          //regular dialogueNode
           //change in parent
 
-          console.log('Change in parent, old character was currentlyDrawnLineInfo.lineCharacterId ', currentlyDrawnLineInfo.lineCharacterId);
-          console.log('new character is nodeInfo.characterID ', nodeInfo.characterID);
+          //reset y
+          objectNodeFromWhichWeAreDrawing.dialogueNodeX = 0;
+          objectNodeFromWhichWeAreDrawing.dialogueNodeY = 250;
 
-          let highestIdInNewParent = getMaxDialogueNodeId(gameDialogueMakerProject.characters[nodeInfo.characterID - 1]);
+          console.log('Change in parent, old character was currentlyDrawnLineInfo.lineCharacterId ', currentlyDrawnLineInfo.lineCharacterId);
+          console.log('new character is nodeInfo.characterID ', nodeInfoForFromNode.characterID);
+
+          let highestIdInNewParent = getMaxDialogueNodeId(gameDialogueMakerProject.characters[nodeInfoForFromNode.characterID - 1]);
           //console.log(`highestIdInNewParent was: ${highestIdInNewParent}`);
 
           console.log('calling reparent function with these arguments: ');
           console.log('objectNodeFromWhichWeAreDrawing ', objectNodeFromWhichWeAreDrawing);
           console.log('currentlyDrawnLineInfo.lineCharacterId ', currentlyDrawnLineInfo.lineCharacterId);
-          console.log('nodeInfo.characterID ', nodeInfo.characterID);
+          console.log('nodeInfoForFromNode.characterID ', nodeInfoForFromNode.characterID);
           console.log('highestIdInNewParent + 1: ', highestIdInNewParent + 1);
           console.log('gameDialogueMakerProject ', gameDialogueMakerProject);
-
           console.log('calling reparent node and descendants');
-          reparentNodeAndDescendants(objectNodeFromWhichWeAreDrawing, currentlyDrawnLineInfo.lineCharacterId, nodeInfo.characterID, highestIdInNewParent + 1, gameDialogueMakerProject);
 
-          nodeInfo.dialogueNode.outgoingLines.push({
-            fromNode: nodeInfo.dialogueNode.dialogueID,
+          reparentNodeAndDescendants(objectNodeFromWhichWeAreDrawing, currentlyDrawnLineInfo.lineCharacterId, nodeInfoForFromNode.characterID, highestIdInNewParent + 1, gameDialogueMakerProject);
+
+          nodeInfoForFromNode.dialogueNode.outgoingLines.push({
+            fromNode: nodeInfoForFromNode.dialogueNode.dialogueID,
             fromSocket: plusButtonIndexToAttachTo,
             toNode: objectNodeFromWhichWeAreDrawing.dialogueID,
             lineElem: "",

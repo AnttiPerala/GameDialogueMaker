@@ -2,6 +2,7 @@ function calculateNewPositionAfterElementParentChange(elem, newParentElem){
 
     console.log('calculate with elem ',elem );
 
+    //this doesn't seem to do the actual parenting, it only notes the bounding client rect before a canvas redraw and then redraws 
 
         var childElement = elem.nodeElement;
         var wrapElement = newParentElem;

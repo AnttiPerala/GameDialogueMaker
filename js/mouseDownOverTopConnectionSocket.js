@@ -25,7 +25,8 @@ function mousedownOverTopConnectionSocket(event, elem){
         //hide the socket to help elementFromPoint
 
         //need to temporarily enable svg pointer events for proper detections
-        $('svg.leader-line').each(function () {
+        //note that im using .blueline because dotted lines should not be detected
+        $('svg.blueline').each(function () {
             this.style.setProperty('pointer-events', 'auto', 'important');
         });
 
@@ -46,6 +47,8 @@ function mousedownOverTopConnectionSocket(event, elem){
 
         if (myelement && myelement.classList.contains('leader-line')) {
             console.log(`UNPLUG!`);
+
+            console.log('myelement', myelement);
 
             //use the info on the clicked line to select the correct line from the master object
             disconnectedLineCharacterID = $(myelement).attr('data-character');
