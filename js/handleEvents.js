@@ -213,108 +213,24 @@ jQuery(document).on('change', '.selectBlockType', function () {
     if(selectedValue == "question"){
        //console.log('question');
 
-        //remove possible fight ids
-        jQuery(this).closest('.blockWrap').find('.fightIDWrap').remove();
-
-        jQuery(this).closest('.blockWrap').find('.optionsUnderDialogue').children('.option1').append(`
-            Answers: <input class="answerNumber" type="number" min="2" max="9" value=3>
-        `)
-
-        let theBlockWrap = jQuery(this).closest('.blockWrap');
-
-        // Check if the parent does not have a child with the class .dialogueTextArea
-        if (!jQuery(theBlockWrap).find('.dialogueTextArea').length) {
-            // Append your new element to the parent
-            $(theBlockWrap).find('.block').append(`<textarea class="dialogueTextArea" placeholder="" style="height: 48px;">Not so great</textarea>`);
-        }
-
-        //empty old plus buttons
-        jQuery(this).closest('.blockWrap').find('.plusButtonContainer').html('');
-
-        //append more plus buttons
-        jQuery(this).closest('.blockWrap').find('.plusButtonContainer').first().append('<div class="blockPlusButton" data-buttonindex=1 data-acceptclicks=true>+</div>');
-        jQuery(this).closest('.blockWrap').find('.plusButtonContainer').first().append('<div class="blockPlusButton" data-buttonindex=2 data-acceptclicks=true>+</div>');
-        jQuery(this).closest('.blockWrap').find('.plusButtonContainer').first().append('<div class="blockPlusButton" data-buttonindex=2 data-acceptclicks=true>+</div>');
-
-        jQuery(this).closest('.blockWrap').find('textarea').attr("placeholder", "Type the question");
-
-        //if there are block already connected to the block turned into a question block, change their mode to "answer". Maybe this could be done by checking the "next" values?
-        let theQuestionBlockNextValue = jQuery(this).closest('.blockWrap').find('.next').first().val();
-        let childNodeIdValue = jQuery(this).closest('.blockWrap').find('.blockWrap').first().find('.blockid').val();
-
-        //console.log('theQuestionBlockNextValue' + theQuestionBlockNextValue + 'childNodeIdValue' + childNodeIdValue);
-        if (theQuestionBlockNextValue == childNodeIdValue){
-            //console.log('match');
-            jQuery(this).closest('.blockWrap').children('.blockWrap').find('.selectBlockType').html(`
-            <select name="blockType" class="selectBlockType">
-                <option value="answer0">answer</option>
-            </select>
-            `)
-        }
+        
 
     }
 
     if (selectedValue == "line") {
 
-        //remove input for number of answers
-        jQuery(this).closest('.blockWrap').find('.optionsUnderDialogue').children('.option1').html('');
-
-        //remove all plus buttons
-        jQuery(this).closest('.blockWrap').find('.blockPlusButton').remove();
-
-        //remove possible fight ids
-        jQuery(this).closest('.blockWrap').find('.fightIDWrap').remove();
-        
-        //then bring back just one
-        jQuery(this).closest('.blockWrap').find('.plusButtonContainer').append('<div class="blockPlusButton">+</div>');
-
-        let theBlockWrap = jQuery(this).closest('.blockWrap');
-
-        // Check if the parent does not have a child with the class .dialogueTextArea
-        if (!jQuery(theBlockWrap).find('.dialogueTextArea').length) {
-            // Append your new element to the parent
-            $(theBlockWrap).find('.optionsUnderDialogue').before('<textarea class="dialogueTextArea" placeholder="" data-autoresize="" style="height: 48px;">Not so great</textarea>');
-        }
-
-        // Check if the parent does not have a child with input next
-        if (!jQuery(theBlockWrap).find('.next').length) {
-            // Append your new element to the parent
-            $(theBlockWrap).find('.option3').append('<span style="text-align: right;" title="Optional value. Use this if you want to take the conversation to some other node from here.">Next:</span><input class="next" style="display:inline-block;" type="number" value="">');
-        }
-
-        jQuery(this).closest('.blockWrap').find('textarea').attr("placeholder", "Type the line");
+      
 
     }
 
     if (selectedValue == "fight") {
 
-        //remove input for number of answers
-        jQuery(this).closest('.blockWrap').find('.optionsUnderDialogue').children('.option1').html('');
-
-        //remove next input
-        jQuery(this).closest('.blockWrap').find('.optionsUnderDialogue').children('.option3').html('');
-
-        //remove next input
-        jQuery(this).closest('.blockWrap').find('.dialogueTextArea').remove();
-
-        //remove old fight id
-        jQuery(this).closest('.blockWrap').find('.fightIDWrap').remove();
-
-        //add fight id
-
-        jQuery(this).closest('.blockWrap').find('.block').append('<div class="fightIDWrap">Fight ID: <input class="fightID"></div>');
-
-        //remove all plus buttons
-        jQuery(this).closest('.blockWrap').find('.blockPlusButton').remove();
-
-        //then bring back just two
-        jQuery(this).closest('.blockWrap').find('.plusButtonContainer').append('<div class="blockPlusButton fightWin" title="If fight was won">+</div>');
-
-        jQuery(this).closest('.blockWrap').find('.plusButtonContainer').append('<div class="blockPlusButton fightLose" title="If fight was lost">+</div>');
-
-        jQuery(this).closest('.blockWrap').find('textarea').attr("placeholder", "Type the line");
+       
 
     }
+
+    clearCanvasBeforeReDraw();
+    drawDialogueMakerProject();
 }) // end selectBlockType change
 
 
