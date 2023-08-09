@@ -10,7 +10,7 @@ function createQuestionBlock(nodeInfo){
     let determinedEyeImageSource = determineEyeImageSource(nodeInfo);
    
 
-    console.log('create question block for ', nodeInfo);
+    //console.log('create question block for ', nodeInfo);
 
     let plusButtonHTML = '';
     //add as many plus buttons as needed
@@ -67,7 +67,7 @@ function createQuestionBlock(nodeInfo){
 
 function createAnswerBlock(nodeInfo){
 
-    console.log('create answer block for ', nodeInfo);
+    //console.log('create answer block for ', nodeInfo);
 
     //closed or open eye:
     let determinedEyeImageSource = determineEyeImageSource(nodeInfo);
@@ -127,7 +127,7 @@ function createAnswerBlock(nodeInfo){
 
 
 function createLineBlock(nodeInfo){
-    console.log('create line block for ', nodeInfo );
+    //console.log('create line block for ', nodeInfo );
 
     //closed or open eye:
     let determinedEyeImageSource = determineEyeImageSource(nodeInfo);
@@ -198,7 +198,7 @@ function createLineBlock(nodeInfo){
 
 
 function createFightBlock(nodeInfo){
-    console.log('create fight block for ', nodeInfo);
+    //console.log('create fight block for ', nodeInfo);
 
     //closed or open eye:
     let determinedEyeImageSource = determineEyeImageSource(nodeInfo);

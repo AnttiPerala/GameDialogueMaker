@@ -38,7 +38,7 @@ function drawDialogueMakerProject() {
 
     // Append to the character element only the dialogue nodes that are not in the Set of child node ids
     character.dialogueNodes.forEach((dialogueNode) => {
-      console.log('dialogueNode for checking position coordinates: ', dialogueNode);
+      //console.log('dialogueNode for checking position coordinates: ', dialogueNode);
       if (!childNodeIds.has(dialogueNode.dialogueID)) {
         let dialogueElem = createDialogueHTMLElement(dialogueNode);
         $(dialogueElem).css({ top: dialogueNode.dialogueNodeY + "px", left: dialogueNode.dialogueNodeX + "px" }); // Setting position here
@@ -92,7 +92,7 @@ function drawDialogueMakerProject() {
     //check if the dialogueNode object in the master has a positive next value
     let nextNodeValue = node.nextNode;
 
-    console.log('inside drawOutgoingLines,  nextNodeValue is ', nextNodeValue);
+    //console.log('inside drawOutgoingLines,  nextNodeValue is ', nextNodeValue);
 
     if (nextNodeValue > 0) {
       //get the from node
@@ -322,8 +322,8 @@ function drawLines(sourceId, targetId, isCharacter, outgoingLine, characterId) {
       // Set the socket to contain a line
       $(lineEndElementTopSocket).attr('data-hasline', 'true');
 
-      console.log('lineEndElementTopSocket', lineEndElementTopSocket);
-      console.log('plusButtonElem.get(0)', plusButtonElem.get(0));
+      //console.log('lineEndElementTopSocket', lineEndElementTopSocket);
+      //console.log('plusButtonElem.get(0)', plusButtonElem.get(0));
 
       // Create a new point anchor
       var endPointAnchor = LeaderLine.pointAnchor(
@@ -464,7 +464,7 @@ function handleMouseDownOverTopConnectionSocket(event, myThis) {
 
 
 function handleDocumentMouseUp(event, myThis){
-  console.log('handleDocumentMouseUp from inside drawDialogueMakerProject', event );
+  //console.log('handleDocumentMouseUp from inside drawDialogueMakerProject', event );
   //console.log('currentlyDrawingALine is: ', currentlyDrawingALine);
   if (currentlyDrawingALine) {
     // Get the element under the cursor

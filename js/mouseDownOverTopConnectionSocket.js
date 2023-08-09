@@ -43,7 +43,7 @@ function mousedownOverTopConnectionSocket(event, elem){
             myelement = myelement.ownerSVGElement;
         }
 
-        //UNPLUG!!!!!
+        //UNPLUG!!!!! DISCONNECT!!!
 
         if (myelement && myelement.classList.contains('leader-line')) {
             console.log(`UNPLUG!`);
@@ -64,9 +64,7 @@ function mousedownOverTopConnectionSocket(event, elem){
 
             $(myelement).remove(); //remove because we will redraw
 
-
-            //nah, let's try to get the actual element the original line is attached to 
-            //we can start by finding the correct fromNode
+            //we can start by finding the correct fromNode (plus button), to draw a line from it towards mouse coords
 
             let originalFromNode = getDialogueNodeById(disconnectedLineCharacterID, disconnectedLineFromNodeID);
 
@@ -179,7 +177,6 @@ function mousedownOverTopConnectionSocket(event, elem){
                 //console.log('socketElement', socketElement);
                 $(socketElement).attr('data-hasline', 'false');
 
-                
 
                 //delete the line, ...maybe redraw instead
                 //line.remove(); //note this is leaderLines remove method not jQuery
@@ -188,8 +185,10 @@ function mousedownOverTopConnectionSocket(event, elem){
 
                 let theInfo = getInfoByPassingInDialogueNodeOrElement(theElem);
 
+                //sending the elemement and the character node, because disconnected elements become children of the character
                 calculateNewPositionAfterElementParentChange(theElem, theInfo.characterNode.nodeElement);
 
+        
                 lineInfo = {
 
                     line: theLineInTheObject,

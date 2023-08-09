@@ -1,14 +1,17 @@
 function calculateNewPositionAfterElementParentChange(elem, newParentElem){
 
+    console.log('calculate new position after unplug for elem', elem);
+
     console.log('calculate with elem ',elem );
 
     //this doesn't seem to do the actual parenting, it only notes the bounding client rect before a canvas redraw and then redraws 
 
-        var childElement = elem.nodeElement;
         var wrapElement = newParentElem;
 
         // Get the child's current position relative to the viewport
-        var rectBefore = childElement.get(0).getBoundingClientRect();
+    var rectBefore = elem.nodeElement.get(0).getBoundingClientRect();
+
+    console.log('rectBefore ', rectBefore);
 
         // Append the child to the wrap
     //wrapElement.get(0).appendChild(childElement.get(0));
@@ -16,7 +19,10 @@ function calculateNewPositionAfterElementParentChange(elem, newParentElem){
     drawDialogueMakerProject();
 
         // Get the child's new position relative to the viewport
-    var rectAfter = childElement.get(0).getBoundingClientRect();
+        //needs to be a reference from the master object since the old element gets wiped out
+    var rectAfter = elem.nodeElement.get(0).getBoundingClientRect();
+
+    console.log('rectAfter ', rectAfter);
 
         // Calculate the change in the child's position
         var changeInTop = rectAfter.top - rectBefore.top;
@@ -24,8 +30,11 @@ function calculateNewPositionAfterElementParentChange(elem, newParentElem){
 
         let theInfo = getInfoByPassingInDialogueNodeOrElement(elem);
 
-    theInfo.dialogueNode.dialogueNodeX = childElement.get(0).style.left = (childElement.get(0).offsetLeft - changeInLeft);
-    theInfo.dialogueNode.dialogueNodeY = childElement.get(0).style.top = (childElement.get(0).offsetTop - changeInTop);
+    let newX = elem.nodeElement.get(0).style.left = (elem.nodeElement.get(0).offsetLeft - changeInLeft);
+    let newY = elem.nodeElement.get(0).style.top = (elem.nodeElement.get(0).offsetTop - changeInTop);
+
+    theInfo.dialogueNode.dialogueNodeX = newX;
+    theInfo.dialogueNode.dialogueNodeY = newY;
 
     clearCanvasBeforeReDraw();
     drawDialogueMakerProject();
