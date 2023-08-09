@@ -64,6 +64,7 @@ generator.next().value; //move from sent in node once
     <div class="playModeDialogueContainer">
         <div class="infoLine">
         Character: <span class="charName">${charName}</span> Dialogue: <span class="dialogueId">${dialogueNodeInObject.dialogueID}</span>
+        <div class="exitPlayMode" title="exit playmode">X</div>
         </div>
         <div id="dialogueLine" class="dialogueLine">
             <!-- The dialogue text will be added here by the typewriter function -->
@@ -246,4 +247,10 @@ function typewriter(id, text, index, time, callback) {
         typeWriterInner(id, text, index, time, callback); 
     }
 }
+
+$(document).on('click', '.exitPlayMode', function(){
+    console.log('exit', this);
+    $('.playModeDialogueContainer').remove();
+    playModeActive = false;
+})
 

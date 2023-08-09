@@ -409,6 +409,20 @@ textarea {
     margin: 1rem;
 }
 
+.exitPlayMode{
+    background-color: red;
+    color: white;
+    border-radius: 50%;
+    width: 1rem;
+    height: 1rem;
+    position: absolute;
+    right: 1rem;
+    top: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
 div.dialogueLine{
     color: white;
     border: 1px solid whitesmoke;
