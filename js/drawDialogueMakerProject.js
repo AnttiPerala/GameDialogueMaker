@@ -41,8 +41,8 @@ function drawDialogueMakerProject() {
       console.log('dialogueNode for checking position coordinates: ', dialogueNode);
       if (!childNodeIds.has(dialogueNode.dialogueID)) {
         let dialogueElem = createDialogueHTMLElement(dialogueNode);
-        dialogueElem.css({ top: dialogueNode.dialogueNodeY + "px", left: dialogueNode.dialogueNodeX + "px" }); // Setting position here
-        characterElem.append(dialogueElem);
+        $(dialogueElem).css({ top: dialogueNode.dialogueNodeY + "px", left: dialogueNode.dialogueNodeX + "px" }); // Setting position here
+        $(characterElem).append(dialogueElem);
         appendChildren(dialogueElem, dialogueNode, childrenMap);
       }
     });
@@ -50,12 +50,14 @@ function drawDialogueMakerProject() {
     function appendChildren(element, node, childrenMap) {
       (childrenMap[node.dialogueID] || []).forEach((childNode) => {
         let childElem = createDialogueHTMLElement(childNode);
-        childElem.css({ top: childNode.dialogueNodeY + "px", left: childNode.dialogueNodeX + "px" }); // Setting position here
-        element.append(childElem);
+        $(childElem).css({ top: childNode.dialogueNodeY + "px", left: childNode.dialogueNodeX + "px" }); // Setting position here
+        $(element).append(childElem);
         appendChildren(childElem, childNode, childrenMap);
       });
     }
   });
+
+  console.log('wrapper is ', wrapper );
 
   $('#mainArea').html(wrapper);
 
@@ -133,6 +135,8 @@ function drawDialogueMakerProject() {
       );
 
       node.nextNodeLineElem = theLine;
+
+      lineEndElementTopSocket.attr('hasline', true);
 
       const all_svgs = document.querySelectorAll("svg");
       const this_svg = all_svgs[all_svgs.length - 1]; //this will select the latest svg
@@ -319,6 +323,7 @@ function drawLines(sourceId, targetId, isCharacter, outgoingLine, characterId) {
       $(lineEndElementTopSocket).attr('data-hasline', 'true');
 
       console.log('lineEndElementTopSocket', lineEndElementTopSocket);
+      console.log('plusButtonElem.get(0)', plusButtonElem.get(0));
 
       // Create a new point anchor
       var endPointAnchor = LeaderLine.pointAnchor(

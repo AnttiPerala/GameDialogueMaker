@@ -1,13 +1,49 @@
 function createDialogueHTMLElement(dialogueNode) {
 
     let nodeInfo = getInfoByPassingInDialogueNodeOrElement(dialogueNode);
+    let dialogueElement = ''; //the final product
     let activeNextNode = '';
 
     if (dialogueNode.nextNode > 0){ //only display the number if it's greater than zero
         activeNextNode = dialogueNode.nextNode;
     }
 
-    //answers should have read-only selects
+
+    //new approach
+
+    //if character, return immediately because character nodes are created inside drawDialogueMakerProject
+
+    if (nodeInfo.isCharacter === true){
+        return;
+    }
+
+    if (dialogueNode.dialogueType == 'question'){
+       dialogueElement = createQuestionBlock(nodeInfo);
+       
+       
+    }
+
+    if (dialogueNode.dialogueType == 'answer') {
+        dialogueElement = createAnswerBlock(nodeInfo);
+    }
+
+    if (dialogueNode.dialogueType == 'line') {
+       dialogueElement = createLineBlock(nodeInfo);
+    }
+
+    if (dialogueNode.dialogueType == 'fight') {
+        dialogueElement = createFightBlock(nodeInfo);
+    }
+
+    //store element reference in object
+    nodeInfo.dialogueNode.nodeElement = dialogueElement;
+
+    //turn plus buttons on or off
+    /* $(dialogueElement).find('.blockPlusButton').each(function(){
+        checkIfPlusButtonShouldBeTurnedOff($(this));
+    }) */
+
+   /*  //answers should have read-only selects
     let selectElementContentBasedOnParentBlockType = ``;
     let storyIdToAssignBasedOnBlockType;
     //Dialogue box placeholder is also depending on the type
@@ -112,10 +148,10 @@ function createDialogueHTMLElement(dialogueNode) {
         eyeImageSource = 'img/iconmonstr-eye-off-filled-32.png'
 
     }
-
+ */
 
     //myLog(`dialogueIDSent: ${dialogueIDSent}`, 0, fileInfo = getFileInfo());
-    let dialogueElement = dialogueNode.nodeElement;
+   /*  dialogueElement = dialogueNode.nodeElement;
     dialogueElement.attr('data-character-id', nodeInfo.characterID);  // Adding character ID data attribute
     dialogueElement.attr('data-dialogue-id', dialogueNode.dialogueID);  // Adding dialogue ID data attribute
     dialogueElement.attr('data-hidechildren', dialogueNode.hideChildren);
@@ -135,13 +171,13 @@ function createDialogueHTMLElement(dialogueNode) {
                         </div>
                         ${selectElementContentBasedOnParentBlockType}
                         <textarea class="dialogueTextArea" placeholder="${dialoguePlaceholderBasedOnParentBlockType}" data-autoresize>${dialogueNode.dialogueText}</textarea>
-                        <div>
+                        
                         <div class="optionsUnderDialogue" style="text-align: right;">
                             <div class="option1">${blockOptionsOption1}</div>
                             <div class="option2">${blockOptionsOption2}</div>
                             <div class="option3">${blockOptionsOption3}</div>
                         </div>
-                        </div>
+                       
 
                         
                     </div>
@@ -149,7 +185,7 @@ function createDialogueHTMLElement(dialogueNode) {
                         ${plusButtons}
                     </div>
                 </div>
-                        `);
+                        `); */
 
 
 
