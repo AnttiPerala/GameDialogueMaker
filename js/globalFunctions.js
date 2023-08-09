@@ -244,8 +244,8 @@ function createFightBlock(nodeInfo){
 
                 </div>
                 <div class="plusButtonContainer" style="display: flex; align-items: end; justify-content: center;">
-                    <div class="blockPlusButton fightWin" title="If fight was won">+</div>
-                    <div class="blockPlusButton fightLose" title="If fight was lost">+</div>
+                    <div class="blockPlusButton fightWin" title="If fight was won" data-buttonindex=0 data-acceptclicks=true>+</div>
+                    <div class="blockPlusButton fightLose" title="If fight was lost" data-buttonindex=1 data-acceptclicks=true>+</div>
                 </div>
             </div>`
 

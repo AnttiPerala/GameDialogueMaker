@@ -7,6 +7,8 @@ $('body').on('click', '.blockPlusButton', function () {
 
     if ($(this).attr('data-acceptclicks') == 'true') {
 
+        console.log('plusbuttonclick', this);
+
         //for line connections a bit more down in the code:
 
         const theClickedPlusButton = $(this);
