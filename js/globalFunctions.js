@@ -6,6 +6,10 @@
 
 function createQuestionBlock(nodeInfo){
 
+    //closed or open eye:
+    let determinedEyeImageSource = determineEyeImageSource(nodeInfo);
+   
+
     console.log('create question block for ', nodeInfo);
 
     let plusButtonHTML = '';
@@ -26,7 +30,7 @@ function createQuestionBlock(nodeInfo){
             <div id="id${nodeInfo.dialogueID}" class="block" style="background-color: #4b4b4b;">
                 <div class="dialoguNodeTopRow" style="text-align: left;">
                     <span style="width: 15%; display:inline-block; text-align: right;">ID:</span><input class="blockid" style="width: 15%; display:inline-block;" readonly="" type="number" value="${nodeInfo.dialogueID}">
-                        <img class="eyeImage dialogueNodeEye" src="img/iconmonstr-eye-filled-32.png" alt="eye" width="24" height="24">
+                        <img class="eyeImage dialogueNodeEye" src="${determinedEyeImageSource}" alt="eye" width="24" height="24">
                         </div>
 
                         <select name="blockType" class="selectBlockType">
@@ -65,6 +69,9 @@ function createAnswerBlock(nodeInfo){
 
     console.log('create answer block for ', nodeInfo);
 
+    //closed or open eye:
+    let determinedEyeImageSource = determineEyeImageSource(nodeInfo);
+
     let plusButtonHTML = '';
     //add as many plus buttons as needed
     for (i = 0; i < nodeInfo.dialogueNode.outgoingSockets; i++) {
@@ -83,7 +90,7 @@ function createAnswerBlock(nodeInfo){
             <div id="id${nodeInfo.dialogueID}" class="block" style="background-color: #4b4b4b;">
                 <div class="dialoguNodeTopRow" style="text-align: left;">
                     <span style="width: 15%; display:inline-block; text-align: right;">ID:</span><input class="blockid" style="width: 15%; display:inline-block;" readonly="" type="number" value="${nodeInfo.dialogueID}">
-                        <img class="eyeImage dialogueNodeEye" src="img/iconmonstr-eye-filled-32.png" alt="eye" width="24" height="24">
+                        <img class="eyeImage dialogueNodeEye" src="${determinedEyeImageSource}" alt="eye" width="24" height="24">
                         </div>
 
                         <select name="blockType" class="selectBlockType">
@@ -122,6 +129,9 @@ function createAnswerBlock(nodeInfo){
 function createLineBlock(nodeInfo){
     console.log('create line block for ', nodeInfo );
 
+    //closed or open eye:
+    let determinedEyeImageSource = determineEyeImageSource(nodeInfo);
+
     let activeNextNode ='';  
     if (nodeInfo.dialogueNode.nextNode > 0) { //only display the number if it's greater than zero
         activeNextNode = nodeInfo.dialogueNode.nextNode;
@@ -152,7 +162,7 @@ function createLineBlock(nodeInfo){
             <div id="id${nodeInfo.dialogueID}" class="block" style="background-color: #4b4b4b;">
                 <div class="dialoguNodeTopRow" style="text-align: left;">
                     <span style="width: 15%; display:inline-block; text-align: right;">ID:</span><input class="blockid" style="width: 15%; display:inline-block;" readonly="" type="number" value="${nodeInfo.dialogueID}">
-                        <img class="eyeImage dialogueNodeEye" src="img/iconmonstr-eye-filled-32.png" alt="eye" width="24" height="24">
+                        <img class="eyeImage dialogueNodeEye" src="${determinedEyeImageSource}" alt="eye" width="24" height="24">
                         </div>
 
                         <select name="blockType" class="selectBlockType">
@@ -190,6 +200,9 @@ function createLineBlock(nodeInfo){
 function createFightBlock(nodeInfo){
     console.log('create fight block for ', nodeInfo);
 
+    //closed or open eye:
+    let determinedEyeImageSource = determineEyeImageSource(nodeInfo);
+
     let plusButtonHTML = '';
     //add as many plus buttons as needed
     for (i = 0; i < nodeInfo.dialogueNode.outgoingSockets; i++) {
@@ -207,17 +220,17 @@ function createFightBlock(nodeInfo){
             <div id="id${nodeInfo.dialogueID}" class="block" style="background-color: #4b4b4b;">
                 <div class="dialoguNodeTopRow" style="text-align: left;">
                     <span style="width: 15%; display:inline-block; text-align: right;">ID:</span><input class="blockid" style="width: 15%; display:inline-block;" readonly="" type="number" value="${nodeInfo.dialogueID}">
-                        <img class="eyeImage dialogueNodeEye" src="img/iconmonstr-eye-filled-32.png" alt="eye" width="24" height="24">
+                        <img class="eyeImage dialogueNodeEye" src="${determinedEyeImageSource}" alt="eye" width="24" height="24">
                         </div>
 
                         <select name="blockType" class="selectBlockType">
-                            <option value="line" selected="">Line</option>
+                            <option value="line" >Line</option>
                             <option value="question" >Question</option>
-                            <option value="fight">Fight</option>
+                            <option value="fight" selected="">Fight</option>
                         </select>
 
 
-                        <textarea class="dialogueTextArea" placeholder="" data-autoresize="" style="height: 48px;">${nodeInfo.dialogueNode.dialogueText}</textarea>
+                        Fight ID: <input class="fightID">
 
                         <div class="optionsUnderDialogue" style="text-align: right;">
                             <div class="option1">
@@ -231,7 +244,8 @@ function createFightBlock(nodeInfo){
 
                 </div>
                 <div class="plusButtonContainer" style="display: flex; align-items: end; justify-content: center;">
-                    <div class="blockPlusButton no-clicks" data-buttonindex="0" data-acceptclicks="false">+</div>
+                    <div class="blockPlusButton fightWin" title="If fight was won">+</div>
+                    <div class="blockPlusButton fightLose" title="If fight was lost">+</div>
                 </div>
             </div>`
 
@@ -239,3 +253,25 @@ function createFightBlock(nodeInfo){
 
     return jQueryBlockHTML;
 };
+
+
+function determineEyeImageSource(nodeInfo){
+
+    let eyeImageSource;
+
+    if (!('hideChildren' in nodeInfo.dialogueNode)) { //in case the property is missing
+        nodeInfo.dialogueNode.hideChildren = false;
+    }
+    if (nodeInfo.dialogueNode.hideChildren == false) {
+
+        eyeImageSource = 'img/iconmonstr-eye-filled-32.png'
+
+    } else {
+
+        eyeImageSource = 'img/iconmonstr-eye-off-filled-32.png'
+
+    }
+
+    return eyeImageSource;
+
+}
