@@ -3,6 +3,10 @@ $(playButton).click(startPlayMode);
 
 
 let currentNode = null; // This should be initialized to your starting node in startPlayMode
+let playModeCharID; 
+let charName;
+let dialogueNodeInObject;
+let playModeNodeInfo;
 
 function startPlayMode() {
     //console.log(`playmode started`);
@@ -10,111 +14,53 @@ function startPlayMode() {
     //get the selected node
     let selectedElement = $('.selected');
 
-    if (selectedElement.length == 0){
+    if (selectedElement.length == 0) {
         drawDialogueBox('You need to select the node from which you want to start the playback first (by clicking on it)')
     }
 
     let selectedElementBlockWrap = selectedElement.closest('.blockWrap');
 
+    playModeNodeInfo = getInfoByPassingInDialogueNodeOrElement(selectedElementBlockWrap);
+
+    if (playModeNodeInfo.isCharacter == true){
+        let nextNodeID = playModeNodeInfo.characterNode.outgoingLines[0].toNode;
+        let nextNodeInObject = getDialogueNodeById(playModeNodeInfo.characterID, nextNodeID);
+        playModeNodeInfo = getInfoByPassingInDialogueNodeOrElement(nextNodeInObject);
+        dialogueNodeInObject = playModeNodeInfo.dialogueNode;
+        //let generator = iterateConnectedNodes(playModeNodeInfo.dialogueNode, playModeCharID);
+        //generator.next().value; //move from sent in node once
+    }
+
+
     console.log('selectedElementBlockWrap', selectedElementBlockWrap);
 
-    let nodeInfo = getInfoByPassingInDialogueNodeOrElement(selectedElementBlockWrap);
+    console.log('playModeNodeInfo: ', playModeNodeInfo);
 
-    console.log('nodeInfo: ', nodeInfo);
+    dialogueNodeInObject = playModeNodeInfo.dialogueNode;
 
-    let dialogueNodeInObject = nodeInfo.dialogueNode;
+    playModeCharID = playModeNodeInfo.characterID;
 
-    let charID = nodeInfo.characterID;
-
-    let charName = nodeInfo.characterName;
+    charName = playModeNodeInfo.characterName;
 
     //handle selected element being root
-    if (selectedElementBlockWrap.hasClass('characterRoot')){
+/*     if (selectedElementBlockWrap.hasClass('characterRoot')){
         console.log(`root`);
-        console.log('nodeInfo.characterNode', nodeInfo.characterNode);
-        let nextNodeID = nodeInfo.characterNode.outgoingLines[0].toNode;
-        console.log('charID ', charID);
+        console.log('playModeNodeInfo.characterNode', playModeNodeInfo.characterNode);
+        let nextNodeID = playModeNodeInfo.characterNode.outgoingLines[0].toNode;
+        console.log('charID ', playModeCharID);
         console.log('nextNodeID', nextNodeID);
-        let nextNodeInObject = getDialogueNodeById(charID, nextNodeID);
+        let nextNodeInObject = getDialogueNodeById(playModeCharID, nextNodeID);
         dialogueNodeInObject = nextNodeInObject ?? dialogueNodeInObject; //The nullish coalescing operator ?? checks if nextNodeInObject is null or undefined. If nextNodeInObject is null or undefined, it returns the value on the right-hand side
 
     }
-let generator = iterateConnectedNodes(dialogueNodeInObject, charID);
-generator.next().value; //move from sent in node once
+  */
     
 
-    renderPlayMode(charName, dialogueNodeInObject);
-
-    function renderPlayMode(charName, dialogueNodeInObject) {
-        $('.playModeDialogueContainer').remove();
-        let answerElements = ``;
-        if (dialogueNodeInObject.dialogueType == 'question') {
-            answerElements = "";
-            let character = gameDialogueMakerProject.characters.find(character => character.characterID == charID);
-            for (let i = 0; i < dialogueNodeInObject.outgoingLines.length; i++) {
-                let outgoingLine = dialogueNodeInObject.outgoingLines[i];
-                let answerNode = character.dialogueNodes.find(node => node.dialogueID == outgoingLine.toNode);
-                if (answerNode) {
-                    let reactionNodeId = answerNode.outgoingLines[0]?.toNode;
-                    answerElements += `<button class="answerButton" data-reaction-node="${reactionNodeId}">${answerNode.dialogueText}</button>`;
-                }
-            }
-        }
-        let playModeDialogueContainer = $(`
-    <div class="playModeDialogueContainer">
-        <div class="infoLine">
-        Character: <span class="charName">${charName}</span> Dialogue: <span class="dialogueId">${dialogueNodeInObject.dialogueID}</span>
-        <div class="exitPlayMode" title="exit playmode">X</div>
-        </div>
-        <div id="dialogueLine" class="dialogueLine">
-            <!-- The dialogue text will be added here by the typewriter function -->
-        </div>
-        <div class="answerLine"> 
-        ${answerElements}
-        </div>
-        <div class="bottomLine">
-        <div id="leftArrow" class="gridCell">&lsaquo;</div>
-        <div class="gridCell"></div>
-        <div id="rightArrow" class="gridCell">&rsaquo;</div>
-        </div>
-    </div>
-    `);
-        $('body').append(playModeDialogueContainer);
-
-        
-
-        // Call the typewriter function for the dialogue text
-        typewriter('#dialogueLine', dialogueNodeInObject.dialogueText, 0, 20, function () {
-            if ((dialogueNodeInObject.nextNode !== -1 && dialogueNodeInObject.nextNode !== "" &&
-                dialogueNodeInObject.nextNode !== null && dialogueNodeInObject.nextNode !== undefined)) {
-                $('.answerLine').append('<button id="nextButton">Next</button>');
-            }
-            else if (dialogueNodeInObject.outgoingLines.length === 0) {
-                $('.answerLine').append('<button id="restartButton">Restart Dialogue</button>');
-            }
-        }); 
-
-
-        $(document).off('click', '.answerButton');
-        $(document).on('click', '.answerButton', function () {
-            let reactionNodeId = $(this).data('reaction-node');
-            let character = gameDialogueMakerProject.characters.find(character => character.characterID == charID);
-            let reactionNode = character.dialogueNodes.find(node => node.dialogueID == reactionNodeId);
-            if (reactionNode) {
-                dialogueNodeInObject = reactionNode;
-                renderPlayMode(charName, dialogueNodeInObject);
-            } else {
-                console.error(`Could not find reaction node with ID: ${reactionNodeId}`);
-            }
-        });
-    }
-
-
-//end render play mode
+    
 
     $(document).off('click', '.answerButton').on('click', '.answerButton', function () {
         let reactionNodeId = $(this).data('reaction-node');
-        let character = gameDialogueMakerProject.characters.find(character => character.characterID == charID);
+        let character = gameDialogueMakerProject.characters.find(character => character.characterID == playModeCharID);
         let reactionNode = character.dialogueNodes.find(node => node.dialogueID == reactionNodeId);
         if (reactionNode) {
             dialogueNodeInObject = reactionNode;
@@ -163,12 +109,12 @@ generator.next().value; //move from sent in node once
 
     function moveNext() {
         let nextNodeId = dialogueNodeInObject.nextNode;
-        let character = gameDialogueMakerProject.characters.find(character => character.characterID == charID);
+        let character = gameDialogueMakerProject.characters.find(character => character.characterID == playModeCharID);
         if (nextNodeId !== -1 && nextNodeId !== "" && nextNodeId !== null && nextNodeId !== undefined) {
             let nextNode = character.dialogueNodes.find(node => node.dialogueID == nextNodeId);
             if (nextNode) {
                 dialogueNodeInObject = nextNode;
-                generator = iterateConnectedNodes(dialogueNodeInObject, charID);
+                generator = iterateConnectedNodes(dialogueNodeInObject, playModeCharID);
                 generator.next();
                 renderPlayMode(charName, dialogueNodeInObject);
 
@@ -211,7 +157,88 @@ generator.next().value; //move from sent in node once
 
     //currentNode = dialogueNodeInObject; // Assuming startNode is your starting node
     //renderNode(currentNode);
+
+    renderPlayMode(charName, playModeNodeInfo.dialogueNode);
+
+} //end start playmode
+
+
+
+
+//RENDER PLAY MODE
+
+function renderPlayMode(charName, dialogueNodeInObject) {
+    $('.playModeDialogueContainer').remove();
+    let answerElements = ``;
+    if (dialogueNodeInObject.dialogueType == 'question') {
+        answerElements = "";
+        let character = gameDialogueMakerProject.characters.find(character => character.characterID == playModeCharID);
+        for (let i = 0; i < dialogueNodeInObject.outgoingLines.length; i++) {
+            let outgoingLine = dialogueNodeInObject.outgoingLines[i];
+            let answerNode = character.dialogueNodes.find(node => node.dialogueID == outgoingLine.toNode);
+            if (answerNode) {
+                let reactionNodeId = answerNode.outgoingLines[0]?.toNode;
+                answerElements += `<button class="answerButton" data-reaction-node="${reactionNodeId}">${answerNode.dialogueText}</button>`;
+            }
+        }
+
+        //not a question
+    } else if (dialogueNodeInObject.outgoingLines.length > 0) {
+        // Check if there are outgoing lines and add a button for it
+        let nextNodeID = dialogueNodeInObject.outgoingLines[0].toNode;
+        answerElements += `<button class="continueButton" data-next-node="${nextNodeID}">Continue</button>`;
+    }
+    let playModeDialogueContainer = $(`
+    <div class="playModeDialogueContainer">
+        <div class="infoLine">
+        Character: <span class="charName">${charName}</span> Dialogue: <span class="dialogueId">${dialogueNodeInObject.dialogueID}</span>
+        <div class="exitPlayMode" title="exit playmode">X</div>
+        </div>
+        <div id="dialogueLine" class="dialogueLine">
+            <!-- The dialogue text will be added here by the typewriter function -->
+        </div>
+        <div class="answerLine"> 
+        ${answerElements}
+        </div>
+        <div class="bottomLine">
+        <div id="leftArrow" class="gridCell">&lsaquo;</div>
+        <div class="gridCell"></div>
+        <div id="rightArrow" class="gridCell">&rsaquo;</div>
+        </div>
+    </div>
+    `);
+    $('body').append(playModeDialogueContainer);
+
+
+
+    // Call the typewriter function for the dialogue text
+    typewriter('#dialogueLine', dialogueNodeInObject.dialogueText, 0, 20, function () {
+        if ((dialogueNodeInObject.nextNode !== -1 && dialogueNodeInObject.nextNode !== "" &&
+            dialogueNodeInObject.nextNode !== null && dialogueNodeInObject.nextNode !== undefined)) {
+            $('.answerLine').append('<button id="nextButton">Next</button>');
+        }
+        else if (dialogueNodeInObject.outgoingLines.length === 0) {
+            $('.answerLine').append('<button id="restartButton">Restart Dialogue</button>');
+        }
+    });
+
+
+    $(document).off('click', '.answerButton');
+    $(document).on('click', '.answerButton', function () {
+        let reactionNodeId = $(this).data('reaction-node');
+        let character = gameDialogueMakerProject.characters.find(character => character.characterID == playModeCharID);
+        let reactionNode = character.dialogueNodes.find(node => node.dialogueID == reactionNodeId);
+        if (reactionNode) {
+            dialogueNodeInObject = reactionNode;
+            renderPlayMode(charName, dialogueNodeInObject);
+        } else {
+            console.error(`Could not find reaction node with ID: ${reactionNodeId}`);
+        }
+    });
 }
+
+
+//end render play mode
 
 
 
@@ -254,3 +281,14 @@ $(document).on('click', '.exitPlayMode', function(){
     playModeActive = false;
 })
 
+$(document).off('click', '.continueButton').on('click', '.continueButton', function () {
+    let nextNodeId = $(this).data('next-node');
+    let character = gameDialogueMakerProject.characters.find(character => character.characterID == playModeCharID);
+    let nextNode = character.dialogueNodes.find(node => node.dialogueID == nextNodeId);
+    if (nextNode) {
+        dialogueNodeInObject = nextNode;
+        renderPlayMode(charName, dialogueNodeInObject);
+    } else {
+        console.error(`Could not find the next node with ID: ${nextNodeId}`);
+    }
+});
