@@ -208,16 +208,19 @@ jQuery(document).on('change', '.selectBlockType', function () {
         let nodeToUpdate = findDialogueObjectBasedOnPassedInHtmlElement(this);
 
     nodeToUpdate.dialogueType = selectedValue;
-    nodeToUpdate.outgoingSockets = 3; //when changing the block type to question, set default answer amount to three also in the aobject
+    
 
     if(selectedValue == "question"){
        //console.log('question');
 
-        
+        nodeToUpdate.outgoingSockets = 3; //when changing the block type to question, set default answer amount to three also in the aobject
 
     }
 
     if (selectedValue == "line") {
+
+
+        nodeToUpdate.outgoingSockets = 1;
 
       
 
@@ -225,7 +228,7 @@ jQuery(document).on('change', '.selectBlockType', function () {
 
     if (selectedValue == "fight") {
 
-       
+        nodeToUpdate.outgoingSockets = 2;
 
     }
 
@@ -252,57 +255,7 @@ jQuery(document).on('change', '.answerNumber', function () {
     clearCanvasBeforeReDraw();
     drawDialogueMakerProject();
 
-/*     //remove all plus buttons
-    let blockWrap = jQuery(this).closest('.blockWrap');
-    
-    blockWrap.findWithDepth('.blockPlusButton', 3).remove(); //here we should only remove the immediate children
 
-    for (let i = 0; i < selectedValue; i++) {
-
-        let newPlusButton = $(`<div class="blockPlusButton" data-buttonindex=${i} data-acceptclicks=true>+</div>`);
-        
-        let theDialogueElementInDOM = jQuery(this).closest('.blockWrap');
-
-        let theDialogueElementInObject = findMatchingDialogueNodeInObjectFromPassedInBlockwrap(theDialogueElementInDOM); 
-        
-        //append more plus buttons
-        theDialogueElementInDOM.find('.plusButtonContainer').first().append(newPlusButton);
-
-        theDialogueElementInObject.nodeElement.find('.plusButtonContainer').first().append(newPlusButton);
-        
-        
-        //need to turn connected plus buttons gray
-        checkIfPlusButtonShouldBeTurnedOff(newPlusButton);
-    } */
-
-    //when the number is lowered, we need to delete the blocks connected to the deleted plus buttons:
-
-    /* $(blockWrap).find('.line').each(function (index) {
-
-       //console.log(`this.attr("data-block2") ${$(this).attr("data-block2")}`);
-
-       //console.log('inside each loop for lines, this $(this).attr("data-buttonindextoconnectto") is: ' + $(this).attr("data-buttonindextoconnectto") + 'and selectedValue is' + selectedValue);
-
-        if ($(this).attr("data-buttonindextoconnectto") > selectedValue-1){
-
-            //select the end node of the line
-            let endNode = $(this).attr("data-block2");
-
-           //console.log('endnode: ' + endNode);
-
-            //select and remove the block from dom
-
-            cheeck = $('#' + endNode).closest('.blockWrap');
-
-            cheeck.remove();
-
-            //delete the line
-
-            $(this).remove();
-
-        }
-        
-    }); */
 
  }); //end onchange answernumber
 
