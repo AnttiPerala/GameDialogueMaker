@@ -1,6 +1,6 @@
 // Global Variables
 playModeActive = false;
-//let playModeNodeInfo;
+let latestPlayModeNodeInfo;
 let currentNode = null;
 let playModeCharID;
 let charName;
@@ -35,6 +35,7 @@ function startPlayMode() {
     charName = playModeNodeInfo.characterName;
 
     console.log('playModeNodeInfo now', playModeNodeInfo);
+    latestPlayModeNodeInfo = playModeNodeInfo;
     renderPlayMode(playModeNodeInfo);
 }
 
@@ -42,17 +43,7 @@ function startPlayMode() {
 function attachEventHandlers() {
     $('#playMode img').click(startPlayMode);
 
-    $(document).on('click', '#leftArrow', () => drawDialogueBox("Reversing not implemented"));
-    $(document).on('click', '#rightArrow', moveNext);
-    $(document).on('click', '.conditionButton', function () {
-        moveNext($(this).data('to-node'));
-    });
-    $(document).on('click', '#nextButton', moveNext);
-    $(document).on('click', '#restartButton', startPlayMode);
-    $(document).on('click', '.answerButton', function () {
-        const reactionNodeId = $(this).data('reaction-node');
-        // Handle reaction node click here
-    });
+   
     $(document).on('click', '.exitPlayMode', function () {
         $('.playModeDialogueContainer').remove();
         playModeActive = false;
@@ -69,12 +60,16 @@ function renderPlayMode(nodeInfo) {
     console.log('renderPlayMode nodeInfo', nodeInfo);
     $('.playModeDialogueContainer').remove();
     let answerElements = ``;
-    if (nodeInfo.dialogueType == 'question') {
+
+    console.log('render playmode nodeInfo', nodeInfo);
+    
+    if (nodeInfo.dialogueNode.dialogueType == 'question') {
+        console.log('its a question');
         answerElements = "";
         let character = nodeInfo.characterNode;
         //find the answer options by looping through outgoingLines
-        for (let i = 0; i < nodeInfo.outgoingLines.length; i++) {
-            let outgoingLine = nodeInfo.outgoingLines[i];
+        for (let i = 0; i < nodeInfo.dialogueNode.outgoingLines.length; i++) {
+            let outgoingLine = nodeInfo.dialogueNode.outgoingLines[i];
             let answerNode = character.dialogueNodes.find(node => node.dialogueID == outgoingLine.toNode);
             if (answerNode) {
                 let reactionNodeId = answerNode.outgoingLines[0]?.toNode;
@@ -137,7 +132,9 @@ function renderPlayMode(nodeInfo) {
             console.error(`Could not find reaction node with ID: ${reactionNodeId}`);
         }
     });
-}
+
+    latestPlayModeNodeInfo = nodeInfo;
+} /* end renderPlayMode */
 
 
 
@@ -183,6 +180,18 @@ $(document).on('click', '.continueButton', function () {
     moveNext(fromNodeID, toNodeID);
 });
 
+$(document).on('click', '.conditionButton', function () {
+    console.log('condition button clicked');
+    //let fromNodeID = $(this).attr('data-from-node');
+    let toNodeID = $(this).attr('data-to-node');
+    //console.log('fromNodeID', fromNodeID);
+    console.log('toNodeID', toNodeID);
+    let nextNodeInObject = getDialogueNodeById(latestPlayModeNodeInfo.characterID, toNodeID);
+    playModeNodeInfo = getInfoByPassingInDialogueNodeOrElement(nextNodeInObject);
+    latestPlayModeNodeInfo = playModeNodeInfo;
+    renderPlayMode(playModeNodeInfo);
+});
+
 /* MOVENEXT */
 function moveNext(fromNodeID, toNodeID) {
     //find line and check if it has conditions
@@ -196,6 +205,8 @@ function moveNext(fromNodeID, toNodeID) {
 
     if (lineObject.transitionConditions.length > 0){
         console.log('condition found');
+        $('.answerLine').append(`<button class="conditionButton" data-from-node="${fromNodeID}" data-to-node="${toNodeID}">Fullfil condition: ${lineObject.transitionConditions[0].variableName}${lineObject.transitionConditions[0].comparisonOperator}${lineObject.transitionConditions[0].variableValue}</button>`);
+
     } else {
         //no condition, move to next
         let newNode = getDialogueNodeById(playModeCharID, toNodeID);
@@ -206,15 +217,6 @@ function moveNext(fromNodeID, toNodeID) {
    
 }
 
-function handleCondition(conditionObject) {
-    $('#dialogueLine').html('A condition needs to be fulfilled before the next dialogue is shown.');
-    $('.conditionButton').remove();
-    $('.continueButton').remove();
 
-    conditionObject.conditions.forEach((condition, index) => {
-        console.log("Processing condition:", condition);
-        $('#dialogueLine').append(`<button class="conditionButton" data-to-node="${condition.nextNodeId}">Fulfill ${condition.variableName} ${condition.comparisonOperator} ${condition.variableValue}</button>`);
 
-    });
-}
 
