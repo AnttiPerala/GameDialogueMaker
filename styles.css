@@ -384,7 +384,7 @@ textarea {
 .playModeDialogueContainer{
     font-size: 1.5rem;
     background-color: rgb(46, 46, 46);
-    position: absolute;
+    position: fixed;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -40%);
