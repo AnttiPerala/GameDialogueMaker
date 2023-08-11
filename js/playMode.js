@@ -134,9 +134,19 @@ function renderPlayMode(nodeInfo) {
 
     // Call the typewriter function for the dialogue text
     typewriter('#dialogueLine', nodeInfo.dialogueNode.dialogueText, 0, 20, function () {
-        if ((nodeInfo.nextNode !== -1 && nodeInfo.nextNode !== "" &&
-            nodeInfo.nextNode !== null && nodeInfo.nextNode !== undefined)) {
-            $('.answerLine').append('<button id="nextButton">Next</button>');
+
+        console.log('nodeInfo', nodeInfo);
+        console.log('nodeInfo.dialogueNode.nextNode value:', nodeInfo.dialogueNode.nextNode);
+        console.log('nodeInfo.nextNode !== -1:', nodeInfo.dialogueNode.nextNode !== -1);
+        console.log('nodeInfo.nextNode !== "":', nodeInfo.dialogueNode.nextNode !== "");
+        console.log('nodeInfo.nextNode !== null:', nodeInfo.dialogueNode.nextNode !== null);
+        console.log('nodeInfo.nextNode !== undefined:', nodeInfo.dialogueNode.nextNode !== undefined);
+        console.log('Combined condition:', (nodeInfo.dialogueNode.nextNode !== -1 && nodeInfo.dialogueNode.nextNode !== "" && nodeInfo.dialogueNode.nextNode !== null && nodeInfo.dialogueNode.nextNode !== undefined));
+
+        //we have a next value. Notice how we set fromNode to -1, that is needed for moveNext
+        if ((nodeInfo.dialogueNode.nextNode !== -1 && nodeInfo.dialogueNode.nextNode !== "" &&
+            nodeInfo.dialogueNode.nextNode !== null && nodeInfo.dialogueNode.nextNode !== undefined)) {
+            $('.answerLine').append(`<span class="playModeExplainer">You reached the end of this branch, but a "next" value has been defined. Click on the button to go there.</span><button class="nextButton" data-from-node="-1" data-to-node="${nodeInfo.dialogueNode.nextNode}">Next</button>`);
         }
         else if (nodeInfo.dialogueNode.outgoingLines.length === 0) {
             $('.answerLine').append('<span class="playModeExplainer">No more nodes to progress.</span><button id="restartButton">Restart Dialogue</button>');
@@ -204,6 +214,15 @@ $(document).on('click', '.continueButton', function () {
     moveNext(fromNodeID, toNodeID);
 });
 
+$(document).on('click', '.nextButton', function () {
+    console.log('next button clicked, calling moveNext()');
+    let fromNodeID = $(this).attr('data-from-node');
+    let toNodeID = $(this).attr('data-to-node');
+    console.log('fromNodeID', fromNodeID);
+    console.log('toNodeID', toNodeID);
+    moveNext(fromNodeID, toNodeID);
+});
+
 $(document).on('click', '.loseFightButton, .winFightButton', function () {
     console.log('continue button clicked, calling moveNext()');
     let fromNodeID = $(this).attr('data-from-node');
@@ -241,6 +260,15 @@ function moveNext(fromNodeID, toNodeID) {
     let lineObject = getLineObjectFromMasterObjectUsingFromAndTo(fromNodeID, toNodeID);
 
     console.log('lineObject', lineObject);
+
+    if (fromNodeID == -1){
+        //this is a dotted line "next" transition so we skip the transitionConditions check
+        let newNode = getDialogueNodeById(playModeCharID, toNodeID);
+        let playModeNodeInfo = getInfoByPassingInDialogueNodeOrElement(newNode);
+
+        renderPlayMode(playModeNodeInfo);
+        return;
+    }
 
     if (lineObject.transitionConditions.length > 0){
         console.log('condition found');
