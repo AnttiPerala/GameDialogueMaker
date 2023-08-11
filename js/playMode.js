@@ -90,7 +90,7 @@ function renderPlayMode(nodeInfo) {
             
             if (i == 0) {
                 let reactionNodeId = outgoingLine.toNode;
-                answerElements += `<button class="winFightButton" data-from-node="${nodeInfo.dialogueNode.dialogueID}"  data-to-node="${reactionNodeId}">Win the fight</button>`;
+                answerElements += `<span class="playModeExplainer">A fight started.</span> <button class="winFightButton" data-from-node="${nodeInfo.dialogueNode.dialogueID}"  data-to-node="${reactionNodeId}">Win the fight</button>`;
                 console.log('answerElements', answerElements);
             } 
             if (i == 1){
@@ -139,7 +139,7 @@ function renderPlayMode(nodeInfo) {
             $('.answerLine').append('<button id="nextButton">Next</button>');
         }
         else if (nodeInfo.dialogueNode.outgoingLines.length === 0) {
-            $('.answerLine').append('<button id="restartButton">Restart Dialogue</button>');
+            $('.answerLine').append('<span class="playModeExplainer">No more nodes to progress.</span><button id="restartButton">Restart Dialogue</button>');
         }
     });
 
