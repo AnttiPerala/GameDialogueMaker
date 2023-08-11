@@ -372,8 +372,9 @@ function deleteLineFromObject(gameDialogueMakerProject, characterId, fromNodeVal
 }
 
 //TRAVERSE ALL NODES CONNECTED TO A NODE WITH LINES
+//this is only used in playMode at the moment
 //i think at the moment this only takes dialogueNodes and trying to add characterNode detection broke things
-function* iterateConnectedNodes(startNode, characterId, visitedNodes = new Set()) {
+function* iterateConnectedNodes(startNode, characterId, visitedNodes = new Set(), nextChoiceId = null) {
     if (!startNode || !startNode.dialogueID) {
         console.log("Invalid startNode:", startNode);
         return;
@@ -383,9 +384,31 @@ function* iterateConnectedNodes(startNode, characterId, visitedNodes = new Set()
 
     console.log("Visiting startNode:", startNode);
 
-    let theCharid = findCharacterIDByPassingInDialogueNode(startNode); //which character id should we use actually?
+    let theCharid = findCharacterIDByPassingInDialogueNode(startNode);
 
-    yield startNode;
+    console.log('hello from iterateConnectedNodes. theCharid: ', theCharid);
+
+    //yield startNode;
+
+    console.log("Current startNode's dialogueType:", startNode.dialogueType);
+
+
+    if (startNode.dialogueType == 'question') {
+        // If nextChoiceId is provided, it means player made a choice. Traverse that.
+        console.log('question found, nextChoiceId ', nextChoiceId);
+        if (nextChoiceId) {
+            const chosenLine = startNode.outgoingLines.find(line => line.toNode == nextChoiceId);
+            if (chosenLine) {
+                const toNode = character.dialogueNodes.find(node => node.dialogueID == chosenLine.toNode);
+                yield toNode;
+                yield* iterateConnectedNodes(toNode, characterId, visitedNodes, nextChoiceId);
+            }
+        } else {
+            console.log("Start Node before PLAYER_CHOICE:", startNode);
+            // Player hasn't made a choice yet. Yield the possible choices.
+            yield { type: 'PLAYER_CHOICE', choices: startNode.outgoingLines };
+        }
+    } else {
 
     for (let outgoingLine of startNode.outgoingLines) {
         const character = gameDialogueMakerProject.characters.find(character => character.characterID == theCharid);
@@ -394,12 +417,21 @@ function* iterateConnectedNodes(startNode, characterId, visitedNodes = new Set()
         console.log("Outgoing line from ", startNode.dialogueID, " to ", outgoingLine.toNode);
         console.log("Found toNode: ", toNode);
 
+        // Check for transition conditions here
+        if (outgoingLine.transitionConditions && outgoingLine.transitionConditions.length > 0) {
+            // Instead of traversing to the next node, yield a special instruction or "node" that indicates a condition should be displayed
+            yield { type: 'CONDITION', conditions: outgoingLine.transitionConditions, nextNodeId: outgoingLine.toNode };
+
+        }
+
         if (toNode && !visitedNodes.has(toNode.dialogueID)) {
             console.log("Traversing toNode:", toNode);
             yield* iterateConnectedNodes(toNode, characterId, visitedNodes);
         }
     }
-}
+
+    }
+}/* end iterate */
 
 
 

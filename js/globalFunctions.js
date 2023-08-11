@@ -72,14 +72,8 @@ function createAnswerBlock(nodeInfo){
     //closed or open eye:
     let determinedEyeImageSource = determineEyeImageSource(nodeInfo);
 
-    let plusButtonHTML = '';
-    //add as many plus buttons as needed
-    for (i = 0; i < nodeInfo.dialogueNode.outgoingSockets; i++) {
-
-        plusButtonHTML += `<div class="blockPlusButton" data-buttonindex=${i} data-acceptclicks=true>+</div>`;
-
-    }
-
+    let plusButtonHTML = `<div class="blockPlusButton" data-buttonindex=0 data-acceptclicks=true>+</div>`;
+    //only one plus buttons is needed
 
     let blockHTML = `<div data-character-id="${nodeInfo.characterID}" data-dialogue-id="${nodeInfo.dialogueID}" data-hidechildren="${nodeInfo.dialogueNode.hideChildren}" id="dialogue${nodeInfo.dialogueID}" class="blockWrap dialogue ui-draggable ui-draggable-handle" style="top: ${nodeInfo.dialogueNode.dialogueNodeY}px; left: ${nodeInfo.dialogueNode.dialogueNodeX}px; position: absolute;">
 
@@ -144,13 +138,8 @@ function createLineBlock(nodeInfo){
     style="display:inline-block;" type="number" value="${activeNextNode}">`
     }
 
-    let plusButtonHTML = '';
-    //add as many plus buttons as needed
-    for (i = 0; i < nodeInfo.dialogueNode.outgoingSockets; i++) {
-
-        plusButtonHTML += `<div class="blockPlusButton" data-buttonindex=${i} data-acceptclicks=true>+</div>`;
-
-    }
+    let plusButtonHTML = `<div class="blockPlusButton" data-buttonindex=0 data-acceptclicks=true>+</div>`;
+    //only one plus buttons is needed for lines
 
     
     let blockHTML = `<div data-character-id="${nodeInfo.characterID}" data-dialogue-id="${nodeInfo.dialogueID}" data-hidechildren="${nodeInfo.dialogueNode.hideChildren}" id="dialogue${nodeInfo.dialogueID}" class="blockWrap dialogue ui-draggable ui-draggable-handle" style="top: ${nodeInfo.dialogueNode.dialogueNodeY}px; left: ${nodeInfo.dialogueNode.dialogueNodeX}px; position: absolute;">
