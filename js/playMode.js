@@ -122,9 +122,7 @@ function renderPlayMode(nodeInfo) {
             ${answerElements}
             </div>
             <div class="bottomLine">
-            <div id="leftArrow" class="gridCell">&lsaquo;</div>
-            <div class="gridCell"></div>
-            <div id="rightArrow" class="gridCell">&rsaquo;</div>
+ 
             </div>
         </div>
         `);
@@ -272,7 +270,7 @@ function moveNext(fromNodeID, toNodeID) {
 
     if (lineObject.transitionConditions.length > 0){
         console.log('condition found');
-        $('.answerLine').append(`<span class="playModeExplainer">There is a condition that needs to be met before you can progress to the next dialogue. Click on the button to fulfill it.</span><button class="conditionButton" data-from-node="${fromNodeID}" data-to-node="${toNodeID}">Fulfill condition: ${lineObject.transitionConditions[0].variableName}${lineObject.transitionConditions[0].comparisonOperator}${lineObject.transitionConditions[0].variableValue}</button>`);
+        $('.answerLine').append(`<div class="playModeExplainer">There is a condition that needs to be met before you can progress to the next dialogue. Click on the button to fulfill it.</div><button class="conditionButton" data-from-node="${fromNodeID}" data-to-node="${toNodeID}">Fulfill condition: ${lineObject.transitionConditions[0].variableName}${lineObject.transitionConditions[0].comparisonOperator}${lineObject.transitionConditions[0].variableValue}</button>`);
 
     } else {
         //no condition, move to next
