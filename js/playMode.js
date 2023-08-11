@@ -62,11 +62,12 @@ function renderPlayMode(nodeInfo) {
     let answerElements = ``;
 
     console.log('render playmode nodeInfo', nodeInfo);
-    
+     let character = nodeInfo.characterNode;
+
     if (nodeInfo.dialogueNode.dialogueType == 'question') {
         console.log('its a question');
         answerElements = "";
-        let character = nodeInfo.characterNode;
+       
         //find the answer options by looping through outgoingLines
         for (let i = 0; i < nodeInfo.dialogueNode.outgoingLines.length; i++) {
             let outgoingLine = nodeInfo.dialogueNode.outgoingLines[i];
@@ -80,10 +81,29 @@ function renderPlayMode(nodeInfo) {
 
         //not a question
     } else if (nodeInfo.dialogueNode.dialogueType == 'fight'){
-
         console.log('fight!');
 
-    } else if (nodeInfo.dialogueNode.outgoingLines.length > 0) { //just reular line node
+        //find the fight options by looping through outgoingLines
+        for (let i = 0; i < nodeInfo.dialogueNode.outgoingLines.length; i++) {
+            let outgoingLine = nodeInfo.dialogueNode.outgoingLines[i];
+         
+            
+            if (i == 0) {
+                let reactionNodeId = outgoingLine.toNode;
+                answerElements += `<button class="winFightButton" data-from-node="${nodeInfo.dialogueNode.dialogueID}"  data-to-node="${reactionNodeId}">Win the fight</button>`;
+                console.log('answerElements', answerElements);
+            } 
+            if (i == 1){
+                let reactionNodeId = outgoingLine.toNode;
+                answerElements += `<button class="loseFightButton" data-from-node="${nodeInfo.dialogueNode.dialogueID}" data-to-node="${reactionNodeId}">Lose the fight</button>`;
+                console.log('answerElements', answerElements);
+            }
+        }
+
+        console.log('answerElements after loop', answerElements);
+
+
+    } else if (nodeInfo.dialogueNode.outgoingLines.length > 0) { //just regular line node
         // Check if there are outgoing lines and add a button for it
         let nextNodeID = nodeInfo.dialogueNode.outgoingLines[0].toNode;
         answerElements += `<button class="continueButton" data-from-node="${nodeInfo.dialogueID}" data-to-node="${nextNodeID}">Continue</button>`;
@@ -181,6 +201,15 @@ $(document).on('click', '.continueButton', function () {
     let toNodeID = $(this).attr('data-to-node');
     console.log('fromNodeID', fromNodeID);
     console.log('toNodeID', toNodeID );
+    moveNext(fromNodeID, toNodeID);
+});
+
+$(document).on('click', '.loseFightButton, .winFightButton', function () {
+    console.log('continue button clicked, calling moveNext()');
+    let fromNodeID = $(this).attr('data-from-node');
+    let toNodeID = $(this).attr('data-to-node');
+    console.log('fromNodeID', fromNodeID);
+    console.log('toNodeID', toNodeID);
     moveNext(fromNodeID, toNodeID);
 });
 

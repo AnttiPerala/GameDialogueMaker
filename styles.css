@@ -450,12 +450,20 @@ font-size: 3rem;
     font-weight: 900;
 }
 
-.fightWin{
- background-color: rgb(62, 182, 41);
+.fightWin, .winFightButton{
+ background-color: #30e060;
 }
 
-.fightLose {
-    background-color: #ed281e;
+.fightLose, .loseFightButton {
+    background-color: #e03050;
+}
+
+.winFightButton{
+    box-shadow: hsl(140deg 87% 44%) 0px 7px 0px 0px;
+}
+
+.loseFightButton {
+    box-shadow: hsl(350deg 87% 50%) 0px 7px 0px 0px;
 }
 
 

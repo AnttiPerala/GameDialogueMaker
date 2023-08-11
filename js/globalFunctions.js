@@ -218,6 +218,8 @@ function createFightBlock(nodeInfo){
                             <option value="fight" selected="">Fight</option>
                         </select>
 
+                        <textarea class="dialogueTextArea" placeholder="" data-autoresize="" style="height: 48px;">${nodeInfo.dialogueNode.dialogueText}</textarea>
+
 
                         Fight ID: <input class="fightID" value="${nodeInfo.dialogueNode.fightID}">
 
