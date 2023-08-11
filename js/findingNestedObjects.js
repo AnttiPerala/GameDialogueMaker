@@ -139,38 +139,54 @@ function findLineThatConnectsElementToParent(characterObject, dialogueID){
 //find a specific line based on its fromNode and toNode
 
 function getLineObjectFromMasterObjectUsingFromAndTo(fromNode, toNode) {
+    if (!fromNode || !toNode) {
+        throw new Error("Both fromNode and toNode parameters must be provided");
+    }
+
     let foundLine = '';
+
+    if (!gameDialogueMakerProject || !Array.isArray(gameDialogueMakerProject.characters)) {
+        throw new Error("Invalid or missing gameDialogueMakerProject structure");
+    }
 
     // Search through each character's dialogue nodes
     for (let c = 0; c < gameDialogueMakerProject.characters.length; c++) {
         let character = gameDialogueMakerProject.characters[c];
-        for (let i = 0; i < character.dialogueNodes.length; i++) {
-            let node = character.dialogueNodes[i];
 
-            // Search through each outgoing line from the node
-            for (let j = 0; j < node.outgoingLines.length; j++) {
-                let line = node.outgoingLines[j];
+        if (character.dialogueNodes && Array.isArray(character.dialogueNodes)) {
+            for (let i = 0; i < character.dialogueNodes.length; i++) {
+                let node = character.dialogueNodes[i];
 
-                // Check if the line matches the specified from and to nodes
-                if (line.fromNode == fromNode && line.toNode == toNode) {
-                    //console.log(line);
-                    // Do something with the line object
-                    foundLine = line;
+                if (node.outgoingLines && Array.isArray(node.outgoingLines)) {
+                    for (let j = 0; j < node.outgoingLines.length; j++) {
+                        let line = node.outgoingLines[j];
+
+                        // Check if the line matches the specified from and to nodes
+                        if (line.fromNode == fromNode && line.toNode == toNode) {
+                            foundLine = line;
+                        }
+                    }
                 }
             }
         }
 
         // Search through each line coming from the character object
-        for (let j = 0; j < character.outgoingLines.length; j++) {
-            let line = character.outgoingLines[j];
+        if (character.outgoingLines && Array.isArray(character.outgoingLines)) {
+            for (let j = 0; j < character.outgoingLines.length; j++) {
+                let line = character.outgoingLines[j];
 
-            // Check if the line matches the specified from and to nodes
-            if (line.fromNode == fromNode && line.toNode == toNode) {
-                //console.log(line);
-                // Do something with the line object
-                foundLine = line;
+                // Check if the line matches the specified from and to nodes
+                if (line.fromNode == fromNode && line.toNode == toNode) {
+                    foundLine = line;
+                }
             }
         }
+    }
+
+    if (!foundLine) {
+        console.warn(`No line found matching fromNode "${fromNode}" and toNode "${toNode}"`);
+    } else {
+        console.log('foundLine', foundLine);
     }
 
     return foundLine;

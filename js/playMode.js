@@ -1,14 +1,16 @@
 // Global Variables
 playModeActive = false;
+//let playModeNodeInfo;
 let currentNode = null;
 let playModeCharID;
 let charName;
-let dialogueNodeInObject;
-let generator;
+
+
 
 // Start Play Mode
 function startPlayMode() {
     playModeActive = true;
+    console.log('start playmode');
 
     const selectedElement = $('.selected');
     if (selectedElement.length === 0) {
@@ -19,20 +21,21 @@ function startPlayMode() {
     const selectedElementBlockWrap = selectedElement.closest('.blockWrap');
     let playModeNodeInfo = getInfoByPassingInDialogueNodeOrElement(selectedElementBlockWrap);
 
+    console.log('start playModeNodeInfo', playModeNodeInfo);
+
     // If character, navigate to the next node
     if (playModeNodeInfo.isCharacter) {
         let nextNodeID = playModeNodeInfo.characterNode.outgoingLines[0].toNode;
         let nextNodeInObject = getDialogueNodeById(playModeNodeInfo.characterID, nextNodeID);
         playModeNodeInfo = getInfoByPassingInDialogueNodeOrElement(nextNodeInObject);
-        dialogueNodeInObject = playModeNodeInfo.dialogueNode;
+        console.log('is char');
     }
 
-    generator = iterateConnectedNodes(playModeNodeInfo.dialogueNode, playModeCharID);
-    dialogueNodeInObject = playModeNodeInfo.dialogueNode;
     playModeCharID = playModeNodeInfo.characterID;
     charName = playModeNodeInfo.characterName;
 
-    renderPlayMode(charName, playModeNodeInfo.dialogueNode);
+    console.log('playModeNodeInfo now', playModeNodeInfo);
+    renderPlayMode(playModeNodeInfo);
 }
 
 // Attach Event Handlers
@@ -54,7 +57,7 @@ function attachEventHandlers() {
         $('.playModeDialogueContainer').remove();
         playModeActive = false;
     });
-    $(document).on('click', '.continueButton', moveNext);
+    
 }
 
 $(document).ready(attachEventHandlers);
@@ -62,14 +65,16 @@ $(document).ready(attachEventHandlers);
 
 //RENDER PLAY MODE
 
-function renderPlayMode(charName, dialogueNodeInObject) {
+function renderPlayMode(nodeInfo) {
+    console.log('renderPlayMode nodeInfo', nodeInfo);
     $('.playModeDialogueContainer').remove();
     let answerElements = ``;
-    if (dialogueNodeInObject.dialogueType == 'question') {
+    if (nodeInfo.dialogueType == 'question') {
         answerElements = "";
-        let character = gameDialogueMakerProject.characters.find(character => character.characterID == playModeCharID);
-        for (let i = 0; i < dialogueNodeInObject.outgoingLines.length; i++) {
-            let outgoingLine = dialogueNodeInObject.outgoingLines[i];
+        let character = nodeInfo.characterNode;
+        //find the answer options by looping through outgoingLines
+        for (let i = 0; i < nodeInfo.outgoingLines.length; i++) {
+            let outgoingLine = nodeInfo.outgoingLines[i];
             let answerNode = character.dialogueNodes.find(node => node.dialogueID == outgoingLine.toNode);
             if (answerNode) {
                 let reactionNodeId = answerNode.outgoingLines[0]?.toNode;
@@ -79,16 +84,16 @@ function renderPlayMode(charName, dialogueNodeInObject) {
 
 
         //not a question
-    } else if (dialogueNodeInObject.outgoingLines.length > 0) {
+    } else if (nodeInfo.dialogueNode.outgoingLines.length > 0) {
         // Check if there are outgoing lines and add a button for it
-        let nextNodeID = dialogueNodeInObject.outgoingLines[0].toNode;
-        answerElements += `<button class="continueButton" data-next-node="${nextNodeID}">Continue</button>`;
+        let nextNodeID = nodeInfo.dialogueNode.outgoingLines[0].toNode;
+        answerElements += `<button class="continueButton" data-from-node="${nodeInfo.dialogueID}" data-to-node="${nextNodeID}">Continue</button>`;
     }
 
         let playModeDialogueContainer = $(`
         <div class="playModeDialogueContainer">
             <div class="infoLine">
-            Character: <span class="charName">${charName}</span> Dialogue: <span class="dialogueId">${dialogueNodeInObject.dialogueID}</span>
+            Character: <span class="charName">${nodeInfo.characterName}</span> Dialogue: <span class="dialogueId">${nodeInfo.dialogueID}</span>
             <div class="exitPlayMode" title="exit playmode">X</div>
             </div>
             <div id="dialogueLine" class="dialogueLine">
@@ -109,12 +114,12 @@ function renderPlayMode(charName, dialogueNodeInObject) {
 
 
     // Call the typewriter function for the dialogue text
-    typewriter('#dialogueLine', dialogueNodeInObject.dialogueText, 0, 20, function () {
-        if ((dialogueNodeInObject.nextNode !== -1 && dialogueNodeInObject.nextNode !== "" &&
-            dialogueNodeInObject.nextNode !== null && dialogueNodeInObject.nextNode !== undefined)) {
+    typewriter('#dialogueLine', nodeInfo.dialogueNode.dialogueText, 0, 20, function () {
+        if ((nodeInfo.nextNode !== -1 && nodeInfo.nextNode !== "" &&
+            nodeInfo.nextNode !== null && nodeInfo.nextNode !== undefined)) {
             $('.answerLine').append('<button id="nextButton">Next</button>');
         }
-        else if (dialogueNodeInObject.outgoingLines.length === 0) {
+        else if (nodeInfo.dialogueNode.outgoingLines.length === 0) {
             $('.answerLine').append('<button id="restartButton">Restart Dialogue</button>');
         }
     });
@@ -126,8 +131,8 @@ function renderPlayMode(charName, dialogueNodeInObject) {
         let character = gameDialogueMakerProject.characters.find(character => character.characterID == playModeCharID);
         let reactionNode = character.dialogueNodes.find(node => node.dialogueID == reactionNodeId);
         if (reactionNode) {
-            dialogueNodeInObject = reactionNode;
-            renderPlayMode(charName, dialogueNodeInObject);
+            playModeNodeInfo = getInfoByPassingInDialogueNodeOrElement(reactionNode);
+            renderPlayMode(playModeNodeInfo);
         } else {
             console.error(`Could not find reaction node with ID: ${reactionNodeId}`);
         }
@@ -136,12 +141,6 @@ function renderPlayMode(charName, dialogueNodeInObject) {
 
 
 
-function handleAnswerClick(toNodeId) {
-    const characterId = findCharacterIDByPassingInDialogueNode(currentNode);
-    const character = gameDialogueMakerProject.characters.find(character => character.characterID == characterId);
-    currentNode = character.dialogueNodes.find(node => node.dialogueID == toNodeId);
-    renderNode(currentNode);
-}
 
 /* ANIM TYPEWRITER STYLE */
 let isTyping = false; // global variable to track if the typewriter is currently typing
@@ -177,41 +176,34 @@ $(document).on('click', '.exitPlayMode', function () {
 
 $(document).on('click', '.continueButton', function () {
     console.log('continue button clicked, calling moveNext()');
-    moveNext();
+    let fromNodeID = $(this).attr('data-from-node');
+    let toNodeID = $(this).attr('data-to-node');
+    console.log('fromNodeID', fromNodeID);
+    console.log('toNodeID', toNodeID );
+    moveNext(fromNodeID, toNodeID);
 });
 
 /* MOVENEXT */
-function moveNext(chosenNodeId = null) {
-    const nextOutput = generator.next(chosenNodeId).value;
+function moveNext(fromNodeID, toNodeID) {
+    //find line and check if it has conditions
 
-    console.log('generator.next(chosenNodeId).value', nextOutput);
+    console.log('moveNext fromNodeID', fromNodeID);
+    console.log('moveNext toNodeID', toNodeID);
 
-    if (!nextOutput) {
-        console.warn('No more nodes to process');
-        return;
+    let lineObject = getLineObjectFromMasterObjectUsingFromAndTo(fromNodeID, toNodeID);
+
+    console.log('lineObject', lineObject);
+
+    if (lineObject.transitionConditions.length > 0){
+        console.log('condition found');
+    } else {
+        //no condition, move to next
+        let newNode = getDialogueNodeById(playModeCharID, toNodeID);
+        let playModeNodeInfo = getInfoByPassingInDialogueNodeOrElement(newNode);
+
+        renderPlayMode(playModeNodeInfo);
     }
-
-    if (nextOutput.dialogueType === 'question') {
-        renderPlayerChoices(nextOutput.choices);
-        return;
-    }
-
-    if (nextOutput.type === 'CONDITION') {
-        console.log('handleCondition... nextOutput', nextOutput);
-        handleCondition(nextOutput);
-        return;
-    }
-
-    dialogueNodeInObject = nextOutput;
-
-    if (!dialogueNodeInObject) {
-        drawDialogueBox("You have reached the end of this dialogue branch");
-        return;
-    }
-
-    if (dialogueNodeInObject.type !== 'PLAYER_CHOICE') {
-        renderPlayMode(charName, dialogueNodeInObject);
-    }
+   
 }
 
 function handleCondition(conditionObject) {
@@ -226,26 +218,3 @@ function handleCondition(conditionObject) {
     });
 }
 
-function renderPlayerChoices(choices) {
-    if (!choices || !Array.isArray(choices)) {
-        console.error("Invalid choices provided:", choices);
-        return;
-    }
-
-    // Clear any existing choices
-    $('.playerChoicesContainer').remove();
-
-    // Construct the choices container
-    let choicesHTML = `<div class="playerChoicesContainer">`;
-    choices.forEach(choice => {
-        choicesHTML += `<button class="choiceButton" data-node-id="${choice.nodeId}">${choice.text}</button>`;
-    });
-    choicesHTML += `</div>`;
-    $('body').append(choicesHTML);
-
-    // Attach event handlers
-    $(document).on('click', '.choiceButton', function () {
-        const chosenNodeId = $(this).data('node-id');
-        moveNext(chosenNodeId);
-    });
-}
