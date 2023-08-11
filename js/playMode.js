@@ -79,13 +79,17 @@ function renderPlayMode(nodeInfo) {
 
 
         //not a question
-    } else if (nodeInfo.dialogueNode.outgoingLines.length > 0) {
+    } else if (nodeInfo.dialogueNode.dialogueType == 'fight'){
+
+        console.log('fight!');
+
+    } else if (nodeInfo.dialogueNode.outgoingLines.length > 0) { //just reular line node
         // Check if there are outgoing lines and add a button for it
         let nextNodeID = nodeInfo.dialogueNode.outgoingLines[0].toNode;
         answerElements += `<button class="continueButton" data-from-node="${nodeInfo.dialogueID}" data-to-node="${nextNodeID}">Continue</button>`;
     }
 
-        let playModeDialogueContainer = $(`
+    let playModeDialogueContainer = $(`
         <div class="playModeDialogueContainer">
             <div class="infoLine">
             Character: <span class="charName">${nodeInfo.characterName}</span> Dialogue: <span class="dialogueId">${nodeInfo.dialogueID}</span>
@@ -190,6 +194,12 @@ $(document).on('click', '.conditionButton', function () {
     playModeNodeInfo = getInfoByPassingInDialogueNodeOrElement(nextNodeInObject);
     latestPlayModeNodeInfo = playModeNodeInfo;
     renderPlayMode(playModeNodeInfo);
+});
+
+$(document).on('click', '#restartButton', function () {
+    console.log('restart button clicked');
+    //let fromNodeID = $(this).attr('data-from-node');
+    startPlayMode();
 });
 
 /* MOVENEXT */

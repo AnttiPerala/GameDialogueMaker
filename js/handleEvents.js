@@ -269,7 +269,23 @@ jQuery(document).on('change keyup', '.characterName', function () {
 
     nodeToUpdate.characterName = valueTyped;
 
+});
+
+//CHANGE FIGHT ID
+
+jQuery(document).on('change keyup', '.fightID', function () {
+
+
+    let updatedText = $(this).val();
+
+    let nodeToUpdate = findDialogueObjectBasedOnPassedInHtmlElement(this);
+
+    nodeToUpdate.fightID = updatedText;
+
+
 })
+
+
 
 //UPDATE THE MASTER OBJECT WHEN A TEXT FIELD IS CHANGED
 $(document).on('change keyup', 'textarea.dialogueTextArea', function () {

@@ -219,7 +219,7 @@ function createFightBlock(nodeInfo){
                         </select>
 
 
-                        Fight ID: <input class="fightID">
+                        Fight ID: <input class="fightID" value="${nodeInfo.dialogueNode.fightID}">
 
                         <div class="optionsUnderDialogue" style="text-align: right;">
                             <div class="option1">
