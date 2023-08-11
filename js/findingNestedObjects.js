@@ -400,7 +400,8 @@ function* iterateConnectedNodes(startNode, characterId, visitedNodes = new Set()
             const chosenLine = startNode.outgoingLines.find(line => line.toNode == nextChoiceId);
             if (chosenLine) {
                 const toNode = character.dialogueNodes.find(node => node.dialogueID == chosenLine.toNode);
-                yield* iterateConnectedNodes(toNode, characterId, visitedNodes);
+                yield toNode;
+                yield* iterateConnectedNodes(toNode, characterId, visitedNodes, nextChoiceId);
             }
         } else {
             console.log("Start Node before PLAYER_CHOICE:", startNode);
@@ -419,7 +420,8 @@ function* iterateConnectedNodes(startNode, characterId, visitedNodes = new Set()
         // Check for transition conditions here
         if (outgoingLine.transitionConditions && outgoingLine.transitionConditions.length > 0) {
             // Instead of traversing to the next node, yield a special instruction or "node" that indicates a condition should be displayed
-            yield { type: 'CONDITION', conditions: outgoingLine.transitionConditions };
+            yield { type: 'CONDITION', conditions: outgoingLine.transitionConditions, nextNodeId: outgoingLine.toNode };
+
         }
 
         if (toNode && !visitedNodes.has(toNode.dialogueID)) {

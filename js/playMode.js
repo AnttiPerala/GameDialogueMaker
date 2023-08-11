@@ -1,29 +1,26 @@
-const playButton = $('#playMode img');
-$(playButton).click(startPlayMode);
-
-
-let currentNode = null; // This should be initialized to your starting node in startPlayMode
-let playModeCharID; 
+// Global Variables
+playModeActive = false;
+let currentNode = null;
+let playModeCharID;
 let charName;
 let dialogueNodeInObject;
-let playModeNodeInfo;
 let generator;
 
+// Start Play Mode
 function startPlayMode() {
     playModeActive = true;
 
-    let selectedElement = $('.selected');
-    if (selectedElement.length == 0) {
-        drawDialogueBox('You need to select the node from which you want to start the playback first (by clicking on it)');
+    const selectedElement = $('.selected');
+    if (selectedElement.length === 0) {
+        drawDialogueBox('Select a node for playback.');
+        return;
     }
 
-    let selectedElementBlockWrap = selectedElement.closest('.blockWrap');
+    const selectedElementBlockWrap = selectedElement.closest('.blockWrap');
+    let playModeNodeInfo = getInfoByPassingInDialogueNodeOrElement(selectedElementBlockWrap);
 
-    console.log('selectedElementBlockWrap ', selectedElementBlockWrap );
-
-    playModeNodeInfo = getInfoByPassingInDialogueNodeOrElement(selectedElementBlockWrap);
-
-    if (playModeNodeInfo.isCharacter == true) {
+    // If character, navigate to the next node
+    if (playModeNodeInfo.isCharacter) {
         let nextNodeID = playModeNodeInfo.characterNode.outgoingLines[0].toNode;
         let nextNodeInObject = getDialogueNodeById(playModeNodeInfo.characterID, nextNodeID);
         playModeNodeInfo = getInfoByPassingInDialogueNodeOrElement(nextNodeInObject);
@@ -31,38 +28,36 @@ function startPlayMode() {
     }
 
     generator = iterateConnectedNodes(playModeNodeInfo.dialogueNode, playModeCharID);
-    //generator.next(); // Move past the first node
-
     dialogueNodeInObject = playModeNodeInfo.dialogueNode;
     playModeCharID = playModeNodeInfo.characterID;
     charName = playModeNodeInfo.characterName;
 
-    $(document).on("click", '#leftArrow', function () {
-        drawDialogueBox("reversing has not been implemented yet");
-    });
-
-    $(document).off('click', '#rightArrow').on('click', '#rightArrow', function () {
-        moveNext();
-    });
-
-    $(document).off('click', '.conditionButton').on('click', '.conditionButton', function () {
-        moveNext();
-    });
-
-
-    $(document).off('click', '#nextButton').on('click', '#nextButton', function () {
-        moveNext();
-    });
-
-    $(document).off('click', '#restartButton').on('click', '#restartButton', function () {
-        startPlayMode();
-    });
-
     renderPlayMode(charName, playModeNodeInfo.dialogueNode);
 }
 
- //end start playmode
+// Attach Event Handlers
+function attachEventHandlers() {
+    $('#playMode img').click(startPlayMode);
 
+    $(document).on('click', '#leftArrow', () => drawDialogueBox("Reversing not implemented"));
+    $(document).on('click', '#rightArrow', moveNext);
+    $(document).on('click', '.conditionButton', function () {
+        moveNext($(this).data('to-node'));
+    });
+    $(document).on('click', '#nextButton', moveNext);
+    $(document).on('click', '#restartButton', startPlayMode);
+    $(document).on('click', '.answerButton', function () {
+        const reactionNodeId = $(this).data('reaction-node');
+        // Handle reaction node click here
+    });
+    $(document).on('click', '.exitPlayMode', function () {
+        $('.playModeDialogueContainer').remove();
+        playModeActive = false;
+    });
+    $(document).on('click', '.continueButton', moveNext);
+}
+
+$(document).ready(attachEventHandlers);
 
 
 //RENDER PLAY MODE
@@ -177,14 +172,14 @@ function typewriter(id, text, index, time, callback) {
     }
 }
 
-$(document).on('click', '.exitPlayMode', function(){
+$(document).on('click', '.exitPlayMode', function () {
     console.log('exit', this);
     $('.playModeDialogueContainer').remove();
     playModeActive = false;
-})
+});
 
-$(document).off('click', '.continueButton').on('click', '.continueButton', function () {
-    console.log('continye button clicked, calling movenext()', );
+$(document).on('click', '.continueButton', function () {
+    console.log('continue button clicked, calling moveNext()');
     moveNext();
 });
 
@@ -199,7 +194,6 @@ function moveNext(chosenNodeId = null) {
         return;
     }
 
-    // Handle player choices
     if (nextOutput.dialogueType === 'question') {
         renderPlayerChoices(nextOutput.choices);
         return;
@@ -221,15 +215,7 @@ function moveNext(chosenNodeId = null) {
     if (dialogueNodeInObject.type !== 'PLAYER_CHOICE') {
         renderPlayMode(charName, dialogueNodeInObject);
     }
-
-    /* if ((dialogueNodeInObject.nextNode === -1 || dialogueNodeInObject.nextNode === "" ||
-        dialogueNodeInObject.nextNode === null || dialogueNodeInObject.nextNode === undefined) &&
-        dialogueNodeInObject.outgoingLines.length === 0) {
-        $('#dialogueLine').append('<button id="restartButton">Restart Dialogue</button>');
-    } */
-} /* end moveNext */
-
-
+}
 
 function handleCondition(conditionObject) {
     $('#dialogueLine').html('A condition needs to be fulfilled before the next dialogue is shown.');
@@ -238,7 +224,8 @@ function handleCondition(conditionObject) {
 
     conditionObject.conditions.forEach((condition, index) => {
         console.log("Processing condition:", condition);
-        $('#dialogueLine').append(`<button class="conditionButton" data-condition-index="${index}">Fulfill  ${condition.variableName} ${condition.comparisonOperator} ${condition.variableValue}</button>`);
+        $('#dialogueLine').append(`<button class="conditionButton" data-to-node="${condition.nextNodeId}">Fulfill ${condition.variableName} ${condition.comparisonOperator} ${condition.variableValue}</button>`);
+
     });
 }
 
@@ -247,22 +234,20 @@ function renderPlayerChoices(choices) {
         console.error("Invalid choices provided:", choices);
         return;
     }
+
     // Clear any existing choices
     $('.playerChoicesContainer').remove();
 
     // Construct the choices container
     let choicesHTML = `<div class="playerChoicesContainer">`;
-
     choices.forEach(choice => {
         choicesHTML += `<button class="choiceButton" data-node-id="${choice.nodeId}">${choice.text}</button>`;
     });
-
     choicesHTML += `</div>`;
-
     $('body').append(choicesHTML);
 
     // Attach event handlers
-    $(document).off('click', '.choiceButton').on('click', '.choiceButton', function () {
+    $(document).on('click', '.choiceButton', function () {
         const chosenNodeId = $(this).data('node-id');
         moveNext(chosenNodeId);
     });
