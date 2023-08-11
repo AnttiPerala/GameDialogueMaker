@@ -176,9 +176,34 @@ let isTyping = false; // global variable to track if the typewriter is currently
 
 function typewriter(id, text, index, time, callback) {
     $(id).html(""); // Clear the content before typing
+
+    function nextWordSpace(word, containerWidth, currentLineWidth) {
+        // Calculate if the next word and a space will fit in the current line
+        let testSpan = $('<span>').html(word + "&nbsp;").appendTo('body');
+        let wordWidth = testSpan.width();
+        testSpan.remove();
+
+        // If the next word would not fit in the current line, return spaces to push it to the next line
+        if (currentLineWidth + wordWidth > containerWidth) {
+            let spacesRequired = Math.ceil((containerWidth - currentLineWidth) / wordWidth);
+            return " ".repeat(spacesRequired);
+        }
+        return "";
+    }
+
     function typeWriterInner(id, text, index, time, callback) {
         // Add condition to stop appending
         if (index < text.length) {
+            let containerWidth = $(id).width();
+            let currentLineWidth = $(id).children('span:last-child').width() || 0;
+            let nextWord = text.slice(index).split(" ")[0];
+
+            // Before appending the next word, check if we need to add spaces to push it to the next line
+            if (text.charAt(index) === " ") {
+                let spaces = nextWordSpace(nextWord, containerWidth, currentLineWidth);
+                $(id).append(spaces);
+            }
+
             setTimeout(function () {
                 let char = text.charAt(index);
                 $(id).append(char);
@@ -193,9 +218,11 @@ function typewriter(id, text, index, time, callback) {
 
     if (!isTyping) { // only start typing if not currently typing
         isTyping = true;
-        typeWriterInner(id, text, index, time, callback); 
+        $(id).append('<span></span>');  // Add a span to measure line width
+        typeWriterInner(id, text, index, time, callback);
     }
 }
+
 
 $(document).on('click', '.exitPlayMode', function () {
     console.log('exit', this);
