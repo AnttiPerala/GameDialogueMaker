@@ -612,6 +612,14 @@ $('#zoomAmount').on('input', function () {
     }, 50); // debounce time in milliseconds
 });
 
+//SAVE
+jQuery(document).on('click', '#save', function () {
+
+    storeMasterObjectToLocalStorage();
+
+})
+
+
 //DELETE SAVE FROM LOCAL STORAGE
 
 const deleteSaveButton = document.querySelector("#delete");

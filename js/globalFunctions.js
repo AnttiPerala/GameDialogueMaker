@@ -30,7 +30,7 @@ function createQuestionBlock(nodeInfo){
             <div id="id${nodeInfo.dialogueID}" class="block" style="background-color: #4b4b4b;">
                 <div class="dialoguNodeTopRow" style="text-align: left;">
                     <span style="width: 15%; display:inline-block; text-align: right;">ID:</span><input class="blockid" style="width: 15%; display:inline-block;" readonly="" type="number" value="${nodeInfo.dialogueID}">
-                        <img class="eyeImage dialogueNodeEye" src="${determinedEyeImageSource}" alt="eye" width="24" height="24">
+                        <img class="eyeImage dialogueNodeEye btnSmall" src="${determinedEyeImageSource}" alt="eye" width="24" height="24">
                         </div>
 
                         <select name="blockType" class="selectBlockType">
@@ -84,7 +84,7 @@ function createAnswerBlock(nodeInfo){
             <div id="id${nodeInfo.dialogueID}" class="block" style="background-color: #4b4b4b;">
                 <div class="dialoguNodeTopRow" style="text-align: left;">
                     <span style="width: 15%; display:inline-block; text-align: right;">ID:</span><input class="blockid" style="width: 15%; display:inline-block;" readonly="" type="number" value="${nodeInfo.dialogueID}">
-                        <img class="eyeImage dialogueNodeEye" src="${determinedEyeImageSource}" alt="eye" width="24" height="24">
+                        <img class="eyeImage dialogueNodeEye btnSmall" src="${determinedEyeImageSource}" alt="eye" width="24" height="24">
                         </div>
 
                         <select name="blockType" class="selectBlockType">
@@ -151,7 +151,7 @@ function createLineBlock(nodeInfo){
             <div id="id${nodeInfo.dialogueID}" class="block" style="background-color: #4b4b4b;">
                 <div class="dialoguNodeTopRow" style="text-align: left;">
                     <span style="width: 15%; display:inline-block; text-align: right;">ID:</span><input class="blockid" style="width: 15%; display:inline-block;" readonly="" type="number" value="${nodeInfo.dialogueID}">
-                        <img class="eyeImage dialogueNodeEye" src="${determinedEyeImageSource}" alt="eye" width="24" height="24">
+                        <img class="eyeImage dialogueNodeEye btnSmall" src="${determinedEyeImageSource}" alt="eye" width="24" height="24">
                         </div>
 
                         <select name="blockType" class="selectBlockType">
@@ -209,7 +209,7 @@ function createFightBlock(nodeInfo){
             <div id="id${nodeInfo.dialogueID}" class="block" style="background-color: #4b4b4b;">
                 <div class="dialoguNodeTopRow" style="text-align: left;">
                     <span style="width: 15%; display:inline-block; text-align: right;">ID:</span><input class="blockid" style="width: 15%; display:inline-block;" readonly="" type="number" value="${nodeInfo.dialogueID}">
-                        <img class="eyeImage dialogueNodeEye" src="${determinedEyeImageSource}" alt="eye" width="24" height="24">
+                        <img class="eyeImage dialogueNodeEye btnSmall" src="${determinedEyeImageSource}" alt="eye" width="24" height="24">
                         </div>
 
                         <select name="blockType" class="selectBlockType">

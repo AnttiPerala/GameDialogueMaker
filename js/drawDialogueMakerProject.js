@@ -234,7 +234,7 @@ function createCharacterNodeHTML(character){
                         <div class="characterElementIDLine" style="text-align: left;">
                             <span style="width: 35%; display:inline-block; text-align: right;">Character ID:</span><input class="blockid"
                                 style="width: 15%; display:inline-block;" readonly type="number" value="${character.characterID}">
-                                <img class="eyeImage characterNodeEye" src="${eyeImageSource}" alt="eye" width="24" height="24">
+                                <img class="eyeImage characterNodeEye btnSmall" src="${eyeImageSource}" alt="eye" width="24" height="24">
                         </div>
                         <input type="text" class="characterName elementInfoField" placeholder="character name" value="${character.characterName}">
               
