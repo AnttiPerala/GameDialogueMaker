@@ -718,18 +718,24 @@ $(document).on('click', '.blockPlusButton[data-acceptclicks="false"]', function 
 /* HAMBURGER MENU */
 
 function toggleMenu() {
-    const ui = document.getElementById('ui');
-    if (ui.style.display === 'none' || ui.style.display === '') {
-        ui.style.display = 'grid';
+    const ui = $("#ui");
+
+    if (ui.is(":visible")) {
+        ui.slideUp(function() {
+            ui.css("display", "none");
+        });
     } else {
-        ui.style.display = 'none';
+        ui.css("display", "grid");
+        ui.hide().slideDown();
     }
 }
 
 // This function will reset the UI visibility when resizing the window.
-window.addEventListener('resize', function() {
-    const ui = document.getElementById('ui');
-    if (window.innerWidth > 1000) {
-        ui.style.display = 'grid';  // this should match the original display property of your UI
+$(window).resize(function() {
+    const ui = $("#ui");
+    if ($(window).width() > 1000) {
+        ui.css("display", "grid");
+    } else {
+        ui.hide().css("display", "none");
     }
 });
