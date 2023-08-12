@@ -21,6 +21,16 @@ function storeMasterObjectToLocalStorage() {
 
         localStorage.setItem("gameDialogueMakerProject", JSON.stringify(gameDialogueMakerProject));
 
+        const $element = $('#save img');
+
+        // Add the class
+        $element.addClass('flashgreen');
+
+        // Remove the class after 1 second
+        setTimeout(() => {
+            $element.removeClass('flashgreen');
+        }, 1000);
+
 
 
         //put some empty divs back in the object

@@ -74,7 +74,7 @@ function renderPlayMode(nodeInfo) {
             let answerNode = character.dialogueNodes.find(node => node.dialogueID == outgoingLine.toNode);
             if (answerNode) {
                 let reactionNodeId = answerNode.outgoingLines[0]?.toNode;
-                answerElements += `<button class="answerButton" data-reaction-node="${reactionNodeId}">${answerNode.dialogueText}</button>`;
+                answerElements += `<button class="answerButton btn" data-reaction-node="${reactionNodeId}">${answerNode.dialogueText}</button>`;
             }
         }
 
@@ -90,12 +90,12 @@ function renderPlayMode(nodeInfo) {
             
             if (i == 0) {
                 let reactionNodeId = outgoingLine.toNode;
-                answerElements += `<span class="playModeExplainer">A fight started.</span> <button class="winFightButton" data-from-node="${nodeInfo.dialogueNode.dialogueID}"  data-to-node="${reactionNodeId}">Win the fight</button>`;
+                answerElements += `<span class="playModeExplainer">A fight started.</span> <button class="winFightButton btn" data-from-node="${nodeInfo.dialogueNode.dialogueID}"  data-to-node="${reactionNodeId}">Win the fight</button>`;
                 console.log('answerElements', answerElements);
             } 
             if (i == 1){
                 let reactionNodeId = outgoingLine.toNode;
-                answerElements += `<button class="loseFightButton" data-from-node="${nodeInfo.dialogueNode.dialogueID}" data-to-node="${reactionNodeId}">Lose the fight</button>`;
+                answerElements += `<button class="loseFightButton btn" data-from-node="${nodeInfo.dialogueNode.dialogueID}" data-to-node="${reactionNodeId}">Lose the fight</button>`;
                 console.log('answerElements', answerElements);
             }
         }
@@ -106,14 +106,14 @@ function renderPlayMode(nodeInfo) {
     } else if (nodeInfo.dialogueNode.outgoingLines.length > 0) { //just regular line node
         // Check if there are outgoing lines and add a button for it
         let nextNodeID = nodeInfo.dialogueNode.outgoingLines[0].toNode;
-        answerElements += `<button class="continueButton" data-from-node="${nodeInfo.dialogueID}" data-to-node="${nextNodeID}">Continue</button>`;
+        answerElements += `<button class="continueButton btn" data-from-node="${nodeInfo.dialogueID}" data-to-node="${nextNodeID}">Continue</button>`;
     }
 
     let playModeDialogueContainer = $(`
         <div class="playModeDialogueContainer">
             <div class="infoLine">
             Character: <span class="charName">${nodeInfo.characterName}</span> Dialogue: <span class="dialogueId">${nodeInfo.dialogueID}</span>
-            <div class="exitPlayMode" title="exit playmode">X</div>
+            <img class="exitPlayMode btnSmall" title="exit playmode" src="img/iconmonstr-x-mark-6-32.png">
             </div>
             <div id="dialogueLine" class="dialogueLine">
                 <!-- The dialogue text will be added here by the typewriter function -->
@@ -147,7 +147,7 @@ function renderPlayMode(nodeInfo) {
             $('.answerLine').append(`<span class="playModeExplainer">You reached the end of this branch, but a "next" value has been defined. Click on the button to go there.</span><button class="nextButton" data-from-node="-1" data-to-node="${nodeInfo.dialogueNode.nextNode}">Next</button>`);
         }
         else if (nodeInfo.dialogueNode.outgoingLines.length === 0) {
-            $('.answerLine').append('<span class="playModeExplainer">No more nodes to progress.</span><button id="restartButton">Restart Dialogue</button>');
+            $('.answerLine').append('<span class="playModeExplainer">No more nodes to progress.</span><button id="restartButton" class="btn">Restart Dialogue</button>');
         }
     });
 
@@ -297,7 +297,7 @@ function moveNext(fromNodeID, toNodeID) {
 
     if (lineObject.transitionConditions.length > 0){
         console.log('condition found');
-        $('.answerLine').append(`<div class="playModeExplainer">There is a condition that needs to be met before you can progress to the next dialogue. Click on the button to fulfill it.</div><button class="conditionButton" data-from-node="${fromNodeID}" data-to-node="${toNodeID}">Fulfill condition: ${lineObject.transitionConditions[0].variableName}${lineObject.transitionConditions[0].comparisonOperator}${lineObject.transitionConditions[0].variableValue}</button>`);
+        $('.answerLine').append(`<div class="playModeExplainer">There is a condition that needs to be met before you can progress to the next dialogue. Click on the button to fulfill it.</div><button class="conditionButton btn" data-from-node="${fromNodeID}" data-to-node="${toNodeID}">Fulfill condition: ${lineObject.transitionConditions[0].variableName}${lineObject.transitionConditions[0].comparisonOperator}${lineObject.transitionConditions[0].variableValue}</button>`);
 
     } else {
         //no condition, move to next

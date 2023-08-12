@@ -413,14 +413,19 @@ textarea {
     background-color: red;
     color: white;
     border-radius: 50%;
-    width: 1rem;
-    height: 1rem;
+    width: 2rem;
+    height: 2rem;
     position: absolute;
     right: 1rem;
     top: 1rem;
     display: flex;
     align-items: center;
     justify-content: center;
+    filter: hue-rotate(170deg) saturate(1.5) brightness(0.8);
+}
+
+img.flashgreen {
+    filter: hue-rotate(240deg) saturate(1) brightness(1.2);
 }
 
 div.dialogueLine{
@@ -506,6 +511,25 @@ button {
     border-radius: 12px;
     overflow: hidden;
     transition: 31ms cubic-bezier(.5, .7, .4, 1);
+    
+}
+
+.btn {
+    transform: scale(1);
+}
+
+.btnSmall {
+    transform: scale(1);
+}
+
+.btnSmall:hover {
+    transform: scale(1.08);
+    transition: transform 0.5s;
+}
+
+.btn:hover {
+    transform: scale(1.02);
+    transition: transform 0.5s;
 }
 
    button:active {
