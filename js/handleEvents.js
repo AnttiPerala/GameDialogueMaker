@@ -713,3 +713,23 @@ $(document).on('click', '.blockPlusButton[data-acceptclicks="false"]', function 
     // Do something when the user clicks on the button
     drawDialogueBox('A plus button can only have one node connected. If you want to use it, delete the currently connected node first with the eraser.')
 });
+
+
+/* HAMBURGER MENU */
+
+function toggleMenu() {
+    const ui = document.getElementById('ui');
+    if (ui.style.display === 'none' || ui.style.display === '') {
+        ui.style.display = 'grid';
+    } else {
+        ui.style.display = 'none';
+    }
+}
+
+// This function will reset the UI visibility when resizing the window.
+window.addEventListener('resize', function() {
+    const ui = document.getElementById('ui');
+    if (window.innerWidth > 1000) {
+        ui.style.display = 'grid';  // this should match the original display property of your UI
+    }
+});

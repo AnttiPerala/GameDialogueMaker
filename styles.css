@@ -273,6 +273,14 @@ body {
     width: 70vw;
 }
 
+/* Hamburger Menu Styles */
+#hamburger-menu {
+    display: none; /* hide on desktop */
+    font-size: 2rem;
+    cursor: pointer;
+}
+
+
 .uiElem img {
     filter: grayscale(100%);
 }
@@ -550,7 +558,12 @@ button {
         grid-template-columns: 1fr;
     }
     #ui {
+        display: none;
+        width: 100vw;
         grid-template-columns: 1fr 1fr 1fr;
+    }
+    #hamburger-menu {
+        display: block;
     }
 }
 
