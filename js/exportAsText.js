@@ -1,6 +1,6 @@
 function exportDialogueToText(dialogueData) {
     console.log('expoting as text');
-    let outputText = "Dialogue Export\n\n";
+    let outputText = "";
 
     const getNodeByID = (id) => {
         return dialogueData.characters[0].dialogueNodes.find(node => node.dialogueID === id);

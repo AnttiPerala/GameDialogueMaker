@@ -49,6 +49,10 @@ function loadFile() {
 
 function convertTextToJSON(text) {
     let lines = text.split('\n').filter(line => line.trim() !== '');
+
+    // Extract the name dynamically from the first line
+    let characterName = lines[0].split('. ')[1].split(':')[0].trim();
+
     let dialogueIDCounter = 1;
     let dialogueNodes = [];
 
@@ -142,7 +146,7 @@ function convertTextToJSON(text) {
     parseLine(0);
 
     return {
-        characterName: "Liora",
+        characterName: characterName,
         characterID: 1,
         characterNodeX: 389,
         characterNodeY: 29,
