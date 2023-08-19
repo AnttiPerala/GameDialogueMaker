@@ -511,6 +511,7 @@ font-size: 3rem;
     display: flex;
     align-items: center;
     flex-direction: column;
+    margin: 1rem;
 }
 
 #formatSelection{

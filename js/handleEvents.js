@@ -686,6 +686,10 @@ $(document).keydown(function (event) {
 jQuery(document).on('click', '#mainArea', function (event) {
     if (event.target === this) {
         // The user clicked on an empty spot inside #mainArea
+       
+        //close settings menu if open
+        jQuery('#settingsArea').removeClass('open');
+
         //close all conditionCircles
         jQuery('.conditionCircle').each(function () {
             if (parseInt(jQuery(this).css('width')) > 32) { // 32 is equivalent to 2 rem when using pixels
