@@ -31,6 +31,7 @@ function loadFile() {
                         };
                         addEmptyDivsToTheObject();
                         clearCanvasBeforeReDraw();
+                        autoLayoutNodes(gameDialogueMakerProject);
                         drawDialogueMakerProject();
                     } catch (err) {
                         console.error('Error converting text to JSON:', err);
@@ -51,7 +52,7 @@ function convertTextToJSON(text) {
     let dialogueIDCounter = 1;
     let dialogueNodes = [];
 
-    function createNode(line, id, type) {
+    function createNode(line, id, type, childrenCount) {
         let parts = line.split(': ');
         let name = parts[0].trim();
         let content = parts[1].trim();
@@ -61,15 +62,30 @@ function convertTextToJSON(text) {
             dialogueType: type,
             dialogueText: content,
             dialogueNodeX: 0,
-            dialogueNodeY: id * 50, // Arbitrary Y value increment for simplicity.
-            outgoingSockets: type === 'question' ? 3 : 1,
+            dialogueNodeY: id * 50,
+            outgoingSockets: type === 'question' ? childrenCount : 1, // Adjusted based on actual children count
             hideChildren: false,
             bgColor: "#4b4b4b",
             nodeElement: "",
             outgoingLines: [],
             nextNodeLineElem: "",
-            nextNode: -1 // Assuming a default value of -1.
+            nextNode: -1
         };
+    }
+
+    function countChildren(index, childDepth) {
+        let count = 0;
+        for (let i = index + 1; i < lines.length; i++) {
+            let nextLinePrefix = lines[i].split(' ')[0];
+            let nextLineDepth = nextLinePrefix.split('.').length;
+
+            if (nextLineDepth === childDepth) {
+                count++;
+            } else if (nextLineDepth < childDepth) {
+                break;
+            }
+        }
+        return count;
     }
 
     function parseLine(index, parentType) {
@@ -83,14 +99,15 @@ function convertTextToJSON(text) {
             type = 'answer';
         }
 
-
         let id = dialogueIDCounter++;
-        let node = createNode(currentLine, id, type);
-
-        dialogueNodes.push(node);
 
         let childPrefix = currentLine.split(' ')[0];
         let childDepth = childPrefix.split('.').length;
+
+        let childrenCount = countChildren(index, childDepth + 1);
+        let node = createNode(currentLine, id, type, childrenCount);
+
+        dialogueNodes.push(node);
 
         let siblingCount = 0;
 
@@ -126,7 +143,7 @@ function convertTextToJSON(text) {
 
     return {
         characterName: "Liora",
-        characterID: 1,  // Keeping ID as 1 for the example
+        characterID: 1,
         characterNodeX: 389,
         characterNodeY: 29,
         hideChildren: false,
@@ -136,7 +153,7 @@ function convertTextToJSON(text) {
             {
                 fromNode: 0,
                 fromSocket: 0,
-                toNode: 1,  // First dialogue node ID
+                toNode: 1,
                 lineElem: {},
                 transitionConditions: []
             }
@@ -144,5 +161,6 @@ function convertTextToJSON(text) {
         dialogueNodes: dialogueNodes
     };
 }
+
 
 

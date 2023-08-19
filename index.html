@@ -83,7 +83,7 @@
             </div>
 
             <div id="openFile" class="uiElem">
-                <p class="uiElemTitle" title="Open previously exported JSON file">OPEN JSON</p>
+                <p class="uiElemTitle" title="Open previously exported JSON file or TXT file">OPEN FILE</p>
                 <img src="img/iconmonstr-folder-20-32.png" width="32" alt="" class="btnSmall">
             </div>
 
@@ -110,7 +110,14 @@
                         </label>
                     </form>
                 </div>
-            </div>
+
+
+                <div id="settingAutoLayout" class="individualSetting">
+                    Layout nodes automatically
+                    <button id="settingsButtonAutoLayout" class="btn">Layout nodes</button>
+                </div>
+
+            </div><!-- close settingsArea -->
 
         </div><!-- close ui -->
 
@@ -224,6 +231,7 @@
     <script src="js/handleEvents.js"></script>
     <script src="js/createLines.js"></script>
     <script src="js/main2.js"></script>
+    <script src="js/autoLayoutNodes.js"></script>
     <script src="js/exportJson.js"></script>
     <script src="js/exportAsText.js"></script>
     <script src="js/loadFile.js"></script>

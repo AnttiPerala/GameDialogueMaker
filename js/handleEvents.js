@@ -390,6 +390,20 @@ jQuery(document).on('click', '#openSettings', function () {
 
 })
 
+//AUTOLAYOUT SETTING
+
+jQuery(document).on('click', '#settingsButtonAutoLayout', function () {
+
+    autoLayoutNodes(gameDialogueMakerProject);
+    clearCanvasBeforeReDraw();
+    drawDialogueMakerProject();
+    jQuery('#settingsArea').toggleClass('open');
+
+})
+
+
+
+
 
 //CLICK ON THE TUTORIAL TO DESTROY IT
 jQuery(document).on('click', '#tutorial', function () {

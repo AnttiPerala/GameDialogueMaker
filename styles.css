@@ -51,8 +51,8 @@ body {
  /* min-height: 90vh; */    
  /* min-width: 100vw; */
     top: 250px;
-    width: 10000px;
-    height: 10000px;
+    width: 20000px;
+    height: 20000px;
     position: relative; /* For panning to work */
     zoom: 100%;
     border: 2px black dotted;
@@ -495,17 +495,22 @@ font-size: 3rem;
 /* Open state */
 #settingsArea.open {
     width: 100%;
-    /* Change to desired open width */
     height: 200px;
-    /* Change to desired open height */
     padding: 2rem;
+    display: grid;
+    grid-column: span 12;
+    grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr;
 }
 
-.individualSetting{
+.individualSetting {
     border: 1px white solid;
     border-radius: 2rem;
     padding: 1rem;
     text-align: left;
+    justify-content: center;
+    display: flex;
+    align-items: center;
+    flex-direction: column;
 }
 
 #formatSelection{
