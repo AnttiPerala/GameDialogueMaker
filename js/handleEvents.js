@@ -334,8 +334,22 @@ $(document).on('change', '.next', function () {
 //CLICKED ON THE EXPORT JSON BUTTON (code handled in separate exportJson.js file)
 jQuery(document).on('click', '#export', function () {
 
-   //console.log(`Export json ${this}`);
-    exportJson(); //defined in separate exportJson.js file
+    var selectedFormat = jQuery('input[name="format"]:checked').val();
+
+    switch (selectedFormat) {
+        case 'json':
+               //console.log(`Export json ${this}`);
+                exportJson(); //defined in separate exportJson.js file
+            break;
+        case 'plainText':
+            //console.log(`Export json ${this}`);
+            exportDialogueToText(gameDialogueMakerProject); //defined in separateexportDialogueToText.js file
+            break;
+        default:
+            exportJson();
+            break;
+    }
+
 
 })
 
@@ -356,31 +370,7 @@ for (let character of gameDialogueMakerProject.characters) {
 
 //CLICK ON THE LOAD JSON BUTTON
 $('#openFile').click(function () {
-    $('<input type="file" accept=".json">')
-        .on('change', function () {
-            const file = this.files[0];
-
-            if (file) {
-                const reader = new FileReader();
-
-                reader.onload = function (e) {
-                    try {
-                        const jsonData = JSON.parse(e.target.result);
-                        gameDialogueMakerProject = jsonData;
-                        addEmptyDivsToTheObject();
-                        clearCanvasBeforeReDraw();
-                        drawDialogueMakerProject();
-                       
-                    } catch (err) {
-                        console.error('Error parsing JSON:', err);
-                    }
-                };
-
-                reader.readAsText(file);
-               
-            }
-        })
-        .click();
+  loadFile(this);
 });
 
 //CLICKED ON THE MANUAL BUTTON
@@ -390,6 +380,16 @@ jQuery(document).on('click', '#showManual', function () {
 
 
 })
+
+//OPEN SETTINGS
+jQuery(document).on('click', '#openSettings', function () {
+
+    console.log('Clicked settings');
+    // Toggle the "open" class on the #settingsDiv
+    jQuery('#settingsArea').toggleClass('open');
+
+})
+
 
 //CLICK ON THE TUTORIAL TO DESTROY IT
 jQuery(document).on('click', '#tutorial', function () {

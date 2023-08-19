@@ -481,6 +481,37 @@ font-size: 3rem;
     box-shadow: hsl(350deg 87% 50%) 0px 7px 0px 0px;
 }
 
+/* Settings */
+
+/* Default state */
+#settingsArea {
+    width: 0;
+    height: 0;
+    overflow: hidden;
+    transition: all 0.3s ease-out;
+    /* This ensures a smooth animation */
+}
+
+/* Open state */
+#settingsArea.open {
+    width: 100%;
+    /* Change to desired open width */
+    height: 200px;
+    /* Change to desired open height */
+    padding: 2rem;
+}
+
+.individualSetting{
+    border: 1px white solid;
+    border-radius: 2rem;
+    padding: 1rem;
+    text-align: left;
+}
+
+#formatSelection{
+    margin: 0.5rem;
+}
+
 
 /* Tooltips */
 

@@ -78,7 +78,7 @@
             </div>
 
             <div id="export" class="uiElem">
-                <p class="uiElemTitle" title="Export the data in JSON format">EXPORT JSON</p>
+                <p class="uiElemTitle" title="Export the data in your desired format. The export format can be changed under settings.">EXPORT FILE</p>
                 <img src="img/iconmonstr-log-out-18-32.png" width="32" alt="" class="btnSmall">
             </div>
 
@@ -97,6 +97,20 @@
                 <img src="img/iconmonstr-gear-6-32.png" width="32" alt="" class="btnSmall">
             </div>
 
+            <div id="settingsArea">
+                <div id="settingExportFormat" class="individualSetting">
+                    Export format:
+                    <form id="formatSelection">
+                        <label>
+                            <input type="radio" name="format" value="json" checked> JSON
+                        </label>
+                        <br>
+                        <label>
+                            <input type="radio" name="format" value="plainText"> Plain text
+                        </label>
+                    </form>
+                </div>
+            </div>
 
         </div><!-- close ui -->
 
@@ -170,7 +184,7 @@
             </ul>
 
 
-        </div>Fine thank you
+        </div>
     <div id="mainArea">
 
        
@@ -211,6 +225,8 @@
     <script src="js/createLines.js"></script>
     <script src="js/main2.js"></script>
     <script src="js/exportJson.js"></script>
+    <script src="js/exportAsText.js"></script>
+    <script src="js/loadFile.js"></script>
     <script src="js/undo.js"></script>
     <script src="js/addNewBlockFromPlusButton.js"></script>
     <script src="js/drawConditionCircleOnPath.js"></script>
