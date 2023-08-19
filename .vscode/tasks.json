@@ -1,0 +1,14 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Open in Brave",
+            "type": "shell",
+            "command": "C:\\Program Files (x86)\\BraveSoftware\\Brave-Browser\\Application\\brave.exe",
+            "args": [
+                "${file}"
+            ],
+            "problemMatcher": []
+        }
+    ]
+}
