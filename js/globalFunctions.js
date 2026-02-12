@@ -8,18 +8,14 @@ function createQuestionBlock(nodeInfo){
 
     //closed or open eye:
     let determinedEyeImageSource = determineEyeImageSource(nodeInfo);
-   
 
-    //console.log('create question block for ', nodeInfo);
+    let nodeBg = (nodeInfo.dialogueNode && nodeInfo.dialogueNode.bgColor) ? nodeInfo.dialogueNode.bgColor : '#4b4b4b';
 
     let plusButtonHTML = '';
     //add as many plus buttons as needed
     for (i = 0; i < nodeInfo.dialogueNode.outgoingSockets; i++) {
-
         plusButtonHTML += `<div class="blockPlusButton" data-buttonindex=${i} data-acceptclicks=true>+</div>`;
-
     }
-
 
     let blockHTML = `<div data-character-id="${nodeInfo.characterID}" data-dialogue-id="${nodeInfo.dialogueID}" data-hidechildren="${nodeInfo.dialogueNode.hideChildren}" id="dialogue${nodeInfo.dialogueID}" class="blockWrap dialogue ui-draggable ui-draggable-handle" style="top: ${nodeInfo.dialogueNode.dialogueNodeY}px; left: ${nodeInfo.dialogueNode.dialogueNodeX}px; position: absolute;">
 
@@ -27,7 +23,7 @@ function createQuestionBlock(nodeInfo){
             <div style="display: flex; align-items:center; justify-content: center;">
                 <div class="topConnectionSocket" data-hasline="false"><div class="roundSocket"></div></div>
             </div>
-            <div id="id${nodeInfo.dialogueID}" class="block" style="background-color: #4b4b4b;">
+            <div id="id${nodeInfo.dialogueID}" class="block" style="background-color: ${nodeBg};">
                 <div class="dialoguNodeTopRow" style="text-align: left;">
                     <span style="width: 15%; display:inline-block; text-align: right;">ID:</span><input class="blockid" style="width: 15%; display:inline-block;" readonly="" type="number" value="${nodeInfo.dialogueID}">
                         <img class="eyeImage dialogueNodeEye btnSmall" src="${determinedEyeImageSource}" alt="eye" width="24" height="24">
@@ -39,7 +35,6 @@ function createQuestionBlock(nodeInfo){
                             <option value="fight">Fight</option>
                         </select>
 
-
                         <textarea class="dialogueTextArea" placeholder="" data-autoresize="" style="height: 48px;">${nodeInfo.dialogueNode.dialogueText}</textarea>
 
                         <div class="optionsUnderDialogue" style="text-align: right;">
@@ -50,30 +45,24 @@ function createQuestionBlock(nodeInfo){
                             <div class="option3"></div>
                         </div>
 
-
-
                 </div>
                 <div class="plusButtonContainer" style="display: flex; align-items: end; justify-content: center;">
                    ${plusButtonHTML}
                 </div>
-            </div>`
+            </div>`;
 
     jQueryBlockHTML = $(blockHTML);
 
     return jQueryBlockHTML;
-            
 }
 
 
 function createAnswerBlock(nodeInfo){
 
-    //console.log('create answer block for ', nodeInfo);
-
-    //closed or open eye:
     let determinedEyeImageSource = determineEyeImageSource(nodeInfo);
+    let nodeBg = (nodeInfo.dialogueNode && nodeInfo.dialogueNode.bgColor) ? nodeInfo.dialogueNode.bgColor : '#4b4b4b';
 
     let plusButtonHTML = `<div class="blockPlusButton" data-buttonindex=0 data-acceptclicks=true>+</div>`;
-    //only one plus buttons is needed
 
     let blockHTML = `<div data-character-id="${nodeInfo.characterID}" data-dialogue-id="${nodeInfo.dialogueID}" data-hidechildren="${nodeInfo.dialogueNode.hideChildren}" id="dialogue${nodeInfo.dialogueID}" class="blockWrap dialogue ui-draggable ui-draggable-handle" style="top: ${nodeInfo.dialogueNode.dialogueNodeY}px; left: ${nodeInfo.dialogueNode.dialogueNodeX}px; position: absolute;">
 
@@ -81,7 +70,7 @@ function createAnswerBlock(nodeInfo){
             <div style="display: flex; align-items:center; justify-content: center;">
                 <div class="topConnectionSocket" data-hasline="false"><div class="roundSocket"></div></div>
             </div>
-            <div id="id${nodeInfo.dialogueID}" class="block" style="background-color: #4b4b4b;">
+            <div id="id${nodeInfo.dialogueID}" class="block" style="background-color: ${nodeBg};">
                 <div class="dialoguNodeTopRow" style="text-align: left;">
                     <span style="width: 15%; display:inline-block; text-align: right;">ID:</span><input class="blockid" style="width: 15%; display:inline-block;" readonly="" type="number" value="${nodeInfo.dialogueID}">
                         <img class="eyeImage dialogueNodeEye btnSmall" src="${determinedEyeImageSource}" alt="eye" width="24" height="24">
@@ -93,18 +82,13 @@ function createAnswerBlock(nodeInfo){
                             <option value="fight">Fight</option>
                         </select>
 
-
                         <textarea class="dialogueTextArea" placeholder="" data-autoresize="" style="height: 48px;">${nodeInfo.dialogueNode.dialogueText}</textarea>
 
                         <div class="optionsUnderDialogue" style="text-align: right;">
-                            <div class="option1">
-                               
-                            </div>
+                            <div class="option1"></div>
                             <div class="option2"></div>
                             <div class="option3"></div>
                         </div>
-
-
 
                 </div>
                 <div class="plusButtonContainer" style="display: flex; align-items: end; justify-content: center;">
@@ -115,40 +99,34 @@ function createAnswerBlock(nodeInfo){
     jQueryBlockHTML = $(blockHTML);
 
     return jQueryBlockHTML;
-
 };
 
 
-
 function createLineBlock(nodeInfo){
-    //console.log('create line block for ', nodeInfo );
 
-    //closed or open eye:
     let determinedEyeImageSource = determineEyeImageSource(nodeInfo);
+    let nodeBg = (nodeInfo.dialogueNode && nodeInfo.dialogueNode.bgColor) ? nodeInfo.dialogueNode.bgColor : '#4b4b4b';
 
     let activeNextNode ='';  
-    if (nodeInfo.dialogueNode.nextNode > 0) { //only display the number if it's greater than zero
+    if (nodeInfo.dialogueNode.nextNode > 0) {
         activeNextNode = nodeInfo.dialogueNode.nextNode;
     }
 
     let option3content = '';
-    //if it has no outgoing lines, add next input
     if (nodeInfo.dialogueNode.outgoingLines.length < 1){
         option3content = `<span style="text-align: right;" title="Optional value. Use this if you want to take the conversation to some other node from here.">Next:</span><input class="next"
-    style="display:inline-block;" type="number" value="${activeNextNode}">`
+    style="display:inline-block;" type="number" value="${activeNextNode}">`;
     }
 
     let plusButtonHTML = `<div class="blockPlusButton" data-buttonindex=0 data-acceptclicks=true>+</div>`;
-    //only one plus buttons is needed for lines
 
-    
     let blockHTML = `<div data-character-id="${nodeInfo.characterID}" data-dialogue-id="${nodeInfo.dialogueID}" data-hidechildren="${nodeInfo.dialogueNode.hideChildren}" id="dialogue${nodeInfo.dialogueID}" class="blockWrap dialogue ui-draggable ui-draggable-handle" style="top: ${nodeInfo.dialogueNode.dialogueNodeY}px; left: ${nodeInfo.dialogueNode.dialogueNodeX}px; position: absolute;">
 
         <div class="contentWrap">
             <div style="display: flex; align-items:center; justify-content: center;">
                 <div class="topConnectionSocket" data-hasline="false"><div class="roundSocket"></div></div>
             </div>
-            <div id="id${nodeInfo.dialogueID}" class="block" style="background-color: #4b4b4b;">
+            <div id="id${nodeInfo.dialogueID}" class="block" style="background-color: ${nodeBg};">
                 <div class="dialoguNodeTopRow" style="text-align: left;">
                     <span style="width: 15%; display:inline-block; text-align: right;">ID:</span><input class="blockid" style="width: 15%; display:inline-block;" readonly="" type="number" value="${nodeInfo.dialogueID}">
                         <img class="eyeImage dialogueNodeEye btnSmall" src="${determinedEyeImageSource}" alt="eye" width="24" height="24">
@@ -160,24 +138,19 @@ function createLineBlock(nodeInfo){
                             <option value="fight">Fight</option>
                         </select>
 
-
                         <textarea class="dialogueTextArea" placeholder="" data-autoresize="" style="height: 48px;">${nodeInfo.dialogueNode.dialogueText}</textarea>
 
                         <div class="optionsUnderDialogue" style="text-align: right;">
-                            <div class="option1">
-                               
-                            </div>
+                            <div class="option1"></div>
                             <div class="option2"></div>
                             <div class="option3">${option3content}</div>
                         </div>
-
-
 
                 </div>
                 <div class="plusButtonContainer" style="display: flex; align-items: end; justify-content: center;">
                     ${plusButtonHTML}
                 </div>
-            </div>`
+            </div>`;
 
     jQueryBlockHTML = $(blockHTML);
 
@@ -185,19 +158,14 @@ function createLineBlock(nodeInfo){
 };
 
 
-
 function createFightBlock(nodeInfo){
-    //console.log('create fight block for ', nodeInfo);
 
-    //closed or open eye:
     let determinedEyeImageSource = determineEyeImageSource(nodeInfo);
+    let nodeBg = (nodeInfo.dialogueNode && nodeInfo.dialogueNode.bgColor) ? nodeInfo.dialogueNode.bgColor : '#4b4b4b';
 
     let plusButtonHTML = '';
-    //add as many plus buttons as needed
     for (i = 0; i < nodeInfo.dialogueNode.outgoingSockets; i++) {
-
         plusButtonHTML += `<div class="blockPlusButton" data-buttonindex=${i} data-acceptclicks=true>+</div>`;
-
     }
 
     let blockHTML = `<div data-character-id="${nodeInfo.characterID}" data-dialogue-id="${nodeInfo.dialogueID}" data-hidechildren="${nodeInfo.dialogueNode.hideChildren}" id="dialogue${nodeInfo.dialogueID}" class="blockWrap dialogue ui-draggable ui-draggable-handle" style="top: ${nodeInfo.dialogueNode.dialogueNodeY}px; left: ${nodeInfo.dialogueNode.dialogueNodeX}px; position: absolute;">
@@ -206,7 +174,7 @@ function createFightBlock(nodeInfo){
             <div style="display: flex; align-items:center; justify-content: center;">
                 <div class="topConnectionSocket" data-hasline="false"><div class="roundSocket"></div></div>
             </div>
-            <div id="id${nodeInfo.dialogueID}" class="block" style="background-color: #4b4b4b;">
+            <div id="id${nodeInfo.dialogueID}" class="block" style="background-color: ${nodeBg};">
                 <div class="dialoguNodeTopRow" style="text-align: left;">
                     <span style="width: 15%; display:inline-block; text-align: right;">ID:</span><input class="blockid" style="width: 15%; display:inline-block;" readonly="" type="number" value="${nodeInfo.dialogueID}">
                         <img class="eyeImage dialogueNodeEye btnSmall" src="${determinedEyeImageSource}" alt="eye" width="24" height="24">
@@ -220,25 +188,20 @@ function createFightBlock(nodeInfo){
 
                         <textarea class="dialogueTextArea" placeholder="" data-autoresize="" style="height: 48px;">${nodeInfo.dialogueNode.dialogueText}</textarea>
 
-
                         Fight ID: <input class="fightID" value="${nodeInfo.dialogueNode.fightID}">
 
                         <div class="optionsUnderDialogue" style="text-align: right;">
-                            <div class="option1">
-                               
-                            </div>
+                            <div class="option1"></div>
                             <div class="option2"></div>
                             <div class="option3"></div>
                         </div>
-
-
 
                 </div>
                 <div class="plusButtonContainer" style="display: flex; align-items: end; justify-content: center;">
                     <div class="blockPlusButton fightWin" title="If fight was won" data-buttonindex=0 data-acceptclicks=true>+</div>
                     <div class="blockPlusButton fightLose" title="If fight was lost" data-buttonindex=1 data-acceptclicks=true>+</div>
                 </div>
-            </div>`
+            </div>`;
 
     jQueryBlockHTML = $(blockHTML);
 
