@@ -569,6 +569,50 @@ jQuery.fn.findWithDepth = function(selector, maxDepth) {
     return elements;
 };
 
+// Returns an iterable (generator) over startNode and all descendant dialogue nodes
+// within the character `oldParentId`, following outgoingLines[].toNode.
+// Usage: for (let dialogueNode of iterateConnectedNodes(startNode, oldParentId)) { ... }
+function* iterateConnectedNodes(startNode, oldParentId) {
+
+  const oldParent = gameDialogueMakerProject.characters.find(
+    (character) => String(character.characterID) === String(oldParentId)
+  );
+
+  if (!oldParent || !oldParent.dialogueNodes) return;
+
+  // Build quick lookup by dialogueID (numbers/strings both ok)
+  const nodeMap = new Map();
+  for (const n of oldParent.dialogueNodes) {
+    nodeMap.set(String(n.dialogueID), n);
+  }
+
+  const visited = new Set();
+
+  function* walk(node) {
+    if (!node) return;
+
+    const key = String(node.dialogueID);
+    if (visited.has(key)) return;
+    visited.add(key);
+
+    yield node;
+
+    // Follow children
+    const lines = node.outgoingLines || [];
+    for (const line of lines) {
+      const childId = line.toNode;
+      const child = nodeMap.get(String(childId));
+      if (child) {
+        yield* walk(child);
+      }
+    }
+  }
+
+  // Ensure we start with the real object instance from oldParent.dialogueNodes when possible
+  const start = nodeMap.get(String(startNode.dialogueID)) || startNode;
+  yield* walk(start);
+}
+
 
 
 function reparentNodeAndDescendants(startNode, oldParentId, newParentId, nextId, gameDialogueMakerProject) {

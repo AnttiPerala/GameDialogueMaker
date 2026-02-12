@@ -128,24 +128,25 @@ function drawOutgoingLines(node, isCharacter, characterId) {
 
  //DRAGGING ON TOP OF A TOP CONNECTION SOCKET. IF IT'S EMPTY, CREATE A NEW LINE FROM IT. IF IT HAS A LINE, DELETE THE LINE.
 
-  $(".topConnectionSocket").mousedown(function (event) {
-    handleMouseDownOverTopConnectionSocket(event, this);
-  })
+ $(".topConnectionSocket").mousedown(function (event) {
+  if (window.__svgEdgeDragging) return;
+  handleMouseDownOverTopConnectionSocket(event, this);
+});
 
-  $(document).mousemove(function (e) {
-    //console.log('mousemove, line is ', currentlyDrawnLineInfo);
-    //console.log('currentlyDrawingALine ', currentlyDrawingALine );
-    if (currentlyDrawingALine) { 
-      // Update the end position of the line to follow the mouse
-      line.setOptions({
-        end: LeaderLine.pointAnchor({ x: e.pageX, y: e.pageY }),
-      });
-    }
-  });
+$(document).mousemove(function (e) {
+  if (window.__svgEdgeDragging) return;
 
-  $(document).mouseup(function (event) {
-    handleDocumentMouseUp(event, this);
-  })
+  if (currentlyDrawingALine) {
+    line.setOptions({
+      end: LeaderLine.pointAnchor({ x: e.pageX, y: e.pageY }),
+    });
+  }
+});
+
+$(document).mouseup(function (event) {
+  if (window.__svgEdgeDragging) return;
+  handleDocumentMouseUp(event, this);
+});
 
 } // end function drawDialogueMakerProject
 
@@ -439,13 +440,13 @@ function handleDocumentMouseUp(event, myThis){
 
           console.log('Change in parent, currentlyDrawnLineInfo.lineCharacterId ', currentlyDrawnLineInfo.lineCharacterId);
 
-          let highestIdInNewParent = getMaxDialogueNodeId(gameDialogueMakerProject.characters[nodeInfo.characterID - 1]);
+          let highestIdInNewParent = getMaxDialogueNodeId(gameDialogueMakerProject.characters[nodeInfoForFromNode.characterID - 1]);
           //console.log(`highestIdInNewParent was: ${highestIdInNewParent}`);
 
           console.log('calling reparent function with these arguments: ');
           console.log('objectNodeFromWhichWeAreDrawing ', objectNodeFromWhichWeAreDrawing);
           console.log('currentlyDrawnLineInfo.lineCharacterId ', currentlyDrawnLineInfo.lineCharacterId);
-          console.log('nodeInfo.characterID ', nodeInfoForFromNode.characterID);
+          console.log('nodeInfoForFromNode.characterID ', nodeInfoForFromNode.characterID);
           console.log('highestIdInNewParent + 1 ', highestIdInNewParent + 1);
           console.log('gameDialogueMakerProject ', gameDialogueMakerProject);
 
@@ -469,7 +470,7 @@ function handleDocumentMouseUp(event, myThis){
 
         //we need to check if the root character changes and if it does then we need to remove the dialogue object from the old character in the object and add it to the new one
 
-        console.log('nodeInfo.dialogueNode ', nodeInfoForFromNode.dialogueNode);
+        console.log('nodeInfoForFromNode.dialogueNode ', nodeInfoForFromNode.dialogueNode);
 
         if (nodeInfoForFromNode.characterID == currentlyDrawnLineInfo.lineCharacterId) {
           //no change in parent
@@ -494,7 +495,7 @@ function handleDocumentMouseUp(event, myThis){
           objectNodeFromWhichWeAreDrawing.dialogueNodeY = 250;
 
           console.log('Change in parent, old character was currentlyDrawnLineInfo.lineCharacterId ', currentlyDrawnLineInfo.lineCharacterId);
-          console.log('new character is nodeInfo.characterID ', nodeInfoForFromNode.characterID);
+          console.log('new character is nodeInfoForFromNode.characterID ', nodeInfoForFromNode.characterID);
 
           let highestIdInNewParent = getMaxDialogueNodeId(gameDialogueMakerProject.characters[nodeInfoForFromNode.characterID - 1]);
           //console.log(`highestIdInNewParent was: ${highestIdInNewParent}`);

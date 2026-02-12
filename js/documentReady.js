@@ -88,12 +88,31 @@ $(document).ready(function () {
   }
 
   SVGConnections.onDropCancel = (conn) => {
-    // Released on empty space -> NOW disconnect for real
-    removeEdgeByConn(conn);
+  // child we are disconnecting
+  const child = conn._detachedTo;
+  if (child) {
+    const oldCharId = Number(child.characterId);
+    const childId = Number(child.dialogueId);
 
-    clearCanvasBeforeReDraw();
-    drawDialogueMakerProject();
-  };
+    // Freeze current visual position so it stays put after becoming a root
+    const pos = freezeNodePositionInMainArea(oldCharId, childId);
+
+    const oldChar = gameDialogueMakerProject.characters.find(c => c.characterID == oldCharId);
+    const childNode = oldChar?.dialogueNodes?.find(n => n.dialogueID == childId);
+
+    if (pos && childNode) {
+      childNode.dialogueNodeX = pos.x;
+      childNode.dialogueNodeY = pos.y;
+    }
+  }
+
+  // Now do the real disconnect
+  removeEdgeByConn(conn);
+
+  clearCanvasBeforeReDraw();
+  drawDialogueMakerProject();
+};
+
 
   SVGConnections.onDropConnect = (conn, dropTarget) => {
     // dropTarget = { characterId, dialogueId, socketIndex, el, isCharacterRoot }
@@ -200,5 +219,29 @@ $(document).ready(function () {
     drawDialogueMakerProject();
     return true;
   };
+
+  function freezeNodePositionInMainArea(characterId, dialogueId) {
+  const el = document.querySelector(
+    `.blockWrap[data-character-id="${characterId}"][data-dialogue-id="${dialogueId}"]`
+  );
+  const main = document.getElementById("mainArea");
+  if (!el || !main) return null;
+
+  const r = el.getBoundingClientRect();
+  const m = main.getBoundingClientRect();
+
+  // Convert screen -> mainArea coords. If you later add zoom, wire the zoom value here.
+  const zoom = (window.SVGConnections && SVGConnections.screenToWorld) ? null : 1;
+
+  // If SVGConnections.screenToWorld exists, use it (handles zoom if you hook it up)
+  if (window.SVGConnections && typeof SVGConnections.screenToWorld === "function") {
+    const p = SVGConnections.screenToWorld(r.left, r.top);
+    return { x: p.x, y: p.y };
+  }
+
+  // Fallback (no zoom)
+  return { x: r.left - m.left, y: r.top - m.top };
+}
+
 
 });

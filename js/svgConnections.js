@@ -286,6 +286,8 @@
   function startDragEnd(e, connId) {
     e.preventDefault();
     e.stopPropagation();
+    window.__svgEdgeDragging = true;
+
 
     const conn = state.connections.find(c => c.id === connId);
     if (!conn) return;
@@ -318,12 +320,16 @@
   }
 
   function onPointerUp(e) {
+    window.__svgEdgeDragging = false;
+
     if (!state.drag) return;
     e.preventDefault();
 
     const conn = state.connections.find(c => c.id === state.drag.connId);
     if (!conn) {
       state.drag = null;
+      window.__svgEdgeDragging = false;
+
       return;
     }
 
