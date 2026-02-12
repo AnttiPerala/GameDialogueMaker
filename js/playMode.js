@@ -43,12 +43,12 @@ function startPlayMode() {
 function attachEventHandlers() {
     $('#playMode img').click(startPlayMode);
 
-   
+
     $(document).on('click', '.exitPlayMode', function () {
         $('.playModeDialogueContainer').remove();
         playModeActive = false;
     });
-    
+
 }
 
 $(document).ready(attachEventHandlers);
@@ -62,38 +62,44 @@ function renderPlayMode(nodeInfo) {
     let answerElements = ``;
 
     console.log('render playmode nodeInfo', nodeInfo);
-     let character = nodeInfo.characterNode;
+    let character = nodeInfo.characterNode;
 
     if (nodeInfo.dialogueNode.dialogueType == 'question') {
         console.log('its a question');
         answerElements = "";
-       
+
         //find the answer options by looping through outgoingLines
         for (let i = 0; i < nodeInfo.dialogueNode.outgoingLines.length; i++) {
             let outgoingLine = nodeInfo.dialogueNode.outgoingLines[i];
             let answerNode = character.dialogueNodes.find(node => node.dialogueID == outgoingLine.toNode);
             if (answerNode) {
                 let reactionNodeId = answerNode.outgoingLines[0]?.toNode;
-                answerElements += `<button class="answerButton btn" data-reaction-node="${reactionNodeId}">${answerNode.dialogueText}</button>`;
+
+                // If the answer has no reaction/next node, make it an end-of-branch button (no crash)
+                if (reactionNodeId === undefined || reactionNodeId === null || reactionNodeId === "" || reactionNodeId === -1) {
+                    answerElements += `<button class="answerButton btn" data-reaction-node="">${answerNode.dialogueText}</button>`;
+                } else {
+                    answerElements += `<button class="answerButton btn" data-reaction-node="${reactionNodeId}">${answerNode.dialogueText}</button>`;
+                }
             }
         }
 
 
         //not a question
-    } else if (nodeInfo.dialogueNode.dialogueType == 'fight'){
+    } else if (nodeInfo.dialogueNode.dialogueType == 'fight') {
         console.log('fight!');
 
         //find the fight options by looping through outgoingLines
         for (let i = 0; i < nodeInfo.dialogueNode.outgoingLines.length; i++) {
             let outgoingLine = nodeInfo.dialogueNode.outgoingLines[i];
-         
-            
+
+
             if (i == 0) {
                 let reactionNodeId = outgoingLine.toNode;
                 answerElements += `<span class="playModeExplainer">A fight started.</span> <button class="winFightButton btn" data-from-node="${nodeInfo.dialogueNode.dialogueID}"  data-to-node="${reactionNodeId}">Win the fight</button>`;
                 console.log('answerElements', answerElements);
-            } 
-            if (i == 1){
+            }
+            if (i == 1) {
                 let reactionNodeId = outgoingLine.toNode;
                 answerElements += `<button class="loseFightButton btn" data-from-node="${nodeInfo.dialogueNode.dialogueID}" data-to-node="${reactionNodeId}">Lose the fight</button>`;
                 console.log('answerElements', answerElements);
@@ -126,7 +132,7 @@ function renderPlayMode(nodeInfo) {
             </div>
         </div>
         `);
-        $('body').append(playModeDialogueContainer);
+    $('body').append(playModeDialogueContainer);
 
 
 
@@ -155,6 +161,12 @@ function renderPlayMode(nodeInfo) {
     $(document).off('click', '.answerButton');
     $(document).on('click', '.answerButton', function () {
         let reactionNodeId = $(this).data('reaction-node');
+
+        if (reactionNodeId === "" || reactionNodeId === undefined || reactionNodeId === null) {
+            // End of branch (no reaction defined)
+            $('.answerLine').append('<span class="playModeExplainer">No reaction node defined for this answer.</span><button id="restartButton" class="btn">Restart Dialogue</button>');
+            return;
+        }
         let character = gameDialogueMakerProject.characters.find(character => character.characterID == playModeCharID);
         let reactionNode = character.dialogueNodes.find(node => node.dialogueID == reactionNodeId);
         if (reactionNode) {
@@ -235,7 +247,7 @@ $(document).on('click', '.continueButton', function () {
     let fromNodeID = $(this).attr('data-from-node');
     let toNodeID = $(this).attr('data-to-node');
     console.log('fromNodeID', fromNodeID);
-    console.log('toNodeID', toNodeID );
+    console.log('toNodeID', toNodeID);
     moveNext(fromNodeID, toNodeID);
 });
 
@@ -286,7 +298,7 @@ function moveNext(fromNodeID, toNodeID) {
 
     console.log('lineObject', lineObject);
 
-    if (fromNodeID == -1){
+    if (fromNodeID == -1) {
         //this is a dotted line "next" transition so we skip the transitionConditions check
         let newNode = getDialogueNodeById(playModeCharID, toNodeID);
         let playModeNodeInfo = getInfoByPassingInDialogueNodeOrElement(newNode);
@@ -295,7 +307,7 @@ function moveNext(fromNodeID, toNodeID) {
         return;
     }
 
-    if (lineObject.transitionConditions.length > 0){
+    if (lineObject.transitionConditions.length > 0) {
         console.log('condition found');
         $('.answerLine').append(`<div class="playModeExplainer">There is a condition that needs to be met before you can progress to the next dialogue. Click on the button to fulfill it.</div><button class="conditionButton btn" data-from-node="${fromNodeID}" data-to-node="${toNodeID}">Fulfill condition: ${lineObject.transitionConditions[0].variableName}${lineObject.transitionConditions[0].comparisonOperator}${lineObject.transitionConditions[0].variableValue}</button>`);
 
@@ -306,7 +318,7 @@ function moveNext(fromNodeID, toNodeID) {
 
         renderPlayMode(playModeNodeInfo);
     }
-   
+
 }
 
 
