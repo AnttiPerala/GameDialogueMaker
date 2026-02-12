@@ -1,236 +1,175 @@
 /* This function will recursively loop through the entire project object and write it to the page as nodes */
 function drawDialogueMakerProject() {
-    
-    // 1. Setup the SVG connection layer
-    setupSVGLayer();
 
-    let wrapper = $('<div class="wrapper"></div>');
 
-    gameDialogueMakerProject.characters.forEach((character) => {
-        let characterElem = createCharacterNodeHTML(character);
-        wrapper.append(characterElem);
 
-        // Helper to find parent-child relationships
-        let dialogueNodeMap = character.dialogueNodes.reduce((map, node) => {
-            map[node.dialogueID] = node;
-            return map;
-        }, {});
+  //store the previously create node after every node creation so right parents can be appended to. Don't change this for answer nodes, because they should all go inside the same parent (the question node)
+  let latestNode = "";
+  //store every node, including answers in this one for line appending:
 
-        let childrenMap = {};
-        let childNodeIds = new Set();
+  let wrapper = $('<div class="wrapper"></div>');
 
-        character.dialogueNodes.forEach((dialogueNode) => {
-            dialogueNode.outgoingLines.forEach((outgoingLine) => {
-                let targetNode = dialogueNodeMap[outgoingLine.toNode];
-                if (targetNode) {
-                    if (!childrenMap[dialogueNode.dialogueID]) childrenMap[dialogueNode.dialogueID] = [];
-                    childrenMap[dialogueNode.dialogueID].push(targetNode);
-                    childNodeIds.add(targetNode.dialogueID);
-                }
-            });
-        });
+  gameDialogueMakerProject.characters.forEach((character) => {
+    let characterElem = createCharacterNodeHTML(character);
+    wrapper.append(characterElem);
 
-        // Add nodes to the DOM
-        character.dialogueNodes.forEach((dialogueNode) => {
-            if (!childNodeIds.has(dialogueNode.dialogueID)) {
-                let dialogueElem = createDialogueHTMLElement(dialogueNode);
-                $(dialogueElem).css({ top: dialogueNode.dialogueNodeY + "px", left: dialogueNode.dialogueNodeX + "px" });
-                
-                // CRITICAL: Ensure the element has a way to be found by ID
-                $(dialogueElem).attr('id', 'node' + dialogueNode.dialogueID);
-                $(dialogueElem).attr('data-dialogue-id', dialogueNode.dialogueID);
-                $(dialogueElem).attr('data-character-id', character.characterID);
+    // Create a map of dialogue nodes for easy lookup
+    let dialogueNodeMap = character.dialogueNodes.reduce((map, node) => {
+      map[node.dialogueID] = node;
+      return map;
+    }, {});
 
-                $(characterElem).append(dialogueElem);
-                appendChildren(dialogueElem, dialogueNode, childrenMap, character.characterID);
-            }
-        });
+    // Create a separate map to manage the children without modifying the original object
+    let childrenMap = {};
 
-        function appendChildren(element, node, childrenMap, charID) {
-            (childrenMap[node.dialogueID] || []).forEach((childNode) => {
-                let childElem = createDialogueHTMLElement(childNode);
-                $(childElem).css({ top: childNode.dialogueNodeY + "px", left: childNode.dialogueNodeX + "px" });
-                
-                // CRITICAL: Ensure the element has a way to be found by ID
-                $(childElem).attr('id', 'node' + childNode.dialogueID);
-                $(childElem).attr('data-dialogue-id', childNode.dialogueID);
-                $(childElem).attr('data-character-id', charID);
+    // Initialize a Set to store dialogue nodes that are referenced by any outgoingLines
+    let childNodeIds = new Set();
 
-                $(element).append(childElem);
-                appendChildren(childElem, childNode, childrenMap, charID);
-            });
+    // Build the parent-child relationships and populate the Set of child node ids
+    character.dialogueNodes.forEach((dialogueNode) => {
+      dialogueNode.outgoingLines.forEach((outgoingLine) => {
+        let targetNode = dialogueNodeMap[outgoingLine.toNode];
+        if (targetNode) {
+          if (!childrenMap[dialogueNode.dialogueID]) {
+            childrenMap[dialogueNode.dialogueID] = [];
+          }
+          childrenMap[dialogueNode.dialogueID].push(targetNode);
+          childNodeIds.add(targetNode.dialogueID); // stores all the dialogue node ids that are children of other dialogue nodes
         }
+      });
     });
 
-    // 2. Clear previous content and append new nodes
-    $('#mainArea').find('.wrapper').remove();
-    $('#mainArea').append(wrapper);
-
-    // 3. Initialize Draggables
-    $('.characterRoot').draggable(draggableSettings).css({ position: "absolute" });
-    // Note: ensure createDialogueHTMLElement adds the 'dialogue' or 'blockWrap' class
-    $('.dialogue, .blockWrap').draggable(draggableSettings).css({ position: "absolute" });
-
-    applyHideToElements();
-
-    $('.dialogueTextArea').each(function () {
-        autoGrowTextArea(this);
+    // Append to the character element only the dialogue nodes that are not in the Set of child node ids
+    character.dialogueNodes.forEach((dialogueNode) => {
+      //console.log('dialogueNode for checking position coordinates: ', dialogueNode);
+      if (!childNodeIds.has(dialogueNode.dialogueID)) {
+        let dialogueElem = createDialogueHTMLElement(dialogueNode);
+        $(dialogueElem).css({ top: dialogueNode.dialogueNodeY + "px", left: dialogueNode.dialogueNodeX + "px" }); // Setting position here
+        $(characterElem).append(dialogueElem);
+        appendChildren(dialogueElem, dialogueNode, childrenMap);
+      }
     });
 
-    // 4. Draw lines after a short delay to ensure DOM is ready
-    setTimeout(() => {
-        updateAllLines();
-    }, 10);
+    function appendChildren(element, node, childrenMap) {
+      (childrenMap[node.dialogueID] || []).forEach((childNode) => {
+        let childElem = createDialogueHTMLElement(childNode);
+        $(childElem).css({ top: childNode.dialogueNodeY + "px", left: childNode.dialogueNodeX + "px" }); // Setting position here
+        $(element).append(childElem);
+        appendChildren(childElem, childNode, childrenMap);
+      });
+    }
+  });
 
-    $(".blockPlusButton").each(function () {
-        checkIfPlusButtonShouldBeTurnedOff(this);
+  console.log('wrapper is ', wrapper );
+
+  const main = $("#mainArea");
+
+// detach the SVG overlay if it exists (keeps event listeners + state)
+const svgOverlay = main.children("#connectionsSvg").detach();
+
+// clear everything else
+main.empty();
+
+// put SVG back first, then your wrapper
+if (svgOverlay.length) main.append(svgOverlay);
+main.append(wrapper);
+
+
+  SVGConnections.init({ worldId: "mainArea" }); // idempotent: recreates SVG if missing
+
+
+
+  $('.characterRoot').draggable(draggableSettings).css({ position: "absolute" });
+
+  $('.dialogue').draggable(draggableSettings).css({ position: "absolute" });
+
+  applyHideToElements();
+
+  $('.dialogueTextArea').each(function(){
+    autoGrowTextArea(this);
+  })
+
+
+/* A SECOND ITERATION FOR DRAWING THE LINES IS NEEDED, BECAUSE THEY DIALOGUES NEED TO ALREADY BE IN THE DOM WHEN THE LINES ARE CREATED */
+
+const allConnections = [];
+
+gameDialogueMakerProject.characters.forEach((character) => {
+  if (character.hideChildren !== true) {
+    drawOutgoingLines(character, true, character.characterID);
+    character.dialogueNodes.forEach((dialogueNode) => {
+      drawOutgoingLines(dialogueNode, false, character.characterID);
     });
+  }
+});
 
-    $(".topConnectionSocket").off('mousedown').on('mousedown', function (event) {
-        handleMouseDownOverTopConnectionSocket(event, this);
-    });
+// ✅ AFTER ALL LOOPS ARE DONE
+SVGConnections.render(allConnections);
+
+function drawOutgoingLines(node, isCharacter, characterId) {
+  node.outgoingLines.forEach((outgoingLine) => {
+    const c = drawLines(
+      (node.dialogueID || node.characterID),
+      outgoingLine.toNode,
+      isCharacter,
+      outgoingLine,
+      characterId
+    );
+    if (c) allConnections.push(c);
+  });
 }
 
-function setupSVGLayer() {
-    // If it exists, we remove it to force a refresh of the marker definitions
-    $('#connectionLayer').remove(); 
 
-    const svgHTML = `
-    <svg id="connectionLayer" style="position:absolute; top:0; left:0; width:10000px; height:10000px; pointer-events:none; overflow:visible; z-index:0;">
-        <defs>
-            <marker id="dot" markerWidth="10" markerHeight="10" refX="5" refY="5" orient="auto">
-                <circle cx="5" cy="5" r="3" fill="#0075ff" />
-            </marker>
-        </defs>
-        <g id="svgLineGroup"></g>
-    </svg>`;
-    $('#mainArea').prepend(svgHTML);
-}
 
-function updateAllLines() {
-    const lineGroup = document.getElementById('svgLineGroup');
-    const canvas = document.getElementById('mainArea');
-    if (!lineGroup || !canvas || !gameDialogueMakerProject) return;
 
-    const zoom = getGlobalZoom();
-    const canvasRect = canvas.getBoundingClientRect();
-    let lineCount = 0;
+  $(".blockPlusButton").each(function () {
+    checkIfPlusButtonShouldBeTurnedOff(this);
+  });
 
-    lineGroup.innerHTML = ''; // Clear lines
+ //DRAGGING ON TOP OF A TOP CONNECTION SOCKET. IF IT'S EMPTY, CREATE A NEW LINE FROM IT. IF IT HAS A LINE, DELETE THE LINE.
 
-    gameDialogueMakerProject.characters.forEach(character => {
-        const charElem = document.getElementById(`char${character.characterID}`);
+  $(".topConnectionSocket").mousedown(function (event) {
+    handleMouseDownOverTopConnectionSocket(event, this);
+  })
 
-        // 1. Root Lines
-        if (charElem && character.outgoingLines) {
-            character.outgoingLines.forEach(line => {
-                const target = findNodeInDOM(line.toNode);
-                if (target) {
-                    drawSVGPath(charElem, target, canvasRect, zoom, false);
-                    lineCount++;
-                }
-            });
-        }
+  $(document).mousemove(function (e) {
+    //console.log('mousemove, line is ', currentlyDrawnLineInfo);
+    //console.log('currentlyDrawingALine ', currentlyDrawingALine );
+    if (currentlyDrawingALine) { 
+      // Update the end position of the line to follow the mouse
+      line.setOptions({
+        end: LeaderLine.pointAnchor({ x: e.pageX, y: e.pageY }),
+      });
+    }
+  });
 
-        // 2. Node Lines
-        character.dialogueNodes.forEach(node => {
-            const nodeElem = findNodeInDOM(node.dialogueID);
-            if (!nodeElem) return;
+  $(document).mouseup(function (event) {
+    handleDocumentMouseUp(event, this);
+  })
 
-            node.outgoingLines.forEach(line => {
-                const target = findNodeInDOM(line.toNode);
-                if (target) {
-                    drawSVGPath(nodeElem, target, canvasRect, zoom, false);
-                    lineCount++;
-                }
-            });
+} // end function drawDialogueMakerProject
 
-            if (node.nextNode > 0) {
-                const target = findNodeInDOM(node.nextNode);
-                if (target) {
-                    drawSVGPath(nodeElem, target, canvasRect, zoom, true);
-                    lineCount++;
-                }
-            }
-        });
-    });
-    console.log(`SVG Line System: Drew ${lineCount} lines.`);
-}
-
-/**
- * Robust node finder: looks for ID, then data-attribute
- */
-function findNodeInDOM(nodeID) {
-    return document.getElementById(`node${nodeID}`) || 
-           document.querySelector(`[data-dialogue-id="${nodeID}"]`);
-}
-
-function drawSVGPath(startNode, endNode, canvasRect, zoom, isDotted, socketIndex) {
-    const lineGroup = document.getElementById('svgLineGroup');
-    
-    // Select ALL plus buttons and pick the one at socketIndex
-    const allSockets = startNode.querySelectorAll('.blockPlusButton');
-    const socket = allSockets[socketIndex] || allSockets[0] || startNode;
-    
-    const targetSocket = endNode.querySelector('.topConnectionSocket') || endNode;
-
-    const sRect = socket.getBoundingClientRect();
-    const eRect = targetSocket.getBoundingClientRect();
-
-    const startX = (sRect.left + sRect.width / 2 - canvasRect.left) / zoom;
-    const startY = (sRect.top + sRect.height / 2 - canvasRect.top) / zoom;
-    const endX = (eRect.left + eRect.width / 2 - canvasRect.left) / zoom;
-    const endY = (eRect.top + eRect.height / 2 - canvasRect.top) / zoom;
-
-    const cpY = startY + (endY - startY) * 0.5;
-    const pathData = `M ${startX} ${startY} C ${startX} ${cpY}, ${endX} ${cpY}, ${endX} ${endY}`;
-
-    const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-    path.setAttribute("d", pathData);
-    path.setAttribute("stroke", isDotted ? "#999" : "#0075ff");
-    path.setAttribute("stroke-width", "3");
-    path.setAttribute("fill", "none");
-    
-    // Use the 'dot' marker
-    path.setAttribute("marker-end", "url(#dot)"); 
-    
-    if (isDotted) path.setAttribute("stroke-dasharray", "8,5");
-
-    lineGroup.appendChild(path);
-}
-
-function getGlobalZoom() {
-    let zoomValue = $('body').css('zoom');
-    if (!zoomValue || zoomValue === "normal") return 1;
-    if (zoomValue.includes('%')) return parseFloat(zoomValue) / 100;
-    return parseFloat(zoomValue) || 1;
-}
-
+/* DRAGGABLE SETTINGS */
 const draggableSettings = {
-    start: function(event, ui) {
-        $(this).data("dragZoom", getGlobalZoom());
-    },
-    drag: function (event, ui) {
-        const zoom = $(this).data("dragZoom");
-        let changeLeft = (ui.position.left - ui.originalPosition.left) / zoom;
-        let changeTop = (ui.position.top - ui.originalPosition.top) / zoom;
-        
-        ui.position.left = ui.originalPosition.left + changeLeft;
-        ui.position.top = ui.originalPosition.top + changeTop;
+  drag: function (event, ui) {
+    //console.log('dragging');
+    if (window.SVGConnections) SVGConnections.requestUpdate();
+$('.conditionCircle').hide();
 
-        updateAllLines(); 
-        $('.conditionCircle').hide();
-    },
-    stop: function (event, ui) {
-        updateElementPositionInObject($(this));
-        $(".conditionCircle").show();
-        updateAllLines();
-    },
+
+    $('.conditionCircle').hide(); //hide the circles
+
+  },
+  stop: function (event, ui) {
+    var position = ui.position;
+    //myLog(("Element stopped at: (" + position.left + ", " + position.top + ")"),3);
+    // Your code to update some other element or data
+    updateElementPositionInObject(ui.helper); //update master object positions
+    $(".conditionCircle").show(); //bring the circle visibility back up
+    requestAnimationFrame(() => SVGConnections.requestUpdate());
+  },
 }
 
-function updateLines(domNode) {
-    updateAllLines();
-}
 
 
 function createCharacterNodeHTML(character){
@@ -297,156 +236,97 @@ function createCharacterNodeHTML(character){
 
 /* DRAWING THE LINES */
 
+/* DRAWING THE LINES (SVG version: returns a connection descriptor) */
+
 function drawLines(sourceId, targetId, isCharacter, outgoingLine, characterId) {
-  
-  let sourceElement, targetElement, plusButtonElem;
 
- 
-  
+  let sourceElement, plusButtonElem;
 
+  // --- Resolve FROM element (plus button) ---
   if (isCharacter) {
-    // Select the source element based on characterId and sourceId
     sourceElement = $(`.characterRoot[data-character-id="${characterId}"]`);
     plusButtonElem = $(sourceElement).find(".blockPlusButton").eq(outgoingLine.fromSocket);
-    sourceId = 0; //the source node can be called 0 for characters
-    //console.log('we got a character, plusButtonElem is: ', plusButtonElem);
+    sourceId = 0; // character root is treated as node 0
   } else {
-    // Select the source element based on characterId and sourceId
     sourceElement = $(`.blockWrap[data-dialogue-id="${sourceId}"][data-character-id="${characterId}"]`);
     plusButtonElem = $(sourceElement).find(".blockPlusButton").eq(outgoingLine.fromSocket);
   }
 
-  
+  // Guard: if we can't find the plus button, skip this connection
+  if (!plusButtonElem || plusButtonElem.length === 0) {
+    return null;
+  }
 
-  // Select the target element based on characterId and targetId
-  targetElement = $(`.blockWrap[data-dialogue-id="${targetId}"][data-character-id="${characterId}"]`);
-
-
-
-  // Find the character based on the characterId
-  let character = gameDialogueMakerProject.characters.find(
+  // --- Resolve TO node in master object (supports cross-character targets) ---
+  let sourceCharacter = gameDialogueMakerProject.characters.find(
     (char) => char.characterID == characterId
   );
 
-  if (character) {
-    // Check if the target node belongs to the current character
-    let targetNode = character.dialogueNodes.find(
-      (dialogueNode) => dialogueNode.dialogueID == targetId
+  if (!sourceCharacter) return null;
+
+  // We'll find which character actually owns the target node
+  let targetCharacter = sourceCharacter;
+  let targetNode = targetCharacter.dialogueNodes.find(
+    (dialogueNode) => dialogueNode.dialogueID == targetId
+  );
+
+  if (!targetNode) {
+    // Find the character that owns targetId
+    targetCharacter = gameDialogueMakerProject.characters.find((char) =>
+      char.dialogueNodes.some((node) => node.dialogueID == targetId)
     );
 
-    // If the target node does not belong to the current character, find the character that owns it
-    if (!targetNode) {
-      let targetCharacter = gameDialogueMakerProject.characters.find((char) =>
-        char.dialogueNodes.some((node) => node.dialogueID == targetId)
+    if (targetCharacter) {
+      targetNode = targetCharacter.dialogueNodes.find(
+        (dialogueNode) => dialogueNode.dialogueID == targetId
       );
-      if (targetCharacter) {
-        // Change the character and find the node in the correct character
-        character = targetCharacter;
-        targetNode = targetCharacter.dialogueNodes.find(
-          (dialogueNode) => dialogueNode.dialogueID == targetId
-        );
-      }
-    }
-
-    if (targetNode) {
-      // Reference the stored DOM element
-      let lineEndNodeElement = targetNode.nodeElement;
-
-      // Get the top socket
-      let lineEndElementTopSocket = $(lineEndNodeElement).find(".topConnectionSocket").eq(0);
-
-      // Set the socket to contain a line
-      $(lineEndElementTopSocket).attr('data-hasline', 'true');
-
-      //console.log('lineEndElementTopSocket', lineEndElementTopSocket);
-      //console.log('plusButtonElem.get(0)', plusButtonElem.get(0));
-
-      // Create a new point anchor
-      var endPointAnchor = LeaderLine.pointAnchor(
-        lineEndElementTopSocket.get(0),
-        { x: 8, y: 8 }
-      );
-
-      let theLine = new LeaderLine(
-        plusButtonElem.get(0),
-        endPointAnchor,
-        {
-          color: "#0075ff",
-          size: 4,
-          dash: false,
-          path: "straight",
-          startSocket: "bottom",
-          endSocket: "bottom",
-          endPlug: "disc",
-        }
-      );
-
-      LeaderLine.positionByWindowResize = false; //this seems to be a global setting that will stop the disconnected element was passed error because leaderLine wont try to update lines anymore
-
-
-      leaderLines.push(theLine);
-
-      // Stores a reference to the actual line into the object
-      outgoingLine.lineElem = theLine;
-
-      // Set the id also of the svg for easier selection
-      const all_svgs = document.querySelectorAll("svg");
-      const this_svg = all_svgs[all_svgs.length - 1]; //this will select the latest svg
-      this_svg.setAttribute("data-character", characterId);
-      this_svg.setAttribute("data-fromnode", sourceId);
-      this_svg.setAttribute("data-tonode", targetId);
-      $(this_svg).addClass('blueline'); //for separating between dotted lines
-
-   
-
-      let selectTheSVGInDOM = $(
-        'svg[data-fromnode="' +
-        sourceId +
-        '"][data-tonode="' +
-        targetId +
-        '"][data-character="' +
-        characterId +
-        '"]'
-      );
-
-      let thePath = $(selectTheSVGInDOM).find(".leader-line-line-path");
-
-      const midpoint = drawConditionCircle(
-        thePath.get(0),
-        characterId,
-        sourceId,
-        targetId
-      );
-
-      // Loop through the transition conditions of the current outgoing line and add a 'withCondition' class to the corresponding circles
-      for (let l = 0; l < outgoingLine.transitionConditions.length; l++) {
-        let transitionCondition = outgoingLine.transitionConditions[l];
-
-        // Select the matching circle from DOM
-        let theCircleinDOM = $(
-          '.conditionCircle[data-fromnode="' +
-          sourceId +
-          '"][data-tonode="' +
-          targetId +
-          '"][data-character="' +
-          characterId +
-          '"]'
-        );
-
-        theCircleinDOM.addClass("withCondition");
-        theCircleinDOM.attr(
-          "title",
-          "Click to change the condition for the transition"
-        );
-      }
-
-      return theLine;
     }
   }
+
+  if (!targetNode) return null;
+
+  // --- Mark target top socket as having a line (keeps your existing UI/state behavior) ---
+  let lineEndNodeElement = targetNode.nodeElement;
+  let lineEndElementTopSocket = $(lineEndNodeElement).find(".topConnectionSocket").eq(0);
+
+  if (lineEndElementTopSocket && lineEndElementTopSocket.length) {
+    $(lineEndElementTopSocket).attr("data-hasline", "true");
+  }
+
+  // --- Return connection descriptor for SVGConnections ---
+  const normalizedSourceId = isCharacter ? 0 : sourceId;
+
+  // Make ID stable + unique even for cross-character connections
+  const fromChar = Number(characterId);
+  const toChar = Number(targetCharacter.characterID);
+  const fromNode = Number(normalizedSourceId);
+  const toNode = Number(targetId);
+  const fromSocket = Number(outgoingLine.fromSocket);
+
+  const connId = `c_${fromChar}_${fromNode}_${fromSocket}__${toChar}_${toNode}`;
+
+  return {
+    id: connId,
+    from: {
+      characterId: fromChar,
+      dialogueId: fromNode,       // 0 for character root, else dialogueID
+      socketIndex: fromSocket,
+      isCharacter: !!isCharacter, // optional, handy for later
+    },
+    to: {
+      characterId: toChar,
+      dialogueId: toNode,
+    },
+
+    // Keep references so you can map back later without re-searching
+    _outgoingLineRef: outgoingLine,
+    _fromPlusButtonEl: plusButtonElem.get(0),
+    _toSocketEl: lineEndElementTopSocket?.get(0) || null,
+  };
 }
 
+/* end drawLines */
 
- /* end drawLines */
 
 
 function applyHideToElements() {

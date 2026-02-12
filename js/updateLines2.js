@@ -1,80 +1,53 @@
-/* svgLineSystem.js */
+// updateLines2.js
+// Safe updater during drag: supports both LeaderLine leftovers (e.g. dotted nextNode lines)
+// and the new SVGConnections renderer.
 
-function getGlobalZoom() {
-    let zoomValue = $('body').css('zoom');
-    if (!zoomValue || zoomValue === "normal") return 1;
-    if (zoomValue.includes('%')) return parseFloat(zoomValue) / 100;
-    let zoomNum = parseFloat(zoomValue);
-    return zoomNum > 0 ? zoomNum : 1;
-}
+function updateLines(uiHelper) {
 
-function updateAllLines() {
-    const lineGroup = document.getElementById('svgLineGroup');
-    const canvas = document.getElementById('mainArea');
-    if (!lineGroup || !canvas || !gameDialogueMakerProject) return;
+  // 1) Update SVG connections (your new system)
+  if (window.SVGConnections && typeof SVGConnections.requestUpdate === "function") {
+    SVGConnections.requestUpdate();
+  }
 
-    const zoom = getGlobalZoom();
-    const canvasRect = canvas.getBoundingClientRect();
+  // 2) Update any remaining LeaderLine instances (legacy)
+  //    (Your project still creates dotted LeaderLines for nextNode, etc.)
+  try {
+    // Update dotted "next node" lines if they exist on nodes
+    if (window.gameDialogueMakerProject && gameDialogueMakerProject.characters) {
+      gameDialogueMakerProject.characters.forEach((character) => {
 
-    lineGroup.innerHTML = ''; 
-
-    gameDialogueMakerProject.characters.forEach(character => {
-        const charID = character.characterID;
-        const charElem = document.getElementById(`char${charID}`);
-
-        // 1. Character Root Lines
-        if (charElem && character.outgoingLines) {
-            character.outgoingLines.forEach(line => {
-                const target = findNodeInDOM(line.toNode);
-                // Characters usually only have one socket (index 0)
-                if (target) drawSVGPath(charElem, target, canvasRect, zoom, false, line.fromSocket || 0);
-            });
+        // characterRoot dotted? (if you ever add them)
+        if (character && character.nextNodeLineElem && typeof character.nextNodeLineElem.position === "function") {
+          character.nextNodeLineElem.position();
         }
 
-        // 2. Dialogue Node Lines
-        character.dialogueNodes.forEach(node => {
-            const nodeElem = findNodeInDOM(node.dialogueID);
-            if (!nodeElem) return;
+        // dialogue nodes dotted + any legacy outgoing lines
+        (character.dialogueNodes || []).forEach((node) => {
 
-            node.outgoingLines.forEach(line => {
-                const target = findNodeInDOM(line.toNode);
-                // Use line.fromSocket to pick the correct "+" button
-                if (target) drawSVGPath(nodeElem, target, canvasRect, zoom, false, line.fromSocket);
-            });
+          // dotted next-node line
+          if (node.nextNodeLineElem && typeof node.nextNodeLineElem.position === "function") {
+            node.nextNodeLineElem.position();
+          }
 
-            if (node.nextNode > 0) {
-                const target = findNodeInDOM(node.nextNode);
-                if (target) drawSVGPath(nodeElem, target, canvasRect, zoom, true, 0);
+          // legacy outgoing LeaderLines (most will now be "" or missing)
+          (node.outgoingLines || []).forEach((line) => {
+            if (line && line.lineElem && typeof line.lineElem.position === "function") {
+              line.lineElem.position();
             }
+          });
         });
-    });
-}
+      });
+    }
 
-function drawSVGLine(startNode, endNode, canvasRect, zoom, isDotted) {
-    const svg = document.getElementById('connectionLayer');
-    const socket = startNode.querySelector('.blockPlusButton') || startNode;
+    // Also update anything in your global leaderLines array if it’s still used
+    if (window.leaderLines && Array.isArray(window.leaderLines)) {
+      window.leaderLines.forEach((ll) => {
+        if (ll && typeof ll.position === "function") ll.position();
+      });
+    }
 
-    const sRect = socket.getBoundingClientRect();
-    const eRect = endNode.getBoundingClientRect();
-
-    // Normalize coordinates: (ScreenPos - CanvasPos) / Zoom
-    const startX = (sRect.left + sRect.width / 2 - canvasRect.left) / zoom;
-    const startY = (sRect.top + sRect.height / 2 - canvasRect.top) / zoom;
-    
-    const endX = (eRect.left + eRect.width / 2 - canvasRect.left) / zoom;
-    const endY = (eRect.top - canvasRect.top) / zoom;
-
-    const cp1Y = startY + (endY - startY) / 2;
-    const cp2Y = startY + (endY - startY) / 2;
-    const pathData = `M ${startX} ${startY} C ${startX} ${cp1Y}, ${endX} ${cp2Y}, ${endX} ${endY}`;
-
-    const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-    path.setAttribute("d", pathData);
-    path.setAttribute("stroke", isDotted ? "#999" : "#0075ff");
-    path.setAttribute("stroke-width", "3");
-    path.setAttribute("fill", "none");
-    path.setAttribute("marker-end", "url(#arrowhead)");
-    if (isDotted) path.setAttribute("stroke-dasharray", "5,5");
-
-    svg.appendChild(path);
+  } catch (err) {
+    // Don't let line updating crash dragging
+    console.warn("updateLines(): safe-caught error:", err);
+  }
 }

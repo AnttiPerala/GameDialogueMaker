@@ -140,11 +140,21 @@ function deleteLinesByToNode(characterObjectToEraseFrom,toNodeId) {
 
 function clearCanvasBeforeReDraw() {
 
-    document.querySelector('#mainArea').innerHTML = '';
-    $('svg').remove();
-    $('.conditionCircle').remove();
+  const main = document.querySelector('#mainArea');
 
+  // Remove everything EXCEPT the SVG overlay (and anything else you may later whitelist)
+  Array.from(main.children).forEach(child => {
+    if (child.id === 'connectionsSvg') return; // keep SVG lines
+    child.remove();
+  });
+
+  // Remove legacy leaderline SVGs that might live elsewhere
+  $("svg").not("#connectionsSvg").remove();
+
+  // Remove your condition circles (these are separate DOM elements)
+  $('.conditionCircle').remove();
 }
+
 
 //shift elements down
 function shiftObjecElementsThatAreGreaterThanDeletedIDDownByOne(characterObjectToEraseFrom, erasedID) {

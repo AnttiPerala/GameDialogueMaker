@@ -1,55 +1,204 @@
-
 $(document).ready(function () {
 
+  // hide the manual by default
+  $('#tutorial').hide();
 
-    //hide the manual by default
+  // GET STORED OBJECT
+  const myObjectString = localStorage.getItem("gameDialogueMakerProject");
+  if (myObjectString !== null) {
+    gameDialogueMakerProject = JSON.parse(myObjectString);
+  }
 
-    $('#tutorial').hide();
+  addEmptyDivsToTheObject();
 
-    //GET THE STORED OBJECT FROM LOCAL STORAGE
+  drawDialogueMakerProject();
 
+  // canvas drag (panning)
+  $("#mainArea").draggable({
+    cancel: ".blockWrap, .block, .dialogue, .characterRoot, .topConnectionSocket, .blockPlusButton, input, textarea, select, button, .conditionCircle",
 
-    const myObjectString = localStorage.getItem("gameDialogueMakerProject");
-    if (myObjectString !== null) {
-        //myLog(` was not null when getting key from local storage`, 1);
-        gameDialogueMakerProject = JSON.parse(myObjectString);
-        //myLog(gameDialogueMakerProject, 1);
-    } else {
-        //myLog(` null it seems: ${myObjectString}`, 1);
+    drag: throttle(function (event, ui) {
+      $(".conditionCircle").hide();
+      if (window.SVGConnections) SVGConnections.requestUpdate();
+    }, 20),
+
+    stop: function (event, ui) {
+      if (ui.position.left === ui.originalPosition.left && ui.position.top === ui.originalPosition.top) {
+        $(".conditionCircle").show();
+        return;
+      }
+      clearCanvasBeforeReDraw();
+      drawDialogueMakerProject();
+      $(".conditionCircle").show();
+    }
+  });
+
+  // ---------------------------------------------------------------------------
+  // SVG connection drag behavior:
+  // - pointerdown: visual detach only (handled inside svgConnections.js)
+  // - pointerup on empty: DISCONNECT in model (remove outgoingLine)
+  // - pointerup on plus button: MOVE connection (remove old + add new)
+  // ---------------------------------------------------------------------------
+
+  // We do NOT disconnect on pointerdown anymore.
+  SVGConnections.onDetach = (conn) => {
+    // intentionally empty
+  };
+
+  function removeEdgeByConn(conn) {
+    const lineObj = conn._outgoingLineRef || {};
+    const fromNode = Number(lineObj.fromNode ?? conn.from?.dialogueId ?? 0);
+    const fromSocket = Number(lineObj.fromSocket ?? conn.from?.socketIndex ?? 0);
+
+    // conn.to is null during drag, so use remembered original target
+    const toNode = Number(lineObj.toNode ?? conn._detachedTo?.dialogueId);
+
+    let removed = false;
+
+    for (const character of gameDialogueMakerProject.characters) {
+
+      // character root
+      if (character.outgoingLines && character.outgoingLines.length) {
+        const before = character.outgoingLines.length;
+        character.outgoingLines = character.outgoingLines.filter(l =>
+          !(Number(l.fromNode) === fromNode &&
+            Number(l.fromSocket) === fromSocket &&
+            Number(l.toNode) === toNode)
+        );
+        if (character.outgoingLines.length !== before) removed = true;
+      }
+
+      // dialogue nodes
+      for (const node of (character.dialogueNodes || [])) {
+        if (!node.outgoingLines || !node.outgoingLines.length) continue;
+
+        const before = node.outgoingLines.length;
+        node.outgoingLines = node.outgoingLines.filter(l =>
+          !(Number(l.fromNode) === fromNode &&
+            Number(l.fromSocket) === fromSocket &&
+            Number(l.toNode) === toNode)
+        );
+        if (node.outgoingLines.length !== before) removed = true;
+      }
     }
 
-    addEmptyDivsToTheObject();
+    if (!removed) {
+      console.warn("removeEdgeByConn: edge not found", { fromNode, fromSocket, toNode, conn });
+    }
+  }
 
+  SVGConnections.onDropCancel = (conn) => {
+    // Released on empty space -> NOW disconnect for real
+    removeEdgeByConn(conn);
 
-    //myLog(`Inside document ready and local storage should be loaded now ${gameDialogueMakerProject}`, 0);
-
-
-    
-
+    clearCanvasBeforeReDraw();
     drawDialogueMakerProject();
+  };
 
-    //these make moving/dragging the canvas possible
-    $("#mainArea").draggable({
-        drag: throttle(function (event, ui) {
-            $(".conditionCircle").hide();
-            updateAllLines(ui.helper);
-        }, 20),
-        
-        stop: function (event, ui) {
-            var position = ui.position;
-            //console.log("Element stopped at: (" + position.left + ", " + position.top + ")");
-            // Your code to update some other element or data
-            //updateElementPositionInObject(ui.helper); //update master object positions
-            clearCanvasBeforeReDraw();
-            drawDialogueMakerProject();
-            $(".conditionCircle").show();//bring the circle visibility back up
-        }
+  SVGConnections.onDropConnect = (conn, dropTarget) => {
+    // dropTarget = { characterId, dialogueId, socketIndex, el, isCharacterRoot }
+    const child = conn._detachedTo;
+    if (!child) return false;
 
+    // Remove the old connection first (since we didn't detach at pointerdown)
+    removeEdgeByConn(conn);
 
-    });
-    /* $("#mainArea").draggable(
-        'enable'
-    );
- */
+    const oldCharId = Number(child.characterId);
+    const childId = Number(child.dialogueId);
+
+    const oldChar = gameDialogueMakerProject.characters.find(c => c.characterID == oldCharId);
+    if (!oldChar) return false;
+
+    const childNode = oldChar.dialogueNodes.find(n => n.dialogueID == childId);
+    if (!childNode) return false;
+
+    const newParentCharId = Number(dropTarget.characterId);
+    const newParentDialogueId = Number(dropTarget.dialogueId);
+    const newSocket = Number(dropTarget.socketIndex);
+
+    const newParentChar = gameDialogueMakerProject.characters.find(c => c.characterID == newParentCharId);
+    if (!newParentChar) return false;
+
+    // Respect acceptclicks gate (svgConnections also checks, but safe)
+    if (dropTarget.el.dataset.acceptclicks === "false") return false;
+
+    // CASE 1: dropped on character root plus button
+    if (dropTarget.isCharacterRoot) {
+
+      if (newParentCharId === oldCharId) {
+        newParentChar.outgoingLines.push({
+          fromNode: 0,
+          fromSocket: newSocket,
+          toNode: childId,
+          lineElem: "",
+          transitionConditions: [],
+        });
+      } else {
+        const highestIdInNewParent = getMaxDialogueNodeId(newParentChar);
+        reparentNodeAndDescendants(
+          childNode,
+          oldCharId,
+          newParentCharId,
+          highestIdInNewParent + 1,
+          gameDialogueMakerProject
+        );
+
+        newParentChar.outgoingLines.push({
+          fromNode: 0,
+          fromSocket: newSocket,
+          toNode: childNode.dialogueID,
+          lineElem: "",
+          transitionConditions: [],
+        });
+      }
+
+      clearCanvasBeforeReDraw();
+      drawDialogueMakerProject();
+      return true;
+    }
+
+    // CASE 2: dropped on a dialogue node plus button
+    const newParentNode = newParentChar.dialogueNodes.find(n => n.dialogueID == newParentDialogueId);
+    if (!newParentNode) return false;
+
+    if (newParentCharId === oldCharId) {
+      newParentNode.outgoingLines.push({
+        fromNode: newParentNode.dialogueID,
+        fromSocket: newSocket,
+        toNode: childId,
+        lineElem: "",
+        transitionConditions: [],
+      });
+
+      // match your existing behavior
+      childNode.dialogueNodeX = 0;
+      childNode.dialogueNodeY = 250;
+
+    } else {
+      childNode.dialogueNodeX = 0;
+      childNode.dialogueNodeY = 250;
+
+      const highestIdInNewParent = getMaxDialogueNodeId(newParentChar);
+      reparentNodeAndDescendants(
+        childNode,
+        oldCharId,
+        newParentCharId,
+        highestIdInNewParent + 1,
+        gameDialogueMakerProject
+      );
+
+      newParentNode.outgoingLines.push({
+        fromNode: newParentNode.dialogueID,
+        fromSocket: newSocket,
+        toNode: childNode.dialogueID,
+        lineElem: "",
+        transitionConditions: [],
+      });
+    }
+
+    clearCanvasBeforeReDraw();
+    drawDialogueMakerProject();
+    return true;
+  };
 
 });
