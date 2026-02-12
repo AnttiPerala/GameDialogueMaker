@@ -619,12 +619,25 @@ var zoomTimeout;
 
 $('#zoomAmount').on('input', function () {
     clearTimeout(zoomTimeout);
+
     zoomTimeout = setTimeout(function () {
-        var zoomValue = $('#zoomAmount').val();
+        var zoomValue = Number($('#zoomAmount').val());
+
+        // Apply visual zoom
         $('body').css('zoom', zoomValue + '%');
-        $('#header').css('zoom', 1 / (zoomValue / 100));
+
+        // Keep header readable (inverse zoom)
+        var z = zoomValue / 100;
+        $('#header').css('zoom', 1 / z);
+
+        // 🔧 IMPORTANT: tell SVGConnections about the zoom
+        if (window.SVGConnections && typeof SVGConnections.setZoom === 'function') {
+            SVGConnections.setZoom(z);
+            SVGConnections.requestUpdate();
+        }
     }, 50); // debounce time in milliseconds
 });
+
 
 //SAVE
 jQuery(document).on('click', '#save', function () {
