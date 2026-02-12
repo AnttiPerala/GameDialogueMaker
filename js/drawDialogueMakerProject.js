@@ -106,6 +106,18 @@ gameDialogueMakerProject.characters.forEach((character) => {
 // ✅ AFTER ALL LOOPS ARE DONE
 SVGConnections.render(allConnections);
 
+// Wait until SVGConnections has updated path "d" attributes (next frame)
+requestAnimationFrame(() => {
+  // ensure it has run its redraw
+  SVGConnections.requestUpdate();
+
+  requestAnimationFrame(() => {
+    rebuildConditionCirclesFromSvgConnections(allConnections);
+  });
+});
+
+
+
 function drawOutgoingLines(node, isCharacter, characterId) {
   node.outgoingLines.forEach((outgoingLine) => {
     const c = drawLines(
@@ -327,6 +339,43 @@ function drawLines(sourceId, targetId, isCharacter, outgoingLine, characterId) {
 }
 
 /* end drawLines */
+
+
+function rebuildConditionCirclesFromSvgConnections(allConnections) {
+  // remove old ones
+  document.querySelectorAll('.conditionCircle').forEach(e => e.remove());
+
+  for (const conn of allConnections) {
+    if (!conn) continue;
+
+    // Find the SVG path for this connection
+    const path = document.querySelector(`#connectionsSvg g[data-conn-id="${conn.id}"] path.connection-path`)
+              || document.querySelector(`#connectionsSvg g.conn[data-conn-id="${conn.id}"] path.connection-path`)
+              || document.querySelector(`#connectionsSvg g[data-conn-id="${conn.id}"] path`)
+              || document.querySelector(`#connectionsSvg g[data-connid="${conn.id}"] path`);
+
+    if (!path) continue;
+
+    // Match the old data attributes your condition system expects
+    const characterId = conn.from.characterId;
+    const fromNode = conn.from.dialogueId;    // 0 for character root
+    const toNode = conn.to.dialogueId;
+
+    drawConditionCircle(path, characterId, fromNode, toNode);
+
+    // Apply withCondition if master object line has conditions
+    const outgoing = conn._outgoingLineRef;
+    if (outgoing && outgoing.transitionConditions && outgoing.transitionConditions.length > 0) {
+      const circle = document.querySelector(
+        `.conditionCircle[data-fromnode="${fromNode}"][data-tonode="${toNode}"][data-character="${characterId}"]`
+      );
+      if (circle) {
+        circle.classList.add("withCondition");
+        circle.setAttribute("title", "Click to change the condition for the transition");
+      }
+    }
+  }
+}
 
 
 

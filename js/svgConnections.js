@@ -158,7 +158,8 @@
 
     const g = document.createElementNS(NS, "g");
     g.classList.add("conn");
-    g.dataset.connId = conn.id;
+    g.setAttribute("data-conn-id", conn.id); // ✅ matches selector
+
 
     const path = document.createElementNS(NS, "path");
     path.classList.add("connection-path");
