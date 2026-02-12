@@ -173,17 +173,23 @@ function drawDialogueMakerProject() {
 
 /* DRAGGABLE SETTINGS */
 const draggableSettings = {
+  // ✅ don't start dragging when interacting with controls
+  cancel: "input, textarea, select, option, button, .blockPlusButton, .eyeImage, .topConnectionSocket, .conditionCircle",
+
+  // optional: require a small movement before drag starts (reduces accidental drags)
+  distance: 3,
+
   drag: function (event, ui) {
     if (window.SVGConnections) SVGConnections.requestUpdate();
     $('.conditionCircle').hide();
   },
   stop: function (event, ui) {
-    var position = ui.position;
-    updateElementPositionInObject(ui.helper); //update master object positions
+    updateElementPositionInObject(ui.helper);
     $(".conditionCircle").show();
     requestAnimationFrame(() => SVGConnections.requestUpdate());
   },
 };
+
 
 
 function createCharacterNodeHTML(character) {
