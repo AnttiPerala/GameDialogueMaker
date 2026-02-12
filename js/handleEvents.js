@@ -150,6 +150,16 @@ $('#stylebrush').on('click', function () {
 })
 
 
+//CLICK AUTOLAYOUT BUTTON
+
+$('#autolayout').on('click', function () {
+  autoLayoutAllCharacters();
+  storeMasterObjectToLocalStorage();
+  drawDialogueMakerProject();
+});
+
+
+
 //CLICKING ON A BLOCK WITH CLONEMODE ON
 
 $('body').on('mousedown', '.blockWrap', function () {

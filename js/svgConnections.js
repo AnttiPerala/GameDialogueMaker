@@ -28,13 +28,13 @@
 
     // Hooks user code can override:
     // NOTE: we no longer call onDetach automatically on pointerdown.
-    onDetach: (conn) => {},
+    onDetach: (conn) => { },
 
     // Called on pointerup if dropped on a plus button.
     onDropConnect: (conn, dropTarget) => false,
 
     // Called on pointerup if not dropped on a valid target OR if onDropConnect returns false.
-    onDropCancel: (conn) => {},
+    onDropCancel: (conn) => { },
 
     getWorldPointOfElement,
     screenToWorld,
@@ -214,8 +214,8 @@
     const p1 = getFromPoint(conn);
     const p2 = getToPoint(conn);
 
-    const dx = Math.max(60, Math.abs(p2.x - p1.x) * 0.35);
-    const d = `M ${p1.x} ${p1.y} C ${p1.x + dx} ${p1.y}, ${p2.x - dx} ${p2.y}, ${p2.x} ${p2.y}`;
+    const d = `M ${p1.x} ${p1.y} L ${p2.x} ${p2.y}`;
+    rec.path.setAttribute("d", d);
     rec.path.setAttribute("d", d);
 
     rec.cStart.setAttribute("cx", p1.x);
@@ -360,10 +360,10 @@
       let ok = false;
       try { ok = !!API.onDropConnect(conn, drop); } catch (_) { ok = false; }
       if (!ok) {
-        try { API.onDropCancel(conn); } catch (_) {}
+        try { API.onDropCancel(conn); } catch (_) { }
       }
     } else {
-      try { API.onDropCancel(conn); } catch (_) {}
+      try { API.onDropCancel(conn); } catch (_) { }
     }
 
     state.drag = null;
