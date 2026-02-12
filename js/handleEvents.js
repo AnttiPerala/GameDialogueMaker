@@ -94,42 +94,45 @@ $('body').on('mousedown', '.line', function (event) {
 
 //COLOR PICKER
 
+//COLOR PICKER (auto-save)
+
+let __colorAutosaveT = null;
+
 $('#blockColor').on('change input', function () {
-    //console.log(`change ${$(this).val()}`);
     let selectedDomObject = $('.selected');
-    //if nothing got selected (so no node is active)
+
     if (selectedDomObject.length === 0){
         drawDialogueBox('Select a node first');
+        return;
+    }
+
+    // apply to DOM immediately
+    selectedDomObject.css("background-color", $(this).val());
+    selectedColor = $(this).val(); //for cloning
+
+    // store to master object
+    if ($(selectedDomObject).closest('.blockWrap').hasClass('characterRoot')) {
+        // character root
+        let characterID = $(selectedDomObject).closest('.blockWrap').attr('id').replace(/\D/g, '');
+        let characterObjectToChange = getCharacterById(characterID);
+        if (characterObjectToChange) characterObjectToChange.bgColor = $(this).val();
     } else {
+        // regular node
+        let characterID = $(selectedDomObject).closest('.characterRoot').attr('id').replace(/\D/g, '');
+        let nodeId = $(selectedDomObject).closest('.blockWrap').attr('id').replace(/\D/g, '');
+        let objectToChange = getDialogueNodeById(characterID, nodeId);
+        if (objectToChange) objectToChange.bgColor = $(this).val();
+    }
 
-        selectedDomObject.css("background-color", $(this).val());
-        selectedColor = $(this).val(); //for cloning
-
-        let characterObjectToChange = '';
-        let characterID = '';
-        //check if already root
-        if ($(selectedDomObject).closest('.blockWrap').hasClass('characterRoot')) { //if the element is already the characterRoot
-
-            characterID = $(selectedDomObject).closest('.blockWrap').attr('id').replace(/\D/g, ''); //get the if of character
-            characterObjectToChange = getCharacterById(characterID); //send the ID number to the find function
-            characterObjectToChange.bgColor = $(this).val();
-
-
-        } else { //the element is not the characterRoot
-
-            characterID = $(selectedDomObject).closest('.characterRoot').attr('id').replace(/\D/g, ''); //get just the number from the id
-            let nodeId = $(selectedDomObject).closest('.blockWrap').attr('id').replace(/\D/g, '');
-
-            //store the color also to the object
-            let objectToChange = getDialogueNodeById(characterID, nodeId); //send the ID number to the find function
-            objectToChange.bgColor = $(this).val();
-
+    // ✅ auto-save (debounced so dragging the picker doesn't spam localStorage)
+    clearTimeout(__colorAutosaveT);
+    __colorAutosaveT = setTimeout(() => {
+        if (typeof storeMasterObjectToLocalStorage === "function") {
+            storeMasterObjectToLocalStorage();
         }
-
-
-    } // end else if selectedDomObject.length !== 0
-
-}) //END COLOR PICKER
+    }, 200);
+});
+ //END COLOR PICKER
 
 //COPY FORMATTING BRUSH FEATURE
 
