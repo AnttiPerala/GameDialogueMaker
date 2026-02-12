@@ -1,159 +1,231 @@
+// addNewBlockFromPlusButton.js
+// CLICK ON THE BLOCK PLUS BUTTON TO ADD A NEW DIALOGUE NODE
 
+// --- world coord helper (handles wrapper transform + zoom/pan if you use transform) ---
+function getWorldFromClient(clientX, clientY) {
+  const worldEl =
+    document.querySelector("#mainArea .wrapper") ||
+    document.getElementById("mainArea");
 
-//CLICK ON THE BLOCK PLUS BUTTON TO ADD A NEW DIALOGUE NODE
+  const r = worldEl.getBoundingClientRect();
 
+  const style = getComputedStyle(worldEl);
+  const t =
+    style.transform && style.transform !== "none"
+      ? style.transform
+      : "matrix(1,0,0,1,0,0)";
 
+  const m = new DOMMatrixReadOnly(t);
+  const inv = m.inverse();
+
+  // point in element-local screen space
+  const local = new DOMPoint(clientX - r.left, clientY - r.top);
+
+  // convert back to pre-transform world space
+  const world = local.matrixTransform(inv);
+
+  return {
+    x: world.x,
+    y: world.y,
+    scaleX: m.a || 1,
+    scaleY: m.d || 1,
+  };
+}
+
+// Get approximate node width in WORLD units by measuring an existing blockWrap
+function getNodeWidthWorld(referenceEl) {
+  const ref = referenceEl || document.querySelector(".blockWrap.dialogue");
+  if (!ref) return 360;
+
+  const rect = ref.getBoundingClientRect();
+  const w = getWorldFromClient(rect.left + rect.width, rect.top).x - getWorldFromClient(rect.left, rect.top).x;
+  return (isFinite(w) && w > 50) ? w : 360;
+}
+
+// CLICK ON THE BLOCK PLUS BUTTON TO ADD A NEW DIALOGUE NODE
 $('body').on('click', '.blockPlusButton', function () {
+  if ($(this).attr('data-acceptclicks') != 'true') return;
 
-    if ($(this).attr('data-acceptclicks') == 'true') {
+  console.log('plusbuttonclick', this);
 
-        console.log('plusbuttonclick', this);
+  const theClickedPlusButton = $(this);
+  const clickedPlusButtonButtonIndex = Number(theClickedPlusButton.attr('data-buttonindex')) || 0;
 
-        //for line connections a bit more down in the code:
+  const topMostParent = $(this).closest('.blockWrap');
+  const parentBlockType = $(this).closest('.blockWrap').find('.selectBlockType').val();
 
-        const theClickedPlusButton = $(this);
+  // Character object (master)
+  const info = getInfoByPassingInDialogueNodeOrElement(this);
+  const characterObject = info.characterNode;
 
-        let clickedPlusButtonButtonIndex = theClickedPlusButton.attr('data-buttonindex');
+  // Parent node object in master (can be character root "node 0" style)
+  const previousDialogueNodeInMasterObject = findDialogueObjectBasedOnPassedInHtmlElement(this);
 
-        let selectedBlock = $(this).closest('.blockWrap').find('.block');
+  const earlierObjectBGColor =
+    previousDialogueNodeInMasterObject?.bgColor ||
+    characterObject?.bgColor ||
+    '#4b4b4b';
 
-        let topMostParent = $(this).closest('.blockWrap');
+  // Get next dialogue ID
+  let biggestDialogueID = getMaxDialogueNodeId(characterObject);
+  const newId = biggestDialogueID + 1;
 
-        let parentBlockType = $(this).closest('.blockWrap').find('.selectBlockType').val();
+  // Spacing (tuned to your UI)
+  const Y_GAP = 180;
 
-        let parentBlockCharacterName = $(this).closest('.blockWrap').find('.characterName').val();
+  // Anchor to the CLICKED plus button center, converted to WORLD coords
+  const pr = theClickedPlusButton.get(0).getBoundingClientRect();
+  const centerClientX = pr.left + pr.width / 2;
+  const centerClientY = pr.top + pr.height / 2;
+  const w = getWorldFromClient(centerClientX, centerClientY);
 
-        let parentBlockNextInputField = $(this).closest('.blockWrap').find('.next');
+  const NODE_WIDTH = getNodeWidthWorld(topMostParent.get(0)); // in WORLD units
+  const px = w.x - NODE_WIDTH / 2; // store LEFT (not center)
+  const py = w.y + Y_GAP;
 
-        //console.log(`parentBlockType ${parentBlockType}`);
+  // --- CHARACTER ROOT + ---
+  if ($(topMostParent).hasClass('characterRoot')) {
 
-        let characterObject = getInfoByPassingInDialogueNodeOrElement(this).characterNode;
+    // Connect character -> new node
+    characterObject.outgoingLines.push({
+      fromNode: 0,
+      fromSocket: clickedPlusButtonButtonIndex,
+      toNode: newId,
+      lineElem: '',
+      transitionConditions: []
+    });
 
-        let previousDialogueNodeInMasterObject = findDialogueObjectBasedOnPassedInHtmlElement(this);
-        
+    const newDialogueNode = {
+      dialogueID: newId,
+      dialogueType: 'line',
+      dialogueText: 'This is a new dialogue node!',
+      nextNode: -1,
+      dialogueNodeX: px,
+      dialogueNodeY: py,
+      outgoingSockets: 1,
+      bgColor: earlierObjectBGColor,
+      nodeElement: $('<div></div>'),
+      outgoingLines: []
+    };
 
-        let earlierObjectBGColor = previousDialogueNodeInMasterObject.bgColor;
+    characterObject.dialogueNodes.push(newDialogueNode);
 
-        //get the biggest dialogueID so far in the character
+  } else {
+    // --- NORMAL NODE + ---
 
-        let biggestDialogueID = getMaxDialogueNodeId(characterObject)
+    // Connect parent node -> new node
+    previousDialogueNodeInMasterObject.outgoingLines.push({
+      fromNode: previousDialogueNodeInMasterObject.dialogueID,
+      fromSocket: clickedPlusButtonButtonIndex,
+      toNode: newId,
+      lineElem: '',
+      transitionConditions: []
+    });
 
-        //check if it's a characterRoot node:
+    if (parentBlockType == "line" || parentBlockType == "answer" || parentBlockType == "fight") {
 
-        if ($(topMostParent).hasClass('characterRoot')){
-            //console.log('rooooot');
-            //console.log('characterObject: ' + characterObject.characterName);
-            //add a line from the previous node to the new node:
-            characterObject.outgoingLines.push(
-                {
-                    fromNode: 0,
-                    fromSocket: clickedPlusButtonButtonIndex,
-                    toNode: biggestDialogueID + 1,
-                    lineElem: '',
-                    transitionConditions: [
-                        
-                    ]
-                }
-            );
+      const newDialogueNode = {
+        dialogueID: newId,
+        dialogueType: 'line',
+        dialogueText: 'This is a new dialogue node!',
+        nextNode: -1,
+        dialogueNodeX: px,
+        dialogueNodeY: py,
+        outgoingSockets: 1,
+        bgColor: earlierObjectBGColor,
+        nodeElement: $('<div></div>'),
+        outgoingLines: []
+      };
 
-            let newDialogueNode = {
-                dialogueID: biggestDialogueID + 1,
-                dialogueType: 'line',
-                dialogueText: 'This is a new dialogue node!',
-                nextNode: -1,
-                dialogueNodeX: 0,
-                dialogueNodeY: 200, //these can be hardcoded since they are relative values relative to their parent nodes 
-                outgoingSockets: 1,
-                bgColor: earlierObjectBGColor,
-                nodeElement: $('<div></div>'),
-                outgoingLines: [
+      characterObject.dialogueNodes.push(newDialogueNode);
 
-                ]
-            };
+    } else if (parentBlockType == "question") {
+      // Parent is question so this should be an answer
+      const newDialogueNode = {
+        dialogueID: newId,
+        dialogueType: 'answer',
+        siblings: 3,
+        siblingNumber: clickedPlusButtonButtonIndex + 1,
+        dialogueText: 'Fine thank you',
+        nextNode: -1,
 
-            characterObject.dialogueNodes.push(newDialogueNode);
-            //console.log(newDialogueNode);
+        // Start under clicked socket (then spread all answers)
+        dialogueNodeX: px,
+        dialogueNodeY: py,
 
-        } else {
-            //was not characterRoot
+        outgoingSockets: 1,
+        bgColor: earlierObjectBGColor,
+        nodeElement: $('<div></div>'),
+        outgoingLines: []
+      };
 
+      characterObject.dialogueNodes.push(newDialogueNode);
 
-            characterObject.dialogueNodes.forEach(function (node) {
-                if (node.dialogueID > biggestDialogueID) {
-                    biggestDialogueID = node.dialogueID;
-                }
-            });
+      // Spread all answers under this question under their sockets
+      // (do it AFTER node exists)
+      positionNewAnswersUnderQuestion(characterObject.characterID, previousDialogueNodeInMasterObject.dialogueID);
+    }
+  }
 
-            //add a line from the previous node to the new node:
-            previousDialogueNodeInMasterObject.outgoingLines.push(
-                {
-                    fromNode: previousDialogueNodeInMasterObject.dialogueID,
-                    fromSocket: clickedPlusButtonButtonIndex,
-                    toNode: biggestDialogueID + 1,
-                    lineElem: '',
-                    transitionConditions: [
-                        
-                    ]
-                }
-            )
+  // Persist + redraw
+  if (typeof storeMasterObjectToLocalStorage === "function") {
+    storeMasterObjectToLocalStorage();
+  }
 
-
-            if (parentBlockType == "line" || parentBlockType == "answer" || parentBlockType == "fight") {
-
-
-                let newDialogueNode = {
-                    dialogueID: biggestDialogueID + 1,
-                    dialogueType: 'line',
-                    dialogueText: 'This is a new dialogue node!',
-                    nextNode: -1,
-                    dialogueNodeX: 0,
-                    dialogueNodeY: 200,
-                    outgoingSockets: 1,
-                    bgColor: earlierObjectBGColor,
-                    nodeElement: $('<div></div>'),
-                    outgoingLines: [
-
-                    ]
-                };
-
-                characterObject.dialogueNodes.push(newDialogueNode);
-                //console.log(newDialogueNode);
-
-
-            } else if (parentBlockType == "question") { //parent is question so this should be an answer
-
-
-                let newDialogueNode = {
-                    dialogueID: biggestDialogueID + 1,
-                    dialogueType: 'answer',
-                    siblings: 3,
-                    siblingNumber: Number(clickedPlusButtonButtonIndex)+1,
-                    dialogueText: 'Fine thank you',
-                    nextNode: -1,
-                    dialogueNodeX: (previousDialogueNodeInMasterObject.dialogueNodeX - 382) + (clickedPlusButtonButtonIndex *(382)),
-                    dialogueNodeY: 200,
-                    outgoingSockets: 1,
-                    bgColor: earlierObjectBGColor,
-                    nodeElement: $('<div></div>'),
-                    outgoingLines: [
-
-                    ] //end lines
-                };
-
-                characterObject.dialogueNodes.push(newDialogueNode);
-
-            }
-
-        } //end else (not hasClass characterRoot)
-
-
-
-
-        clearCanvasBeforeReDraw();
-        drawDialogueMakerProject();
-
-  
-    }//end if data-acceptclicks = true;
-
+  clearCanvasBeforeReDraw();
+  drawDialogueMakerProject();
 });
 
+
+// Spread answers under a question (WORLD coords): place each answer under its socket center
+function positionNewAnswersUnderQuestion(characterId, questionId) {
+  const charObj = gameDialogueMakerProject.characters.find(c => Number(c.characterID) === Number(characterId));
+  if (!charObj) return;
+
+  const q = charObj.dialogueNodes.find(n => Number(n.dialogueID) === Number(questionId));
+  if (!q) return;
+
+  const qEl = document.querySelector(`.blockWrap[data-dialogue-id="${questionId}"][data-character-id="${characterId}"]`);
+  if (!qEl) return;
+
+  const outgoing = (q.outgoingLines || [])
+    .filter(l => Number.isFinite(Number(l.toNode)) && Number(l.toNode) > 0);
+
+  if (!outgoing.length) return;
+
+  // Compute Y below question in world coords
+  const qr = qEl.getBoundingClientRect();
+  const qBottomWorld = getWorldFromClient(qr.left, qr.top + qr.height).y;
+  const targetY = qBottomWorld + 90;
+
+  // Measure answer width (world) from any existing answer/dialogue node
+  const sampleAnswerEl =
+    document.querySelector(`.blockWrap.dialogue[data-character-id="${characterId}"]`) ||
+    document.querySelector(".blockWrap.dialogue");
+
+  const ANSWER_W = getNodeWidthWorld(sampleAnswerEl);
+
+  // stable order: by fromSocket
+  outgoing.sort((a, b) => (Number(a.fromSocket) || 0) - (Number(b.fromSocket) || 0));
+
+  outgoing.forEach(line => {
+    const socketIndex = Number(line.fromSocket) || 0;
+    const toId = Number(line.toNode);
+
+    const answerNode = charObj.dialogueNodes.find(n => Number(n.dialogueID) === toId);
+    if (!answerNode) return;
+
+    const plusEl = qEl.querySelector(`.blockPlusButton[data-buttonindex="${socketIndex}"]`);
+    if (!plusEl) return;
+
+    const pr = plusEl.getBoundingClientRect();
+    const cx = pr.left + pr.width / 2;
+    const cy = pr.top + pr.height / 2;
+
+    const w = getWorldFromClient(cx, cy);
+
+    // store LEFT, not center
+    answerNode.dialogueNodeX = w.x - ANSWER_W / 2;
+    answerNode.dialogueNodeY = targetY;
+  });
+}

@@ -1,3 +1,5 @@
+// drawDialogueMakerProject.js
+
 /* This function will recursively loop through the entire project object and write it to the page as nodes */
 function drawDialogueMakerProject() {
 
@@ -25,7 +27,7 @@ function drawDialogueMakerProject() {
 
     // Build the parent-child relationships and populate the Set of child node ids
     character.dialogueNodes.forEach((dialogueNode) => {
-      dialogueNode.outgoingLines.forEach((outgoingLine) => {
+      (dialogueNode.outgoingLines || []).forEach((outgoingLine) => {
         let targetNode = dialogueNodeMap[outgoingLine.toNode];
         if (targetNode) {
           if (!childrenMap[dialogueNode.dialogueID]) {
@@ -37,22 +39,52 @@ function drawDialogueMakerProject() {
       });
     });
 
+    // Character absolute ("world") coords from data
+    const charAbsX = Number(character.characterNodeX) || 0;
+    const charAbsY = Number(character.characterNodeY) || 0;
+
     // Append to the character element only the dialogue nodes that are not in the Set of child node ids
     character.dialogueNodes.forEach((dialogueNode) => {
       if (!childNodeIds.has(dialogueNode.dialogueID)) {
         let dialogueElem = createDialogueHTMLElement(dialogueNode);
-        $(dialogueElem).css({ top: dialogueNode.dialogueNodeY + "px", left: dialogueNode.dialogueNodeX + "px" }); // Setting position here
+
+        // Node absolute ("world") coords from data
+        const nodeAbsX = Number(dialogueNode.dialogueNodeX) || 0;
+        const nodeAbsY = Number(dialogueNode.dialogueNodeY) || 0;
+
+        // ✅ ROOT nodes are appended inside characterElem,
+        // so their CSS left/top must be RELATIVE to the character element.
+        $(dialogueElem).css({
+          position: "absolute",
+          left: (nodeAbsX - charAbsX) + "px",
+          top: (nodeAbsY - charAbsY) + "px"
+        });
+
         $(characterElem).append(dialogueElem);
-        appendChildren(dialogueElem, dialogueNode, childrenMap);
+
+        // recurse with absolute coords
+        appendChildren(dialogueElem, dialogueNode, childrenMap, nodeAbsX, nodeAbsY);
       }
     });
 
-    function appendChildren(element, node, childrenMap) {
-      (childrenMap[node.dialogueID] || []).forEach((childNode) => {
+    function appendChildren(parentElem, parentNode, childrenMap, parentAbsX, parentAbsY) {
+      (childrenMap[parentNode.dialogueID] || []).forEach((childNode) => {
         let childElem = createDialogueHTMLElement(childNode);
-        $(childElem).css({ top: childNode.dialogueNodeY + "px", left: childNode.dialogueNodeX + "px" }); // Setting position here
-        $(element).append(childElem);
-        appendChildren(childElem, childNode, childrenMap);
+
+        const childAbsX = Number(childNode.dialogueNodeX) || 0;
+        const childAbsY = Number(childNode.dialogueNodeY) || 0;
+
+        // ✅ CHILD nodes are appended inside parentElem,
+        // so their CSS left/top must be RELATIVE to the parent dialogue element.
+        $(childElem).css({
+          position: "absolute",
+          left: (childAbsX - parentAbsX) + "px",
+          top: (childAbsY - parentAbsY) + "px"
+        });
+
+        $(parentElem).append(childElem);
+
+        appendChildren(childElem, childNode, childrenMap, childAbsX, childAbsY);
       });
     }
   });
@@ -108,7 +140,7 @@ function drawDialogueMakerProject() {
 
   function drawOutgoingLines(node, isCharacter, characterId) {
     // Normal outgoingLines
-    node.outgoingLines.forEach((outgoingLine) => {
+    (node.outgoingLines || []).forEach((outgoingLine) => {
       const c = drawLines(
         (node.dialogueID || node.characterID),
         outgoingLine.toNode,
@@ -191,7 +223,6 @@ const draggableSettings = {
 };
 
 
-
 function createCharacterNodeHTML(character) {
 
   let eyeImageSource;
@@ -208,7 +239,7 @@ function createCharacterNodeHTML(character) {
   let acceptclicksValue = false;
 
   //check for acceptclicks (note that there is also a function for this but it might be more efficient to do it here)
-  if (character.outgoingLines.length < 1) {
+  if ((character.outgoingLines || []).length < 1) {
     acceptclicksValue = true;
   }
 
@@ -236,6 +267,7 @@ function createCharacterNodeHTML(character) {
         `);
 
   characterNodeHTML.css({
+    position: "absolute",
     left: character.characterNodeX,
     top: character.characterNodeY,
   });

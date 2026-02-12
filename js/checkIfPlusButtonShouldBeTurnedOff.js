@@ -1,74 +1,80 @@
-function checkIfPlusButtonShouldBeTurnedOff(theButton){
+// checkIfPlusButtonShouldBeTurnedOff.js
+function checkIfPlusButtonShouldBeTurnedOff(theButton) {
 
+  const $btn = $(theButton);
+  const $wrap = $btn.closest(".blockWrap");
 
-  //start by checking if the button is a child of a characterRoot or dialogueNode
+  // Helper: robust ID extraction
+  function numFromAttr($el, attrName) {
+    const v = $el.attr(attrName);
+    if (v == null) return null;
+    const n = Number(v);
+    return Number.isFinite(n) ? n : null;
+  }
+  function numFromIdLike($el) {
+    const id = $el.attr("id");
+    if (!id) return null;
+    const digits = String(id).replace(/\D/g, "");
+    if (!digits) return null;
+    const n = Number(digits);
+    return Number.isFinite(n) ? n : null;
+  }
 
-  let closestBlockWrap = $(theButton).closest('.blockWrap');
+  // Default: clickable unless we find a connection occupying this socket
+  let accept = true;
 
-  if ($(closestBlockWrap).hasClass('characterRoot')){
+  // --- CHARACTER ROOT BUTTON ---
+  if ($wrap.hasClass("characterRoot")) {
+    const characterId =
+      numFromAttr($wrap, "data-character-id") ??
+      numFromIdLike($wrap);
 
-    let characterNodeInfo = getInfoByPassingInDialogueNodeOrElement(closestBlockWrap);
-
-    if (characterNodeInfo.characterNode.outgoingLines.length < 1){
-
-      //no outgoing lines
-      closestBlockWrap.find('.blockPlusButton').attr("data-acceptclicks", true);
-
+    const charObj = getCharacterById(characterId);
+    if (!charObj) {
+      // If we can't find the character, don't block clicks
+      accept = true;
+    } else {
+      // One socket on character root: accept only if no outgoing lines yet
+      accept = (charObj.outgoingLines || []).length < 1;
     }
 
   } else {
-    let theDialogueIdToGet = $(theButton)
-    .closest(".blockWrap")
-    .attr("id")
-    .replace(/\D/g, ""); //strip char from id
-  let theCharacterIdToGet = $(theButton)
-    .closest(".characterRoot")
-    .attr("id")
-    .replace(/\D/g, ""); //strip char from id
-  let plusButtonIndex = $(theButton).attr("data-buttonindex");
+    // --- DIALOGUE NODE BUTTON (flat-safe) ---
+    const dialogueId =
+      numFromAttr($wrap, "data-dialogue-id") ??
+      numFromIdLike($wrap);
 
-  let dialogueNodeInMaster = getDialogueNodeById(
-    theCharacterIdToGet,
-    theDialogueIdToGet
-  );
+    const characterId =
+      numFromAttr($wrap, "data-character-id") ??
+      // fallback: any ancestor that might carry the character id
+      numFromAttr($wrap.closest("[data-character-id]"), "data-character-id") ??
+      null;
 
-  //loop through all the lines of this dialogueNode
+    const plusButtonIndex = String($btn.attr("data-buttonindex") ?? "0");
 
-  //loop through all the lines of this dialogueNode
-if (dialogueNodeInMaster) {
-  //console.log('dialogueNodeInMaster exists:', dialogueNodeInMaster);
-  if (dialogueNodeInMaster.outgoingLines.length > 0) {
-    //console.log('outgoingLines length:', dialogueNodeInMaster.outgoingLines.length);
-    dialogueNodeInMaster.outgoingLines.forEach((outgoingLine) => {
-      // Do something with the outgoingLine
-      //console.log('outgoingLine:', outgoingLine);
-      if (outgoingLine.fromSocket == plusButtonIndex) {
-        //console.log('outgoingLine.fromSocket == plusButtonIndex', outgoingLine.fromSocket, plusButtonIndex);
-        //we have an outgoing line
-        $(theButton).attr("data-acceptclicks", false);
-        //console.log('data-acceptclicks attribute:', $(this).attr("data-acceptclicks"));
+    if (dialogueId == null || characterId == null) {
+      // Can't resolve ownership -> don't block
+      accept = true;
+    } else {
+      const dialogueNodeInMaster = getDialogueNodeById(characterId, dialogueId);
+
+      if (!dialogueNodeInMaster) {
+        accept = true;
+      } else {
+        // If an outgoing line already uses this socket, block it
+        accept = true;
+        (dialogueNodeInMaster.outgoingLines || []).forEach((outgoingLine) => {
+          if (String(outgoingLine.fromSocket) === plusButtonIndex) {
+            accept = false;
+          }
+        });
       }
-    });
-  } else {
-    //console.log('No outgoing lines.');
-  } //end if dialogueNodeInMaster.outgoingLines
-} else {
-  //console.log('dialogueNodeInMaster does not exist.');
-} //end if dialogueNodeInMaster
+    }
   }
 
+  // Apply result to DOM
+  $btn.attr("data-acceptclicks", accept ? "true" : "false");
 
-
-
-
-  if ($(theButton).attr("data-acceptclicks") == "false") {
-    $(theButton).addClass("no-clicks");
-  }
-
-  // If data-acceptclicks is true, remove the no-clicks class
-  if ($(theButton).attr("data-acceptclicks") == "true") {
-    $(theButton).removeClass("no-clicks");
-  }
-
-
+  if (!accept) $btn.addClass("no-clicks");
+  else $btn.removeClass("no-clicks");
 }

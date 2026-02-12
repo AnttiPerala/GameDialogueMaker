@@ -1,47 +1,53 @@
-function updateElementPositionInObject(element){
+function updateElementPositionInObject(element) {
 
-    //console.log('Inside updateElementPositionInObject, element is: ', element);
+  // Make sure we always have a jQuery object
+  const $el = (element && element.jquery) ? element : $(element);
 
-//check if characterRoot or regular node:
-    if (element.hasClass('characterRoot')) {
-        // Do something if the element has the class characterRoot
+  // ---- CHARACTER ROOT DRAG ----
+  if ($el.hasClass('characterRoot')) {
 
-        let character = $(element).closest('.characterRoot').attr('id').replace(/\D/g, ''); //characterID
-        let theNodeObjectToChange = getCharacterById(character);
-        //myLog(`character: ${character}`,1,fileInfo = getFileInfo())
-        const xPos = element.get(0).offsetLeft;
-        const yPos = element.get(0).offsetTop;
+    const characterId = Number($el.attr('data-character-id')) || Number(($el.attr('id') || '').replace(/\D/g, ''));
+    const theNodeObjectToChange = getCharacterById(characterId);
 
-        theNodeObjectToChange.characterNodeX = xPos;
-        theNodeObjectToChange.characterNodeY = yPos;
+    if (theNodeObjectToChange) {
+      const xPos = $el.get(0).offsetLeft;
+      const yPos = $el.get(0).offsetTop;
 
-    } else {
-        // Do something else if the element does not have the class
-        //update object
-        //myLog(`dragging ${element.attr('id')}`, 1);
-
-        let character = $(element).closest('.characterRoot').attr('id').replace(/\D/g, '');//strip char from id
-
-
-        theNodeObjectToChange = getDialogueNodeById(character, element.attr('id').replace(/\D/g, ''));
-
-        //console.log(` character: ${character} and node id: ${element.attr('id').replace(/\D/g, '')}`);
-
-        //const rect = element.getBoundingClientRect();
-        //const xPos = rect.left + window.scrollX;
-        const xPos = element.get(0).offsetLeft;
-        const yPos = element.get(0).offsetTop;
-
-        theNodeObjectToChange.dialogueNodeX = xPos;
-        theNodeObjectToChange.dialogueNodeY = yPos;    
-
+      theNodeObjectToChange.characterNodeX = xPos;
+      theNodeObjectToChange.characterNodeY = yPos;
     }
 
-    if (!eraseMode) { //don't do any of this stuff is the eraser is being used because it might cause drawing twice
-
+    if (!eraseMode) {
       storeMasterObjectToLocalStorage();
+    }
 
-    }//end if eraseMode
+    return;
+  }
 
+  // ---- DIALOGUE NODE DRAG ----
+  const characterId = Number($el.attr('data-character-id')) ||
+                      Number(($el.closest('.characterRoot').attr('data-character-id')) || '') ||
+                      Number((($el.closest('.characterRoot').attr('id') || '').replace(/\D/g, '')));
+
+  const questionId = Number(($el.attr('id') || '').replace(/\D/g, '')) ||
+                     Number($el.attr('data-dialogue-id'));
+
+  const theNodeObjectToChange = getDialogueNodeById(characterId, questionId);
+
+  if (theNodeObjectToChange) {
+    const xPos = $el.get(0).offsetLeft;
+    const yPos = $el.get(0).offsetTop;
+
+    theNodeObjectToChange.dialogueNodeX = xPos;
+    theNodeObjectToChange.dialogueNodeY = yPos;
+  }
+
+  if (!eraseMode) {
+    // If this node is a question and has answers, this will only reposition "default/unplaced" ones
+    if (typeof positionNewAnswersUnderQuestion === "function") {
+      positionNewAnswersUnderQuestion(characterId, questionId);
+    }
+
+    storeMasterObjectToLocalStorage();
+  }
 }
-
