@@ -95,6 +95,10 @@
         stroke-width:3;
         vector-effect: non-scaling-stroke;
       }
+      #connectionsSvg .connection-path.dashed{
+        stroke-dasharray: 8 8;
+        opacity: 0.75;
+      }
       #connectionsSvg .endpoint{
         fill:#2d86ff;
         stroke:#ffffff;
@@ -110,6 +114,10 @@
       }
       #connectionsSvg .connection-path.dim{
         opacity:0.35;
+      }
+      /* Don't hint drag on dashed/next connections */
+      #connectionsSvg g.is-next .endpoint.end{
+        cursor: default;
       }
     `;
     document.head.appendChild(style);
@@ -160,9 +168,11 @@
     g.classList.add("conn");
     g.setAttribute("data-conn-id", conn.id); // ✅ matches selector
 
+    if (conn.type === "next") g.classList.add("is-next");
 
     const path = document.createElementNS(NS, "path");
     path.classList.add("connection-path");
+    if (conn.type === "next") path.classList.add("dashed");
 
     const cStart = document.createElementNS(NS, "circle");
     cStart.classList.add("endpoint", "start");
@@ -172,7 +182,10 @@
     cEnd.classList.add("endpoint", "end");
     cEnd.setAttribute("r", "7");
 
-    cEnd.addEventListener("pointerdown", (e) => startDragEnd(e, conn.id));
+    // Only normal (non-next) connections are draggable
+    if (conn.type !== "next") {
+      cEnd.addEventListener("pointerdown", (e) => startDragEnd(e, conn.id));
+    }
 
     g.appendChild(path);
     g.appendChild(cStart);
@@ -193,6 +206,10 @@
 
   function updateConnSvg(conn) {
     const rec = state.svgByConnId.get(conn.id) || ensureConnSvg(conn);
+
+    // keep dashed state in sync
+    if (conn.type === "next") rec.path.classList.add("dashed");
+    else rec.path.classList.remove("dashed");
 
     const p1 = getFromPoint(conn);
     const p2 = getToPoint(conn);
@@ -242,6 +259,11 @@
     const node = findNodeEl(conn.from?.characterId, conn.from?.dialogueId, isRoot);
     if (!node) return null;
 
+    // ✅ NEXT port starts at the "next" input field
+    if (conn.from?.port === "next") {
+      return node.querySelector(".next");
+    }
+
     const idx = Number(conn.from?.socketIndex);
     if (!Number.isFinite(idx)) return null;
 
@@ -289,7 +311,6 @@
     e.stopPropagation();
     window.__svgEdgeDragging = true;
 
-
     const conn = state.connections.find(c => c.id === connId);
     if (!conn) return;
 
@@ -330,7 +351,6 @@
     if (!conn) {
       state.drag = null;
       window.__svgEdgeDragging = false;
-
       return;
     }
 
