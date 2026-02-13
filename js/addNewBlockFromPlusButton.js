@@ -208,21 +208,47 @@ function positionNewAnswersUnderQuestion(characterId, questionId) {
   // stable order: by fromSocket
   outgoing.sort((a, b) => (Number(a.fromSocket) || 0) - (Number(b.fromSocket) || 0));
 
-  outgoing.forEach(line => {
+  // Gather socket X positions (world). Some layouts stack/overlay the plus buttons,
+  // which makes all answers land on the same X and overlap. If the socket X range
+  // is tiny, we fall back to a nice horizontal spread.
+  const socketWorldXs = outgoing.map(line => {
+    const socketIndex = Number(line.fromSocket) || 0;
+    const plusEl = qEl.querySelector(`.blockPlusButton[data-buttonindex="${socketIndex}"]`);
+    if (!plusEl) return NaN;
+    const pr = plusEl.getBoundingClientRect();
+    const w = getWorldFromClient(pr.left + pr.width / 2, pr.top + pr.height / 2);
+    return w.x;
+  }).filter(x => isFinite(x));
+
+  const xMin = socketWorldXs.length ? Math.min(...socketWorldXs) : NaN;
+  const xMax = socketWorldXs.length ? Math.max(...socketWorldXs) : NaN;
+  const socketsAreStacked = (!isFinite(xMin) || !isFinite(xMax)) ? true : (Math.abs(xMax - xMin) < 12);
+
+  // Compute spread if sockets are stacked/too close
+  const qCenterWorld = getWorldFromClient(qr.left + qr.width / 2, qr.top + qr.height / 2).x;
+  const X_GAP = 40;
+  const totalW = outgoing.length * ANSWER_W + Math.max(0, outgoing.length - 1) * X_GAP;
+  const startX = qCenterWorld - totalW / 2;
+
+  outgoing.forEach((line, i) => {
     const socketIndex = Number(line.fromSocket) || 0;
     const toId = Number(line.toNode);
 
     const answerNode = charObj.dialogueNodes.find(n => Number(n.dialogueID) === toId);
     if (!answerNode) return;
 
+    if (socketsAreStacked) {
+      // spread answers so they don't overlap
+      answerNode.dialogueNodeX = startX + i * (ANSWER_W + X_GAP);
+      answerNode.dialogueNodeY = targetY;
+      return;
+    }
+
+    // Normal: place each answer under its socket center
     const plusEl = qEl.querySelector(`.blockPlusButton[data-buttonindex="${socketIndex}"]`);
     if (!plusEl) return;
-
     const pr = plusEl.getBoundingClientRect();
-    const cx = pr.left + pr.width / 2;
-    const cy = pr.top + pr.height / 2;
-
-    const w = getWorldFromClient(cx, cy);
+    const w = getWorldFromClient(pr.left + pr.width / 2, pr.top + pr.height / 2);
 
     // store LEFT, not center
     answerNode.dialogueNodeX = w.x - ANSWER_W / 2;

@@ -17,7 +17,23 @@ $(document).ready(function () {
   $("#mainArea").draggable({
     cancel: ".blockWrap, .block, .dialogue, .characterRoot, .topConnectionSocket, .blockPlusButton, input, textarea, select, button, .conditionCircle",
 
+    start: function (event, ui) {
+      // Compensate for CSS zoom to prevent initial jump when panning
+      const zRaw = window.getComputedStyle(document.body).zoom;
+      const z = zRaw ? (String(zRaw).includes('%') ? (parseFloat(zRaw) / 100) : parseFloat(zRaw)) : 1;
+      const zz = (!isFinite(z) || z <= 0) ? 1 : z;
+      ui.position.left /= zz;
+      ui.position.top /= zz;
+    },
+
     drag: throttle(function (event, ui) {
+      // Keep compensation during panning
+      const zRaw = window.getComputedStyle(document.body).zoom;
+      const z = zRaw ? (String(zRaw).includes('%') ? (parseFloat(zRaw) / 100) : parseFloat(zRaw)) : 1;
+      const zz = (!isFinite(z) || z <= 0) ? 1 : z;
+      ui.position.left /= zz;
+      ui.position.top /= zz;
+
       $(".conditionCircle").hide();
       if (window.SVGConnections) SVGConnections.requestUpdate();
     }, 20),

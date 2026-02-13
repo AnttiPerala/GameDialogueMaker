@@ -1,53 +1,45 @@
-function updateElementPositionInObject(element) {
+function updateElementPositionInObject(draggedElement, blockObject) {
+    // Accept DOM element, jQuery object, or id string
+    let el = draggedElement;
 
-  // Make sure we always have a jQuery object
-  const $el = (element && element.jquery) ? element : $(element);
+    // If it's a jQuery object, unwrap it
+    if (el && el.jquery) el = el[0];
 
-  // ---- CHARACTER ROOT DRAG ----
-  if ($el.hasClass('characterRoot')) {
+    // If it's an id string, resolve it
+    if (typeof el === "string") el = document.getElementById(el);
 
-    const characterId = Number($el.attr('data-character-id')) || Number(($el.attr('id') || '').replace(/\D/g, ''));
-    const theNodeObjectToChange = getCharacterById(characterId);
+    if (!el) return;
 
-    if (theNodeObjectToChange) {
-      const xPos = $el.get(0).offsetLeft;
-      const yPos = $el.get(0).offsetTop;
+    const zoom = (typeof getBodyZoomFactor === "function") ? getBodyZoomFactor() : 1;
 
-      theNodeObjectToChange.characterNodeX = xPos;
-      theNodeObjectToChange.characterNodeY = yPos;
+    const mainArea = document.getElementById("mainArea");
+    if (!mainArea) return;
+
+    const mainRect = mainArea.getBoundingClientRect();
+    const elRect = el.getBoundingClientRect();
+
+    // World position inside mainArea, compensated for CSS zoom
+    const left = (elRect.left - mainRect.left) / zoom;
+    const top  = (elRect.top  - mainRect.top)  / zoom;
+
+    const id = el.id;
+
+    // Store back to your data model
+    if (blockObject && blockObject[id]) {
+        blockObject[id].left = left;
+        blockObject[id].top = top;
+        return;
     }
 
-    if (!eraseMode) {
-      storeMasterObjectToLocalStorage();
+    if (blockObject && blockObject.blocks && blockObject.blocks[id]) {
+        blockObject.blocks[id].left = left;
+        blockObject.blocks[id].top = top;
+        return;
     }
 
-    return;
-  }
-
-  // ---- DIALOGUE NODE DRAG ----
-  const characterId = Number($el.attr('data-character-id')) ||
-                      Number(($el.closest('.characterRoot').attr('data-character-id')) || '') ||
-                      Number((($el.closest('.characterRoot').attr('id') || '').replace(/\D/g, '')));
-
-  const questionId = Number(($el.attr('id') || '').replace(/\D/g, '')) ||
-                     Number($el.attr('data-dialogue-id'));
-
-  const theNodeObjectToChange = getDialogueNodeById(characterId, questionId);
-
-  if (theNodeObjectToChange) {
-    const xPos = $el.get(0).offsetLeft;
-    const yPos = $el.get(0).offsetTop;
-
-    theNodeObjectToChange.dialogueNodeX = xPos;
-    theNodeObjectToChange.dialogueNodeY = yPos;
-  }
-
-  if (!eraseMode) {
-    // If this node is a question and has answers, this will only reposition "default/unplaced" ones
-    if (typeof positionNewAnswersUnderQuestion === "function") {
-      positionNewAnswersUnderQuestion(characterId, questionId);
+    // Fallback if caller passed the record itself
+    if (blockObject && typeof blockObject === "object") {
+        blockObject.left = left;
+        blockObject.top = top;
     }
-
-    storeMasterObjectToLocalStorage();
-  }
 }

@@ -127,6 +127,9 @@ function drawDialogueMakerProject() {
     }
   });
 
+  // ✅ keep for drag-end rebuilds
+  window.__gdmAllConnections = allConnections;
+
   // ✅ AFTER ALL LOOPS ARE DONE
   SVGConnections.render(allConnections);
 
@@ -203,6 +206,24 @@ function drawDialogueMakerProject() {
 } // end function drawDialogueMakerProject
 
 
+// ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
+// Our app supports zooming by setting CSS `zoom` on <body>.
+// jQuery-UI draggable doesn't account for that, which can cause elements to
+// "jump" (often too far up/left) as soon as you start dragging.
+// We fix it by dividing draggable's computed positions by the current zoom.
+function getBodyZoomFactor() {
+  const zRaw = window.getComputedStyle(document.body).zoom;
+  let z = 1;
+  if (zRaw) {
+    z = String(zRaw).includes('%') ? (parseFloat(zRaw) / 100) : parseFloat(zRaw);
+  }
+  if (!isFinite(z) || z <= 0) z = 1;
+  return z;
+}
+
+
 /* DRAGGABLE SETTINGS */
 const draggableSettings = {
   // ✅ don't start dragging when interacting with controls
@@ -211,14 +232,44 @@ const draggableSettings = {
   // optional: require a small movement before drag starts (reduces accidental drags)
   distance: 3,
 
+  start: function (event, ui) {
+    // compensate for body zoom to prevent the initial "jump"
+    const z = getBodyZoomFactor();
+    ui.position.left /= z;
+    ui.position.top /= z;
+
+    // ✅ also compensate originalPosition to prevent "snap" on drag end
+    if (ui.originalPosition) {
+      ui.originalPosition.left /= z;
+      ui.originalPosition.top /= z;
+    }
+  },
+
   drag: function (event, ui) {
+    // keep compensation during drag as the mouse moves
+    const z = getBodyZoomFactor();
+    ui.position.left /= z;
+    ui.position.top /= z;
+
     if (window.SVGConnections) SVGConnections.requestUpdate();
     $('.conditionCircle').hide();
   },
+
   stop: function (event, ui) {
+    // save new position to master object
     updateElementPositionInObject(ui.helper);
-    $(".conditionCircle").show();
-    requestAnimationFrame(() => SVGConnections.requestUpdate());
+
+    // ✅ don't show stale circles; rebuild after SVG updated to new geometry
+    $(".conditionCircle").hide();
+
+    requestAnimationFrame(() => {
+      if (window.SVGConnections) SVGConnections.requestUpdate();
+
+      requestAnimationFrame(() => {
+        rebuildConditionCirclesFromSvgConnections(window.__gdmAllConnections || []);
+        $(".conditionCircle").show();
+      });
+    });
   },
 };
 
