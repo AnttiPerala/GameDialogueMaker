@@ -1,13 +1,19 @@
 // addNewBlockFromPlusButton.js
 // CLICK ON THE BLOCK PLUS BUTTON TO ADD A NEW DIALOGUE NODE
 
-// --- world coord helper (handles wrapper transform + zoom/pan if you use transform) ---
+// --- world coord helper (handles wrapper transform + body zoom) ---
 function getWorldFromClient(clientX, clientY) {
   const worldEl =
     document.querySelector("#mainArea .wrapper") ||
     document.getElementById("mainArea");
 
   const r = worldEl.getBoundingClientRect();
+
+  // ✅ body zoom compensation (CSS zoom breaks coordinate math otherwise)
+  const zRaw = window.getComputedStyle(document.body).zoom;
+  let z = 1;
+  if (zRaw) z = String(zRaw).includes('%') ? (parseFloat(zRaw) / 100) : parseFloat(zRaw);
+  if (!isFinite(z) || z <= 0) z = 1;
 
   const style = getComputedStyle(worldEl);
   const t =
@@ -18,8 +24,11 @@ function getWorldFromClient(clientX, clientY) {
   const m = new DOMMatrixReadOnly(t);
   const inv = m.inverse();
 
-  // point in element-local screen space
-  const local = new DOMPoint(clientX - r.left, clientY - r.top);
+  // point in element-local screen space → convert to unzoomed local space
+  const local = new DOMPoint(
+    (clientX - r.left) / z,
+    (clientY - r.top) / z
+  );
 
   // convert back to pre-transform world space
   const world = local.matrixTransform(inv);
@@ -70,8 +79,10 @@ $('body').on('click', '.blockPlusButton', function () {
   let biggestDialogueID = getMaxDialogueNodeId(characterObject);
   const newId = biggestDialogueID + 1;
 
-  // Spacing (tuned to your UI)
-  const Y_GAP = 180;
+  // ------------------------------------------------------------
+  // Placement: anchor to clicked plus-button center (world coords),
+  // and place new node just below parent with small padding.
+  // ------------------------------------------------------------
 
   // Anchor to the CLICKED plus button center, converted to WORLD coords
   const pr = theClickedPlusButton.get(0).getBoundingClientRect();
@@ -79,9 +90,24 @@ $('body').on('click', '.blockPlusButton', function () {
   const centerClientY = pr.top + pr.height / 2;
   const w = getWorldFromClient(centerClientX, centerClientY);
 
-  const NODE_WIDTH = getNodeWidthWorld(topMostParent.get(0)); // in WORLD units
-  const px = w.x - NODE_WIDTH / 2; // store LEFT (not center)
-  const py = w.y + Y_GAP;
+  // Node width in WORLD units (store LEFT, not center)
+  const NODE_WIDTH = getNodeWidthWorld(topMostParent.get(0));
+  const px = w.x - NODE_WIDTH / 2;
+
+  // Parent height in WORLD units (to avoid huge gaps)
+  const refNode = topMostParent.get(0);
+  const rect = refNode ? refNode.getBoundingClientRect() : null;
+
+  const zRaw = window.getComputedStyle(document.body).zoom;
+  let z = 1;
+  if (zRaw) z = String(zRaw).includes('%') ? (parseFloat(zRaw) / 100) : parseFloat(zRaw);
+  if (!isFinite(z) || z <= 0) z = 1;
+
+  const parentH = rect ? (rect.height / z) : 150;
+
+  // Put the new node just below the parent + small padding
+  const Y_PAD = 15; // tweak: 10–25
+  const py = w.y + (parentH / 2) + Y_PAD;
 
   // --- CHARACTER ROOT + ---
   if ($(topMostParent).hasClass('characterRoot')) {

@@ -79,7 +79,9 @@ function drawDialogueMakerProject() {
         $(childElem).css({
           position: "absolute",
           left: (childAbsX - parentAbsX) + "px",
-          top: (childAbsY - parentAbsY) + "px"
+          top:
+            (childAbsY - parentAbsY +
+              (childNode.dialogueType === "answer" ? 10 : 0)) + "px"
         });
 
         $(parentElem).append(childElem);
@@ -157,22 +159,51 @@ function drawDialogueMakerProject() {
     // ✅ NEXT dotted link (SVG) – dialogue nodes only
     if (!isCharacter) {
       const nextNodeValue = Number(node.nextNode);
+
       if (Number.isFinite(nextNodeValue) && nextNodeValue > 0) {
+        const fromChar = Number(characterId);
         const fromNodeId = Number(node.dialogueID);
 
-        allConnections.push({
-          id: `next_${Number(characterId)}_${fromNodeId}__${Number(characterId)}_${nextNodeValue}`,
+        // Resolve which character actually owns the target node (supports cross-character next)
+        let targetCharacter = gameDialogueMakerProject.characters.find((char) =>
+          char.dialogueNodes?.some((n) => Number(n.dialogueID) === nextNodeValue)
+        );
+
+        // fallback: same character if not found
+        if (!targetCharacter) {
+          targetCharacter = gameDialogueMakerProject.characters.find((c) => Number(c.characterID) === fromChar) || null;
+        }
+
+        const toChar = targetCharacter ? Number(targetCharacter.characterID) : fromChar;
+
+        const nextConn = {
+          id: `next_${fromChar}_${fromNodeId}__${toChar}_${nextNodeValue}`,
           type: "next",
           from: {
-            characterId: Number(characterId),
+            characterId: fromChar,
             dialogueId: fromNodeId,
-            port: "next"
+            port: "next",
           },
           to: {
-            characterId: Number(characterId),
-            dialogueId: Number(nextNodeValue)
-          }
-        });
+            characterId: toChar,
+            dialogueId: nextNodeValue,
+          },
+        };
+
+        // ✅ DEDUPE: there can only be ONE "next" per (fromChar, fromNodeId).
+        const existingIndex = allConnections.findIndex(
+          (c) =>
+            c &&
+            c.type === "next" &&
+            Number(c.from?.characterId) === fromChar &&
+            Number(c.from?.dialogueId) === fromNodeId
+        );
+
+        if (existingIndex >= 0) {
+          allConnections[existingIndex] = nextConn;
+        } else {
+          allConnections.push(nextConn);
+        }
       }
     }
   }
@@ -181,27 +212,25 @@ function drawDialogueMakerProject() {
     checkIfPlusButtonShouldBeTurnedOff(this);
   });
 
-  // DRAGGING ON TOP OF A TOP CONNECTION SOCKET. IF IT'S EMPTY, CREATE A NEW LINE FROM IT. IF IT HAS A LINE, DELETE THE LINE.
+  // -------------------------------------------------------------------------
+  // ✅ Drag from empty TOP socket -> show dotted SVG preview + connect on mouseup
+  // IMPORTANT: drawDialogueMakerProject() is called often, so we must namespace
+  // and .off() handlers to prevent stacking duplicates.
+  // -------------------------------------------------------------------------
 
-  $(".topConnectionSocket").mousedown(function (event) {
-    if (window.__svgEdgeDragging) return;
-    handleMouseDownOverTopConnectionSocket(event, this);
-  });
+  $(".topConnectionSocket")
+    .off("mousedown.gdmSocketDrag")
+    .on("mousedown.gdmSocketDrag", function (event) {
+      if (window.__svgEdgeDragging) return;
+      handleMouseDownOverTopConnectionSocket(event, this);
+    });
 
-  $(document).mousemove(function (e) {
-    if (window.__svgEdgeDragging) return;
-
-    if (currentlyDrawingALine) {
-      line.setOptions({
-        end: LeaderLine.pointAnchor({ x: e.pageX, y: e.pageY }),
-      });
-    }
-  });
-
-  $(document).mouseup(function (event) {
-    if (window.__svgEdgeDragging) return;
-    handleDocumentMouseUp(event, this);
-  });
+  $(document)
+    .off("mouseup.gdmSocketDrag")
+    .on("mouseup.gdmSocketDrag", function (event) {
+      if (window.__svgEdgeDragging) return;
+      handleDocumentMouseUp(event, this);
+    });
 
 } // end function drawDialogueMakerProject
 
@@ -256,24 +285,24 @@ const draggableSettings = {
   },
 
   stop: function (event, ui) {
-  // 1) write new x/y into the master object
-  updateElementPositionInObject(ui.helper);
+    // 1) write new x/y into the master object
+    updateElementPositionInObject(ui.helper);
 
-  // 2) persist to localStorage WITHOUT redrawing (critical)
-  if (!eraseMode) storeMasterObjectToLocalStorage({ redraw: false });
+    // 2) persist to localStorage WITHOUT redrawing (critical)
+    if (!eraseMode) storeMasterObjectToLocalStorage({ redraw: false });
 
-  // 3) rebuild circles after SVG updates
-  $(".conditionCircle").hide();
-
-  requestAnimationFrame(() => {
-    if (window.SVGConnections) SVGConnections.requestUpdate();
+    // 3) rebuild circles after SVG updates
+    $(".conditionCircle").hide();
 
     requestAnimationFrame(() => {
-      rebuildConditionCirclesFromSvgConnections(window.__gdmAllConnections || []);
-      $(".conditionCircle").show();
+      if (window.SVGConnections) SVGConnections.requestUpdate();
+
+      requestAnimationFrame(() => {
+        rebuildConditionCirclesFromSvgConnections(window.__gdmAllConnections || []);
+        $(".conditionCircle").show();
+      });
     });
-  });
-},
+  },
 
 };
 
@@ -443,6 +472,10 @@ function rebuildConditionCirclesFromSvgConnections(allConnections) {
 
     if (!path) continue;
 
+    // ✅ if the connection itself is hidden or rendered as a stub, don't draw a condition circle
+    const g = path.closest("g");
+    if (!g || g.style.display === "none" || g.classList.contains("is-stub")) continue;
+
     // Match the old data attributes your condition system expects
     const characterId = conn.from.characterId;
     const fromNode = conn.from.dialogueId;    // 0 for character root
@@ -478,7 +511,13 @@ function applyHideToElements() {
 
 function handleMouseDownOverTopConnectionSocket(event, myThis) {
   console.log('going to ask for mousedownOverTopConnectionSocket using myThis: ', myThis);
-  currentlyDrawnLineInfo = mousedownOverTopConnectionSocket(event, myThis); //globalvar
+
+  if (typeof window.mousedownOverTopConnectionSocket !== "function") {
+    console.error("mousedownOverTopConnectionSocket is not available. Check script loading order.");
+    return;
+  }
+  currentlyDrawnLineInfo = window.mousedownOverTopConnectionSocket(event, myThis);
+
   console.log('mousedownOverTopConnectionSocket call should be over now and it returned: ', currentlyDrawnLineInfo);
 
   // Check if currentlyDrawnLineInfo is defined and not null
@@ -645,3 +684,91 @@ function logAllElements(element) {
     logAllElements(element.children[i]);
   }
 }
+
+
+// ---------------------------------------------------------------------------
+// Top-socket drag-to-connect (for empty node input dot)
+// SVG preview line while dragging
+// ---------------------------------------------------------------------------
+
+let __tempSocketDrag = null; // { g, path, start:{x,y} }
+
+function __ensureTempSocketDragSvg() {
+  const svg = document.getElementById("connectionsSvg");
+  if (!svg) return null;
+  const group = svg.querySelector("#connectionsGroup") || svg;
+
+  const NS = "http://www.w3.org/2000/svg";
+  const g = document.createElementNS(NS, "g");
+  g.setAttribute("data-temp", "socket-drag");
+
+  const path = document.createElementNS(NS, "path");
+  path.setAttribute("fill", "none");
+  path.setAttribute("stroke", "#2d86ff");
+  path.setAttribute("stroke-width", "3");
+  path.setAttribute("stroke-dasharray", "6 6");
+  path.style.vectorEffect = "non-scaling-stroke";
+  g.appendChild(path);
+
+  group.appendChild(g);
+  return { g, path };
+}
+
+function __removeTempSocketDragSvg() {
+  if (__tempSocketDrag && __tempSocketDrag.g) __tempSocketDrag.g.remove();
+  __tempSocketDrag = null;
+}
+
+// ✅ This provides the missing function that the top-socket logic expects
+window.mousedownOverTopConnectionSocket = function (event, socketEl) {
+  const nodeEl = socketEl.closest(".blockWrap");
+  if (!nodeEl) return null;
+
+  const characterId = Number(nodeEl.dataset.characterId);
+  const dialogueId = Number(nodeEl.dataset.dialogueId);
+
+  // globals your existing code expects
+  nodeIdFromWhichWeAreDrawing = dialogueId;
+  currentlyDrawingALine = true;
+
+  // start point = the socket center in "world" coords
+  const worldEl = document.getElementById("mainArea");
+  const start = (window.SVGConnections && SVGConnections.getWorldPointOfElement)
+    ? SVGConnections.getWorldPointOfElement(socketEl, worldEl)
+    : { x: 0, y: 0 };
+
+  // create temp svg preview
+  __removeTempSocketDragSvg();
+  const rec = __ensureTempSocketDragSvg();
+  if (rec) {
+    __tempSocketDrag = { ...rec, start };
+    rec.path.setAttribute("d", `M ${start.x} ${start.y} L ${start.x} ${start.y}`);
+  }
+
+  return {
+    line: null, // old LeaderLine placeholder
+    lineCharacterId: characterId,
+    lineFromNodeId: dialogueId,
+    lineToNodeId: null
+  };
+};
+
+// Update preview while dragging (namespaced so it doesn't stack)
+$(document).off("mousemove.__topSocketDrag").on("mousemove.__topSocketDrag", function (e) {
+  if (window.__svgEdgeDragging) return;
+  if (!currentlyDrawingALine) return;
+  if (!__tempSocketDrag) return;
+
+  const world = (window.SVGConnections && SVGConnections.screenToWorld)
+    ? SVGConnections.screenToWorld(e.clientX, e.clientY)
+    : { x: 0, y: 0 };
+
+  const s = __tempSocketDrag.start;
+  __tempSocketDrag.path.setAttribute("d", `M ${s.x} ${s.y} L ${world.x} ${world.y}`);
+});
+
+// Cleanup preview on mouseup (namespaced so it doesn't stack)
+$(document).off("mouseup.__topSocketDragCleanup").on("mouseup.__topSocketDragCleanup", function () {
+  if (!currentlyDrawingALine) return;
+  __removeTempSocketDragSvg();
+});
