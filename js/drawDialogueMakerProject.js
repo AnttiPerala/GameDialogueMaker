@@ -1,315 +1,8 @@
-// drawDialogueMakerProject.js
-
-/* This function will recursively loop through the entire project object and write it to the page as nodes */
-function drawDialogueMakerProject() {
-
-  //store the previously create node after every node creation so right parents can be appended to. Don't change this for answer nodes, because they should all go inside the same parent (the question node)
-  let latestNode = "";
-  //store every node, including answers in this one for line appending:
-
-  let wrapper = $('<div class="wrapper"></div>');
-
-  gameDialogueMakerProject.characters.forEach((character) => {
-    let characterElem = createCharacterNodeHTML(character);
-    wrapper.append(characterElem);
-
-    // Create a map of dialogue nodes for easy lookup
-    let dialogueNodeMap = character.dialogueNodes.reduce((map, node) => {
-      map[node.dialogueID] = node;
-      return map;
-    }, {});
-
-    // Create a separate map to manage the children without modifying the original object
-    let childrenMap = {};
-
-    // Initialize a Set to store dialogue nodes that are referenced by any outgoingLines
-    let childNodeIds = new Set();
-
-    // Build the parent-child relationships and populate the Set of child node ids
-    character.dialogueNodes.forEach((dialogueNode) => {
-      (dialogueNode.outgoingLines || []).forEach((outgoingLine) => {
-        let targetNode = dialogueNodeMap[outgoingLine.toNode];
-        if (targetNode) {
-          if (!childrenMap[dialogueNode.dialogueID]) {
-            childrenMap[dialogueNode.dialogueID] = [];
-          }
-          childrenMap[dialogueNode.dialogueID].push(targetNode);
-          childNodeIds.add(targetNode.dialogueID); // stores all the dialogue node ids that are children of other dialogue nodes
-        }
-      });
-    });
-
-    // Character absolute ("world") coords from data
-    const charAbsX = Number(character.characterNodeX) || 0;
-    const charAbsY = Number(character.characterNodeY) || 0;
-
-    // Append to the character element only the dialogue nodes that are not in the Set of child node ids
-    character.dialogueNodes.forEach((dialogueNode) => {
-      if (!childNodeIds.has(dialogueNode.dialogueID)) {
-        let dialogueElem = createDialogueHTMLElement(dialogueNode);
-
-        // Node absolute ("world") coords from data
-        const nodeAbsX = Number(dialogueNode.dialogueNodeX) || 0;
-        const nodeAbsY = Number(dialogueNode.dialogueNodeY) || 0;
-
-        // ✅ ROOT nodes are appended inside characterElem,
-        // so their CSS left/top must be RELATIVE to the character element.
-        $(dialogueElem).css({
-          position: "absolute",
-          left: (nodeAbsX - charAbsX) + "px",
-          top: (nodeAbsY - charAbsY) + "px"
-        });
-
-        $(characterElem).append(dialogueElem);
-
-        // recurse with absolute coords
-        appendChildren(dialogueElem, dialogueNode, childrenMap, nodeAbsX, nodeAbsY);
-      }
-    });
-
-    function appendChildren(parentElem, parentNode, childrenMap, parentAbsX, parentAbsY) {
-      (childrenMap[parentNode.dialogueID] || []).forEach((childNode) => {
-        let childElem = createDialogueHTMLElement(childNode);
-
-        const childAbsX = Number(childNode.dialogueNodeX) || 0;
-        const childAbsY = Number(childNode.dialogueNodeY) || 0;
-
-        // ✅ CHILD nodes are appended inside parentElem,
-        // so their CSS left/top must be RELATIVE to the parent dialogue element.
-        $(childElem).css({
-          position: "absolute",
-          left: (childAbsX - parentAbsX) + "px",
-          top: (childAbsY - parentAbsY) + "px"
-        });
-
-        $(parentElem).append(childElem);
-
-        appendChildren(childElem, childNode, childrenMap, childAbsX, childAbsY);
-      });
-    }
-  });
-
-  console.log('wrapper is ', wrapper);
-
-  const main = $("#mainArea");
-
-  // detach the SVG overlay if it exists (keeps event listeners + state)
-  const svgOverlay = main.children("#connectionsSvg").detach();
-
-  // clear everything else
-  main.empty();
-
-  // put SVG back first, then your wrapper
-  if (svgOverlay.length) main.append(svgOverlay);
-  main.append(wrapper);
-
-  SVGConnections.init({ worldId: "mainArea" }); // idempotent: recreates SVG if missing
-
-  $('.characterRoot').draggable(draggableSettings).css({ position: "absolute" });
-  $('.dialogue').draggable(draggableSettings).css({ position: "absolute" });
-
-  applyHideToElements();
-
-  $('.dialogueTextArea').each(function () {
-    autoGrowTextArea(this);
-  });
-
-  /* A SECOND ITERATION FOR DRAWING THE LINES IS NEEDED, BECAUSE THEY DIALOGUES NEED TO ALREADY BE IN THE DOM WHEN THE LINES ARE CREATED */
-
-  const allConnections = [];
-
-  gameDialogueMakerProject.characters.forEach((character) => {
-    if (character.hideChildren !== true) {
-      drawOutgoingLines(character, true, character.characterID);
-      character.dialogueNodes.forEach((dialogueNode) => {
-        drawOutgoingLines(dialogueNode, false, character.characterID);
-      });
-    }
-  });
-
-  // ✅ keep for drag-end rebuilds
-  window.__gdmAllConnections = allConnections;
-
-  // ✅ AFTER ALL LOOPS ARE DONE
-  SVGConnections.render(allConnections);
-
-  // Wait until SVGConnections has updated path "d" attributes (next frame)
-  requestAnimationFrame(() => {
-    SVGConnections.requestUpdate();
-    requestAnimationFrame(() => {
-      rebuildConditionCirclesFromSvgConnections(allConnections);
-    });
-  });
-
-  function drawOutgoingLines(node, isCharacter, characterId) {
-    // Normal outgoingLines
-    (node.outgoingLines || []).forEach((outgoingLine) => {
-      const c = drawLines(
-        (node.dialogueID || node.characterID),
-        outgoingLine.toNode,
-        isCharacter,
-        outgoingLine,
-        characterId
-      );
-      if (c) allConnections.push(c);
-    });
-
-    // ✅ NEXT dotted link (SVG) – dialogue nodes only
-    if (!isCharacter) {
-      const nextNodeValue = Number(node.nextNode);
-
-      if (Number.isFinite(nextNodeValue) && nextNodeValue > 0) {
-        const fromChar = Number(characterId);
-        const fromNodeId = Number(node.dialogueID);
-
-        // Resolve which character actually owns the target node (supports cross-character next)
-        let targetCharacter = gameDialogueMakerProject.characters.find((char) =>
-          char.dialogueNodes?.some((n) => Number(n.dialogueID) === nextNodeValue)
-        );
-
-        // fallback: same character if not found
-        if (!targetCharacter) {
-          targetCharacter = gameDialogueMakerProject.characters.find((c) => Number(c.characterID) === fromChar) || null;
-        }
-
-        const toChar = targetCharacter ? Number(targetCharacter.characterID) : fromChar;
-
-        const nextConn = {
-          id: `next_${fromChar}_${fromNodeId}__${toChar}_${nextNodeValue}`,
-          type: "next",
-          from: {
-            characterId: fromChar,
-            dialogueId: fromNodeId,
-            port: "next",
-          },
-          to: {
-            characterId: toChar,
-            dialogueId: nextNodeValue,
-          },
-        };
-
-        // ✅ DEDUPE: there can only be ONE "next" per (fromChar, fromNodeId).
-        const existingIndex = allConnections.findIndex(
-          (c) =>
-            c &&
-            c.type === "next" &&
-            Number(c.from?.characterId) === fromChar &&
-            Number(c.from?.dialogueId) === fromNodeId
-        );
-
-        if (existingIndex >= 0) {
-          allConnections[existingIndex] = nextConn;
-        } else {
-          allConnections.push(nextConn);
-        }
-      }
-    }
-  }
-
-  $(".blockPlusButton").each(function () {
-    checkIfPlusButtonShouldBeTurnedOff(this);
-  });
-
-  // -------------------------------------------------------------------------
-  // ✅ Drag from empty TOP socket -> show dotted SVG preview + connect on mouseup
-  // IMPORTANT: drawDialogueMakerProject() is called often, so we must namespace
-  // and .off() handlers to prevent stacking duplicates.
-  // -------------------------------------------------------------------------
-
-  $(".topConnectionSocket")
-    .off("mousedown.gdmSocketDrag")
-    .on("mousedown.gdmSocketDrag", function (event) {
-      if (window.__svgEdgeDragging) return;
-      handleMouseDownOverTopConnectionSocket(event, this);
-    });
-
-  $(document)
-    .off("mouseup.gdmSocketDrag")
-    .on("mouseup.gdmSocketDrag", function (event) {
-      if (window.__svgEdgeDragging) return;
-      handleDocumentMouseUp(event, this);
-    });
-
-} // end function drawDialogueMakerProject
-
-
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
-// Our app supports zooming by setting CSS `zoom` on <body>.
-// jQuery-UI draggable doesn't account for that, which can cause elements to
-// "jump" (often too far up/left) as soon as you start dragging.
-// We fix it by dividing draggable's computed positions by the current zoom.
-function getBodyZoomFactor() {
-  const zRaw = window.getComputedStyle(document.body).zoom;
-  let z = 1;
-  if (zRaw) {
-    z = String(zRaw).includes('%') ? (parseFloat(zRaw) / 100) : parseFloat(zRaw);
-  }
-  if (!isFinite(z) || z <= 0) z = 1;
-  return z;
-}
-
-
-/* DRAGGABLE SETTINGS */
-const draggableSettings = {
-  // ✅ don't start dragging when interacting with controls
-  cancel: "input, textarea, select, option, button, .blockPlusButton, .eyeImage, .topConnectionSocket, .conditionCircle",
-
-  // optional: require a small movement before drag starts (reduces accidental drags)
-  distance: 3,
-
-  start: function (event, ui) {
-    // compensate for body zoom to prevent the initial "jump"
-    const z = getBodyZoomFactor();
-    ui.position.left /= z;
-    ui.position.top /= z;
-
-    // ✅ also compensate originalPosition to prevent "snap" on drag end
-    if (ui.originalPosition) {
-      ui.originalPosition.left /= z;
-      ui.originalPosition.top /= z;
-    }
-  },
-
-  drag: function (event, ui) {
-    // keep compensation during drag as the mouse moves
-    const z = getBodyZoomFactor();
-    ui.position.left /= z;
-    ui.position.top /= z;
-
-    if (window.SVGConnections) SVGConnections.requestUpdate();
-    $('.conditionCircle').hide();
-  },
-
-  stop: function (event, ui) {
-    // 1) write new x/y into the master object
-    updateElementPositionInObject(ui.helper);
-
-    // 2) persist to localStorage WITHOUT redrawing (critical)
-    if (!eraseMode) storeMasterObjectToLocalStorage({ redraw: false });
-
-    // 3) rebuild circles after SVG updates
-    $(".conditionCircle").hide();
-
-    requestAnimationFrame(() => {
-      if (window.SVGConnections) SVGConnections.requestUpdate();
-
-      requestAnimationFrame(() => {
-        rebuildConditionCirclesFromSvgConnections(window.__gdmAllConnections || []);
-        $(".conditionCircle").show();
-      });
-    });
-  },
-
-};
-
-
 function createCharacterNodeHTML(character) {
 
   let eyeImageSource;
-  //closed or open eye:
-  if (!('hideChildren' in character)) { //in case the property is missing
+  // closed or open eye:
+  if (!('hideChildren' in character)) { // in case the property is missing
     character.hideChildren = false;
   }
   if (character.hideChildren == false) {
@@ -320,33 +13,35 @@ function createCharacterNodeHTML(character) {
 
   let acceptclicksValue = false;
 
-  //check for acceptclicks (note that there is also a function for this but it might be more efficient to do it here)
+  // check for acceptclicks
   if ((character.outgoingLines || []).length < 1) {
     acceptclicksValue = true;
   }
 
   let characterNodeHTML = $(`
-          <div class="blockWrap characterRoot" data-character-id="${character.characterID}" id="char${character.characterID}" data-hidechildren="${character.hideChildren}">
-            <div class="contentWrap">
-                <div style="display: flex; align-items:center; justify-content: center;">
-          
-                </div>
-                    <div class="block" style="background-color: ${character.bgColor}">
-                        <div class="characterElementIDLine" style="text-align: left;">
-                            <span style="width: 35%; display:inline-block; text-align: right;">Character ID:</span><input class="blockid"
-                                style="width: 15%; display:inline-block;" readonly type="number" value="${character.characterID}">
-                                <img class="eyeImage characterNodeEye btnSmall" src="${eyeImageSource}" alt="eye" width="24" height="24">
-                        </div>
-                        <input type="text" class="characterName elementInfoField" placeholder="character name" value="${character.characterName}">
-              
-                    </div>
-                    <div class="plusButtonContainer" style="display: flex; align-items: end; justify-content: center;">
-                        <div class="blockPlusButton" data-buttonindex=0 data-acceptclicks=${acceptclicksValue}>+</div>
-                    </div>
-            </div>
+    <div class="blockWrap characterRoot"
+         data-character-id="${character.characterID}"
+         id="char${character.characterID}"
+         data-hidechildren="${character.hideChildren}">
+      <div class="contentWrap">
+        <div style="display: flex; align-items:center; justify-content: center;"></div>
+
+        <div class="block" style="background-color: ${character.bgColor}">
+          <div class="characterElementIDLine" style="text-align: left;">
+            <span style="width: 35%; display:inline-block; text-align: right;">Character ID:</span>
+            <input class="blockid" style="width: 15%; display:inline-block;" readonly type="number" value="${character.characterID}">
+            <img class="eyeImage characterNodeEye btnSmall" src="${eyeImageSource}" alt="eye" width="24" height="24">
           </div>
 
-        `);
+          <input type="text" class="characterName elementInfoField" placeholder="character name" value="${character.characterName}">
+        </div>
+
+        <div class="plusButtonContainer" style="display: flex; align-items: end; justify-content: center;">
+          <div class="blockPlusButton" data-buttonindex="0" data-acceptclicks="${acceptclicksValue}">+</div>
+        </div>
+      </div>
+    </div>
+  `);
 
   characterNodeHTML.css({
     position: "absolute",
@@ -357,9 +52,7 @@ function createCharacterNodeHTML(character) {
   character.nodeElement = characterNodeHTML;
 
   return characterNodeHTML;
-
-}/*End createCharacterNodeHTML  */
-
+}
 
 /* DRAWING THE LINES (SVG version: returns a connection descriptor) */
 function drawLines(sourceId, targetId, isCharacter, outgoingLine, characterId) {
@@ -435,7 +128,7 @@ function drawLines(sourceId, targetId, isCharacter, outgoingLine, characterId) {
       characterId: fromChar,
       dialogueId: fromNode,       // 0 for character root, else dialogueID
       socketIndex: fromSocket,
-      isCharacter: !!isCharacter, // optional, handy for later
+      isCharacter: !!isCharacter,
     },
     to: {
       characterId: toChar,
@@ -449,9 +142,6 @@ function drawLines(sourceId, targetId, isCharacter, outgoingLine, characterId) {
   };
 }
 
-/* end drawLines */
-
-
 function rebuildConditionCirclesFromSvgConnections(allConnections) {
   // remove old ones
   document.querySelectorAll('.conditionCircle').forEach(e => e.remove());
@@ -463,7 +153,8 @@ function rebuildConditionCirclesFromSvgConnections(allConnections) {
     if (conn.type === "next") continue;
 
     // Find the SVG path for this connection
-    const path = document.querySelector(`#connectionsSvg g[data-conn-id="${conn.id}"] path.connection-path`)
+    const path =
+      document.querySelector(`#connectionsSvg g[data-conn-id="${conn.id}"] path.connection-path`)
       || document.querySelector(`#connectionsSvg g.conn[data-conn-id="${conn.id}"] path.connection-path`)
       || document.querySelector(`#connectionsSvg g[data-conn-id="${conn.id}"] path`)
       || document.querySelector(`#connectionsSvg g[data-connid="${conn.id}"] path`);
@@ -476,9 +167,10 @@ function rebuildConditionCirclesFromSvgConnections(allConnections) {
 
     // Match the old data attributes your condition system expects
     const characterId = conn.from.characterId;
-    const fromNode = conn.from.dialogueId;    // 0 for character root
+    const fromNode = conn.from.dialogueId; // 0 for character root
     const toNode = conn.to.dialogueId;
 
+    // drawConditionCircle must exist in your project already
     drawConditionCircle(path, characterId, fromNode, toNode);
 
     // Apply withCondition if master object line has conditions
@@ -496,277 +188,488 @@ function rebuildConditionCirclesFromSvgConnections(allConnections) {
 }
 
 
-function applyHideToElements() {
-  // Select all elements with data-hidechildren="true"
-  let elementsToHide = $('[data-hidechildren="true"]');
 
-  // Loop through each element and find its descendants with class .blockWrap and hide them
-  elementsToHide.each((index, element) => {
-    let descendantsToHide = $(element).find('.blockWrap');
-    descendantsToHide.addClass('hide');
+// drawDialogueMakerProject.js
+
+/* This function will loop through the entire project object and write it to the page as nodes (FLAT DOM) */
+function drawDialogueMakerProject() {
+  let wrapper = $('<div class="wrapper"></div>');
+
+  // Ensure wrapper can host absolute-positioned children
+  wrapper.css({ position: "relative" });
+
+  // --- 1) Draw nodes (FLAT) ---
+  gameDialogueMakerProject.characters.forEach((character) => {
+    let characterElem = createCharacterNodeHTML(character);
+    wrapper.append(characterElem);
+
+    // All dialogue nodes are appended as siblings (flat)
+    (character.dialogueNodes || []).forEach((dialogueNode) => {
+      const dialogueElem = createDialogueHTMLElement(dialogueNode);
+
+      const nodeAbsX = Number(dialogueNode.dialogueNodeX) || 0;
+      const nodeAbsY = Number(dialogueNode.dialogueNodeY) || 0;
+
+      $(dialogueElem).css({
+        position: "absolute",
+        left: nodeAbsX + "px",
+        top: nodeAbsY + "px",
+      });
+
+      wrapper.append(dialogueElem);
+    });
   });
+
+  const main = $("#mainArea");
+
+  // detach the SVG overlay if it exists (keeps event listeners + state)
+  const svgOverlay = main.children("#connectionsSvg").detach();
+
+  // clear everything else
+  main.empty();
+
+  // put SVG back first, then wrapper
+  if (svgOverlay.length) main.append(svgOverlay);
+  main.append(wrapper);
+
+  SVGConnections.init({ worldId: "mainArea" }); // idempotent
+
+  // Make everything draggable
+  $(".characterRoot").draggable(draggableSettings).css({ position: "absolute" });
+  $(".dialogue").draggable(draggableSettings).css({ position: "absolute" });
+
+  // Hide system now must be graph-based (because DOM is flat)
+  applyHideToElementsGraph();
+
+  $(".dialogueTextArea").each(function () {
+    autoGrowTextArea(this);
+  });
+
+  // --- 2) Build connections ---
+  const allConnections = [];
+
+  // Helper: should this node be hidden due to an ancestor with hideChildren?
+  const hiddenNodeSetByCharacter = buildHiddenNodeSets();
+
+  gameDialogueMakerProject.characters.forEach((character) => {
+    const charId = Number(character.characterID);
+    const hiddenSet = hiddenNodeSetByCharacter.get(charId) || new Set();
+
+    // If character hides children, we still show the character root but hide nodes + lines
+    const characterHides = character.hideChildren === true;
+
+    if (!characterHides) {
+      drawOutgoingLines(character, true, charId, hiddenSet);
+    }
+
+    (character.dialogueNodes || []).forEach((dialogueNode) => {
+      const id = Number(dialogueNode.dialogueID);
+      if (hiddenSet.has(id)) return; // node hidden -> skip its outgoing lines
+      if (dialogueNode.hideChildren === true) {
+        // still allow its own outgoing lines? usually "hideChildren" means hide descendants + lines
+        // so skip
+        return;
+      }
+      drawOutgoingLines(dialogueNode, false, charId, hiddenSet);
+    });
+  });
+
+  // keep for drag-end rebuilds
+  window.__gdmAllConnections = allConnections;
+
+  SVGConnections.render(allConnections);
+
+  requestAnimationFrame(() => {
+    SVGConnections.requestUpdate();
+    requestAnimationFrame(() => {
+      rebuildConditionCirclesFromSvgConnections(allConnections);
+    });
+  });
+
+  function drawOutgoingLines(node, isCharacter, characterId, hiddenSet) {
+    // Normal outgoingLines
+    (node.outgoingLines || []).forEach((outgoingLine) => {
+      const toId = Number(outgoingLine.toNode);
+      if (Number.isFinite(toId) && toId > 0 && hiddenSet && hiddenSet.has(toId)) return;
+
+      const c = drawLines(
+        (node.dialogueID || node.characterID),
+        outgoingLine.toNode,
+        isCharacter,
+        outgoingLine,
+        characterId
+      );
+      if (c) allConnections.push(c);
+    });
+
+    // NEXT dotted link (SVG) – dialogue nodes only
+    if (!isCharacter) {
+      const nextNodeValue = Number(node.nextNode);
+      if (Number.isFinite(nextNodeValue) && nextNodeValue > 0) {
+        // don't draw next to hidden targets
+        if (hiddenSet && hiddenSet.has(nextNodeValue)) return;
+
+        const fromChar = Number(characterId);
+        const fromNodeId = Number(node.dialogueID);
+
+        // Resolve which character actually owns the target node (supports cross-character next)
+        let targetCharacter = gameDialogueMakerProject.characters.find((char) =>
+          char.dialogueNodes?.some((n) => Number(n.dialogueID) === nextNodeValue)
+        );
+        if (!targetCharacter) {
+          targetCharacter =
+            gameDialogueMakerProject.characters.find((c) => Number(c.characterID) === fromChar) ||
+            null;
+        }
+        const toChar = targetCharacter ? Number(targetCharacter.characterID) : fromChar;
+
+        const nextConn = {
+          id: `next_${fromChar}_${fromNodeId}__${toChar}_${nextNodeValue}`,
+          type: "next",
+          from: {
+            characterId: fromChar,
+            dialogueId: fromNodeId,
+            port: "next",
+          },
+          to: {
+            characterId: toChar,
+            dialogueId: nextNodeValue,
+          },
+        };
+
+        // Dedupe: only one next per from-node
+        const existingIndex = allConnections.findIndex(
+          (c) =>
+            c &&
+            c.type === "next" &&
+            Number(c.from?.characterId) === fromChar &&
+            Number(c.from?.dialogueId) === fromNodeId
+        );
+
+        if (existingIndex >= 0) allConnections[existingIndex] = nextConn;
+        else allConnections.push(nextConn);
+      }
+    }
+  }
+
+  // Plus buttons enable/disable
+  $(".blockPlusButton").each(function () {
+    checkIfPlusButtonShouldBeTurnedOff(this);
+  });
+
+  // Top socket drag-to-connect (your SVG preview system attaches globally)
+  // so we do NOT bind old leaderline handlers here.
+
+} // end drawDialogueMakerProject
+
+
+// ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
+
+function getBodyZoomFactor() {
+  const zRaw = window.getComputedStyle(document.body).zoom;
+  let z = 1;
+  if (zRaw) z = String(zRaw).includes("%") ? parseFloat(zRaw) / 100 : parseFloat(zRaw);
+  if (!isFinite(z) || z <= 0) z = 1;
+  return z;
 }
 
-function handleMouseDownOverTopConnectionSocket(event, myThis) {
-  console.log('going to ask for mousedownOverTopConnectionSocket using myThis: ', myThis);
 
-  if (typeof window.mousedownOverTopConnectionSocket !== "function") {
-    console.error("mousedownOverTopConnectionSocket is not available. Check script loading order.");
-    return;
+// ---------------------------------------------------------------------------
+// Subtree drag (LIVE): while dragging a node, move its descendants visually;
+// on stop, commit positions to master object + localStorage.
+// ---------------------------------------------------------------------------
+
+let __subtreeDrag = null;
+// { type:"character"|"dialogue", characterId, rootDialogueId,
+//   start: Map(key-> {x,y}), elements: Map(key->HTMLElement), rootKey }
+
+function buildChildrenMapForCharacter(charObj) {
+  const map = {};
+  const byId = {};
+  (charObj.dialogueNodes || []).forEach((n) => (byId[Number(n.dialogueID)] = n));
+
+  (charObj.dialogueNodes || []).forEach((n) => {
+    const fromId = Number(n.dialogueID);
+    (n.outgoingLines || []).forEach((l) => {
+      const toId = Number(l.toNode);
+      if (!Number.isFinite(toId) || toId <= 0) return;
+      const target = byId[toId];
+      if (!target) return;
+      if (!map[fromId]) map[fromId] = [];
+      map[fromId].push(target);
+    });
+  });
+
+  return { map, byId };
+}
+
+function collectDescendants(charObj, startDialogueId) {
+  const { map } = buildChildrenMapForCharacter(charObj);
+  const out = [];
+  const seen = new Set();
+  const stack = [Number(startDialogueId)];
+
+  while (stack.length) {
+    const id = stack.pop();
+    const kids = map[id] || [];
+    for (const kid of kids) {
+      const kidId = Number(kid.dialogueID);
+      if (seen.has(kidId)) continue;
+      seen.add(kidId);
+      out.push(kid);
+      stack.push(kidId);
+    }
   }
-  currentlyDrawnLineInfo = window.mousedownOverTopConnectionSocket(event, myThis);
+  return out;
+}
 
-  console.log('mousedownOverTopConnectionSocket call should be over now and it returned: ', currentlyDrawnLineInfo);
+function getDialogueEl(characterId, dialogueId) {
+  return document.querySelector(
+    `.blockWrap.dialogue[data-character-id="${Number(characterId)}"][data-dialogue-id="${Number(dialogueId)}"]`
+  );
+}
 
-  // Check if currentlyDrawnLineInfo is defined and not null
-  if (currentlyDrawnLineInfo) {
-    console.log('lineInfo', currentlyDrawnLineInfo);
+function getCharacterEl(characterId) {
+  return document.querySelector(`.characterRoot[data-character-id="${Number(characterId)}"]`);
+}
 
-    // Check if properties exist on currentlyDrawnLineInfo before trying to access them
-    if ('line' in currentlyDrawnLineInfo) {
-      line = currentlyDrawnLineInfo.line;
-    } else {
-      console.log('Property "line" does not exist on currentlyDrawnLineInfo');
+function applyDeltaToEl(el, startX, startY, dx, dy) {
+  if (!el) return;
+  el.style.left = (startX + dx) + "px";
+  el.style.top = (startY + dy) + "px";
+}
+
+
+// DRAGGABLE SETTINGS
+const draggableSettings = {
+  cancel: "input, textarea, select, option, button, .blockPlusButton, .eyeImage, .topConnectionSocket, .conditionCircle",
+  distance: 3,
+
+  start: function (event, ui) {
+    const z = getBodyZoomFactor();
+    ui.position.left /= z;
+    ui.position.top /= z;
+    if (ui.originalPosition) {
+      ui.originalPosition.left /= z;
+      ui.originalPosition.top /= z;
     }
 
-    if ('lineCharacterId' in currentlyDrawnLineInfo) {
-      lineCharacterId = currentlyDrawnLineInfo.lineCharacterId; //lineCharacterId is defined in globalVars
+    const el = ui.helper.get(0);
+    const isChar = el.classList.contains("characterRoot");
+    const characterId = Number(el.dataset.characterId);
+    if (!Number.isFinite(characterId)) return;
+
+    const charObj = gameDialogueMakerProject.characters.find((c) => Number(c.characterID) === characterId);
+    if (!charObj) return;
+
+    __subtreeDrag = {
+      type: isChar ? "character" : "dialogue",
+      characterId,
+      rootDialogueId: isChar ? null : Number(el.dataset.dialogueId),
+      start: new Map(),
+      elements: new Map(),
+      rootKey: isChar ? `char:${characterId}` : `dlg:${characterId}:${Number(el.dataset.dialogueId)}`,
+    };
+
+    // Root start pos (DOM left/top are WORLD coords because we're flat)
+    const rootStartX = ui.originalPosition ? ui.originalPosition.left : parseFloat(el.style.left) || 0;
+    const rootStartY = ui.originalPosition ? ui.originalPosition.top : parseFloat(el.style.top) || 0;
+
+    __subtreeDrag.start.set(__subtreeDrag.rootKey, { x: rootStartX, y: rootStartY });
+    __subtreeDrag.elements.set(__subtreeDrag.rootKey, el);
+
+    if (isChar) {
+      // Affect ALL dialogue nodes of this character
+      (charObj.dialogueNodes || []).forEach((n) => {
+        const key = `dlg:${characterId}:${Number(n.dialogueID)}`;
+        const nodeEl = getDialogueEl(characterId, n.dialogueID);
+        if (!nodeEl) return;
+
+        const sx = parseFloat(nodeEl.style.left) || 0;
+        const sy = parseFloat(nodeEl.style.top) || 0;
+        __subtreeDrag.start.set(key, { x: sx, y: sy });
+        __subtreeDrag.elements.set(key, nodeEl);
+      });
     } else {
-      console.log('Property "lineCharacterId" does not exist on currentlyDrawnLineInfo');
+      const rootId = __subtreeDrag.rootDialogueId;
+      if (!Number.isFinite(rootId)) return;
+
+      const descendants = collectDescendants(charObj, rootId);
+      descendants.forEach((n) => {
+        const key = `dlg:${characterId}:${Number(n.dialogueID)}`;
+        const nodeEl = getDialogueEl(characterId, n.dialogueID);
+        if (!nodeEl) return;
+
+        const sx = parseFloat(nodeEl.style.left) || 0;
+        const sy = parseFloat(nodeEl.style.top) || 0;
+        __subtreeDrag.start.set(key, { x: sx, y: sy });
+        __subtreeDrag.elements.set(key, nodeEl);
+      });
+    }
+  },
+
+  drag: function (event, ui) {
+    const z = getBodyZoomFactor();
+    ui.position.left /= z;
+    ui.position.top /= z;
+
+    if (!__subtreeDrag) {
+      if (window.SVGConnections) SVGConnections.requestUpdate();
+      $(".conditionCircle").hide();
+      return;
     }
 
-    if ('lineFromNodeId' in currentlyDrawnLineInfo) {
-      lineFromNodeId = currentlyDrawnLineInfo.lineFromNodeId;
-    } else {
-      console.log('Property "lineFromNodeId" does not exist on currentlyDrawnLineInfo');
+    const root = __subtreeDrag.start.get(__subtreeDrag.rootKey);
+    if (!root) return;
+
+    const dx = ui.position.left - root.x;
+    const dy = ui.position.top - root.y;
+
+    // Move every affected element live
+    for (const [key, startPos] of __subtreeDrag.start.entries()) {
+      const el = __subtreeDrag.elements.get(key);
+      applyDeltaToEl(el, startPos.x, startPos.y, dx, dy);
     }
 
-    if ('lineToNodeId' in currentlyDrawnLineInfo) {
-      lineToNodeId = currentlyDrawnLineInfo.lineToNodeId;
-    } else {
-      console.log('Property "lineToNodeId" does not exist on currentlyDrawnLineInfo');
-    }
-  } else {
-    console.log('currentlyDrawnLineInfo is undefined or null');
-  }
-};
+    if (window.SVGConnections) SVGConnections.requestUpdate();
+    $(".conditionCircle").hide();
+  },
 
+  stop: function (event, ui) {
+    // Commit subtree positions into master object + localStorage
+    if (__subtreeDrag) {
+      const root = __subtreeDrag.start.get(__subtreeDrag.rootKey);
+      const el = ui.helper.get(0);
 
-function handleDocumentMouseUp(event, myThis) {
-  if (currentlyDrawingALine) {
-    // Get the element under the cursor
-    var elementUnderCursor = document.elementFromPoint(event.clientX, event.clientY);
-    var $elementUnderCursor = $(elementUnderCursor);
+      const rootNowX = parseFloat(el.style.left) || 0;
+      const rootNowY = parseFloat(el.style.top) || 0;
 
-    // Check if the element is a plus button and if its data-acceptclicks attribute is true
-    if (
-      $elementUnderCursor.hasClass("blockPlusButton") &&
-      $elementUnderCursor.data("acceptclicks") == true &&
-      currentlyDrawingALine == true
-    ) {
+      const dx = root ? (rootNowX - root.x) : 0;
+      const dy = root ? (rootNowY - root.y) : 0;
 
-      console.log('CONNECT!');
+      const characterId = __subtreeDrag.characterId;
+      const charObj = gameDialogueMakerProject.characters.find((c) => Number(c.characterID) === Number(characterId));
 
-      let plusButtonIndexToAttachTo = $elementUnderCursor.data("buttonindex");
-      let nodeInfoForFromNode = getInfoByPassingInDialogueNodeOrElement($elementUnderCursor);
+      if (charObj) {
+        if (__subtreeDrag.type === "character") {
+          // move character root
+          charObj.characterNodeX = (Number(charObj.characterNodeX) || 0) + dx;
+          charObj.characterNodeY = (Number(charObj.characterNodeY) || 0) + dy;
 
-      console.log('nodeInfoForFromNode ', nodeInfoForFromNode);
-      console.log('currentlyDrawnLineInfo.lineCharacterId ', currentlyDrawnLineInfo.lineCharacterId);
-
-      if (nodeInfoForFromNode.isCharacter) {
-
-        if (nodeInfoForFromNode.characterID == currentlyDrawnLineInfo.lineCharacterId) {
-
-          nodeInfoForFromNode.characterNode.outgoingLines.push({
-            fromNode: 0,
-            fromSocket: plusButtonIndexToAttachTo,
-            toNode: nodeIdFromWhichWeAreDrawing,
-            lineElem: "",
-            transitionConditions: [],
+          // move all nodes
+          (charObj.dialogueNodes || []).forEach((n) => {
+            n.dialogueNodeX = (Number(n.dialogueNodeX) || 0) + dx;
+            n.dialogueNodeY = (Number(n.dialogueNodeY) || 0) + dy;
           });
-
         } else {
+          // move the root dialogue node itself
+          const rootId = Number(__subtreeDrag.rootDialogueId);
+          const rootNode = (charObj.dialogueNodes || []).find((n) => Number(n.dialogueID) === rootId);
+          if (rootNode) {
+            rootNode.dialogueNodeX = (Number(rootNode.dialogueNodeX) || 0) + dx;
+            rootNode.dialogueNodeY = (Number(rootNode.dialogueNodeY) || 0) + dy;
+          }
 
-          console.log('Change in parent, currentlyDrawnLineInfo.lineCharacterId ', currentlyDrawnLineInfo.lineCharacterId);
-
-          let highestIdInNewParent = getMaxDialogueNodeId(gameDialogueMakerProject.characters[nodeInfoForFromNode.characterID - 1]);
-
-          console.log('calling reparent function with these arguments: ');
-          console.log('objectNodeFromWhichWeAreDrawing ', objectNodeFromWhichWeAreDrawing);
-          console.log('currentlyDrawnLineInfo.lineCharacterId ', currentlyDrawnLineInfo.lineCharacterId);
-          console.log('nodeInfoForFromNode.characterID ', nodeInfoForFromNode.characterID);
-          console.log('highestIdInNewParent + 1 ', highestIdInNewParent + 1);
-          console.log('gameDialogueMakerProject ', gameDialogueMakerProject);
-
-          reparentNodeAndDescendants(objectNodeFromWhichWeAreDrawing, currentlyDrawnLineInfo.lineCharacterId, nodeInfoForFromNode.characterID, highestIdInNewParent + 1, gameDialogueMakerProject);
-
-          nodeInfoForFromNode.characterNode.outgoingLines.push({
-            fromNode: 0,
-            fromSocket: plusButtonIndexToAttachTo,
-            toNode: objectNodeFromWhichWeAreDrawing.dialogueID,
-            lineElem: "",
-            transitionConditions: [],
+          // move descendants
+          const descendants = collectDescendants(charObj, rootId);
+          descendants.forEach((n) => {
+            n.dialogueNodeX = (Number(n.dialogueNodeX) || 0) + dx;
+            n.dialogueNodeY = (Number(n.dialogueNodeY) || 0) + dy;
           });
-
-        }
-
-      } else {
-
-        console.log('nodeInfoForFromNode.dialogueNode ', nodeInfoForFromNode.dialogueNode);
-
-        if (nodeInfoForFromNode.characterID == currentlyDrawnLineInfo.lineCharacterId) {
-
-          nodeInfoForFromNode.dialogueNode.outgoingLines.push({
-            fromNode: nodeInfoForFromNode.dialogueNode.dialogueID,
-            fromSocket: plusButtonIndexToAttachTo,
-            toNode: nodeIdFromWhichWeAreDrawing,
-            lineElem: "",
-            transitionConditions: [],
-          });
-
-          objectNodeFromWhichWeAreDrawing.dialogueNodeX = 0;
-          objectNodeFromWhichWeAreDrawing.dialogueNodeY = 250;
-
-        } else {
-
-          objectNodeFromWhichWeAreDrawing.dialogueNodeX = 0;
-          objectNodeFromWhichWeAreDrawing.dialogueNodeY = 250;
-
-          console.log('Change in parent, old character was currentlyDrawnLineInfo.lineCharacterId ', currentlyDrawnLineInfo.lineCharacterId);
-          console.log('new character is nodeInfoForFromNode.characterID ', nodeInfoForFromNode.characterID);
-
-          let highestIdInNewParent = getMaxDialogueNodeId(gameDialogueMakerProject.characters[nodeInfoForFromNode.characterID - 1]);
-
-          console.log('calling reparent function with these arguments: ');
-          console.log('objectNodeFromWhichWeAreDrawing ', objectNodeFromWhichWeAreDrawing);
-          console.log('currentlyDrawnLineInfo.lineCharacterId ', currentlyDrawnLineInfo.lineCharacterId);
-          console.log('nodeInfoForFromNode.characterID ', nodeInfoForFromNode.characterID);
-          console.log('highestIdInNewParent + 1: ', highestIdInNewParent + 1);
-          console.log('gameDialogueMakerProject ', gameDialogueMakerProject);
-          console.log('calling reparent node and descendants');
-
-          reparentNodeAndDescendants(objectNodeFromWhichWeAreDrawing, currentlyDrawnLineInfo.lineCharacterId, nodeInfoForFromNode.characterID, highestIdInNewParent + 1, gameDialogueMakerProject);
-
-          nodeInfoForFromNode.dialogueNode.outgoingLines.push({
-            fromNode: nodeInfoForFromNode.dialogueNode.dialogueID,
-            fromSocket: plusButtonIndexToAttachTo,
-            toNode: objectNodeFromWhichWeAreDrawing.dialogueID,
-            lineElem: "",
-            transitionConditions: [],
-          });
-
         }
       }
 
+      __subtreeDrag = null;
+    } else {
+      // fallback: single element update
+      updateElementPositionInObject(ui.helper);
     }
 
-    // Stop updating the line
-    line = null;
-    currentlyDrawingALine = false;
+    if (!eraseMode) storeMasterObjectToLocalStorage({ redraw: false });
 
-    clearCanvasBeforeReDraw();
-    drawDialogueMakerProject();
-  }
+    $(".conditionCircle").hide();
 
+    requestAnimationFrame(() => {
+      if (window.SVGConnections) SVGConnections.requestUpdate();
+      requestAnimationFrame(() => {
+        rebuildConditionCirclesFromSvgConnections(window.__gdmAllConnections || []);
+        $(".conditionCircle").show();
+      });
+    });
+  },
 };
+
+
+// ---------------------------------------------------------------------------
+// Hide system (graph-based because DOM is flat)
+// ---------------------------------------------------------------------------
+
+function buildHiddenNodeSets() {
+  const map = new Map(); // charId -> Set(dialogueId hidden due to ancestor)
+
+  gameDialogueMakerProject.characters.forEach((character) => {
+    const charId = Number(character.characterID);
+    const charObj = character;
+    const hidden = new Set();
+
+    // If character hides children: hide ALL dialogue nodes
+    if (charObj.hideChildren === true) {
+      (charObj.dialogueNodes || []).forEach((n) => hidden.add(Number(n.dialogueID)));
+      map.set(charId, hidden);
+      return;
+    }
+
+    // Hide descendants of any dialogue node with hideChildren===true
+    const { map: kidsMap } = buildChildrenMapForCharacter(charObj);
+
+    function dfsHide(fromId) {
+      const kids = kidsMap[Number(fromId)] || [];
+      kids.forEach((kid) => {
+        const kidId = Number(kid.dialogueID);
+        if (hidden.has(kidId)) return;
+        hidden.add(kidId);
+        dfsHide(kidId);
+      });
+    }
+
+    (charObj.dialogueNodes || []).forEach((n) => {
+      if (n.hideChildren === true) dfsHide(Number(n.dialogueID));
+    });
+
+    map.set(charId, hidden);
+  });
+
+  return map;
+}
+
+function applyHideToElementsGraph() {
+  // clear previous hide class
+  document.querySelectorAll(".blockWrap.hide").forEach((e) => e.classList.remove("hide"));
+
+  const hiddenSets = buildHiddenNodeSets();
+
+  gameDialogueMakerProject.characters.forEach((character) => {
+    const charId = Number(character.characterID);
+    const hidden = hiddenSets.get(charId) || new Set();
+
+    // hide dialogue nodes
+    hidden.forEach((dlgId) => {
+      const el = document.querySelector(
+        `.blockWrap.dialogue[data-character-id="${charId}"][data-dialogue-id="${dlgId}"]`
+      );
+      if (el) el.classList.add("hide");
+    });
+  });
+}
+
+
+// ---------------------------------------------------------------------------
+// Existing small helpers (unchanged)
+// ---------------------------------------------------------------------------
 
 function autoGrowTextArea(element) {
-  element.style.height = "5px"; // Temporarily shrink to measure the real needed size
-  element.style.height = (element.scrollHeight) + "px";
+  element.style.height = "5px";
+  element.style.height = element.scrollHeight + "px";
 }
-
-/* for logging all dom elements to console on a specific moment. pass in document.body */
-function logAllElements(element) {
-  console.log(element);
-  for (let i = 0; i < element.children.length; i++) {
-    logAllElements(element.children[i]);
-  }
-}
-
-
-// ---------------------------------------------------------------------------
-// Top-socket drag-to-connect (for empty node input dot)
-// SVG preview line while dragging
-// ---------------------------------------------------------------------------
-
-let __tempSocketDrag = null; // { g, path, start:{x,y} }
-
-function __ensureTempSocketDragSvg() {
-  const svg = document.getElementById("connectionsSvg");
-  if (!svg) return null;
-  const group = svg.querySelector("#connectionsGroup") || svg;
-
-  const NS = "http://www.w3.org/2000/svg";
-  const g = document.createElementNS(NS, "g");
-  g.setAttribute("data-temp", "socket-drag");
-
-  const path = document.createElementNS(NS, "path");
-  path.setAttribute("fill", "none");
-  path.setAttribute("stroke", "#2d86ff");
-  path.setAttribute("stroke-width", "3");
-  path.setAttribute("stroke-dasharray", "6 6");
-  path.style.vectorEffect = "non-scaling-stroke";
-  g.appendChild(path);
-
-  group.appendChild(g);
-  return { g, path };
-}
-
-function __removeTempSocketDragSvg() {
-  if (__tempSocketDrag && __tempSocketDrag.g) __tempSocketDrag.g.remove();
-  __tempSocketDrag = null;
-}
-
-// ✅ This provides the missing function that the top-socket logic expects
-window.mousedownOverTopConnectionSocket = function (event, socketEl) {
-  const nodeEl = socketEl.closest(".blockWrap");
-  if (!nodeEl) return null;
-
-  const characterId = Number(nodeEl.dataset.characterId);
-  const dialogueId = Number(nodeEl.dataset.dialogueId);
-
-  // globals your existing code expects
-  nodeIdFromWhichWeAreDrawing = dialogueId;
-  currentlyDrawingALine = true;
-
-  // start point = the socket center in "world" coords
-  const worldEl = document.getElementById("mainArea");
-  const start = (window.SVGConnections && SVGConnections.getWorldPointOfElement)
-    ? SVGConnections.getWorldPointOfElement(socketEl, worldEl)
-    : { x: 0, y: 0 };
-
-  // create temp svg preview
-  __removeTempSocketDragSvg();
-  const rec = __ensureTempSocketDragSvg();
-  if (rec) {
-    __tempSocketDrag = { ...rec, start };
-    rec.path.setAttribute("d", `M ${start.x} ${start.y} L ${start.x} ${start.y}`);
-  }
-
-  return {
-    line: null, // old LeaderLine placeholder
-    lineCharacterId: characterId,
-    lineFromNodeId: dialogueId,
-    lineToNodeId: null
-  };
-};
-
-// Update preview while dragging (namespaced so it doesn't stack)
-$(document).off("mousemove.__topSocketDrag").on("mousemove.__topSocketDrag", function (e) {
-  if (window.__svgEdgeDragging) return;
-  if (!currentlyDrawingALine) return;
-  if (!__tempSocketDrag) return;
-
-  const world = (window.SVGConnections && SVGConnections.screenToWorld)
-    ? SVGConnections.screenToWorld(e.clientX, e.clientY)
-    : { x: 0, y: 0 };
-
-  const s = __tempSocketDrag.start;
-  __tempSocketDrag.path.setAttribute("d", `M ${s.x} ${s.y} L ${world.x} ${world.y}`);
-});
-
-// Cleanup preview on mouseup (namespaced so it doesn't stack)
-$(document).off("mouseup.__topSocketDragCleanup").on("mouseup.__topSocketDragCleanup", function () {
-  if (!currentlyDrawingALine) return;
-  __removeTempSocketDragSvg();
-});

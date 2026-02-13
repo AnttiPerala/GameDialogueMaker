@@ -1,74 +1,53 @@
 // updateElementPositionInObject.js
+// Update ONLY the dragged element's position in the master object (WORLD coords).
+// Subtree shifting is handled by drawDialogueMakerProject.js draggable stop.
 
-function updateElementPositionInObject(element) {
+function updateElementPositionInObject(draggedElement) {
+  const el = draggedElement?.get?.(0) || draggedElement;
+  if (!el) return;
 
-  // Stored positions are "world" coordinates relative to #mainArea.
-  // Nodes can be nested, so offsetLeft/Top is NOT reliable.
-  // The app also uses CSS `zoom` on <body>, so we divide DOMRect by zoom.
-  function getBodyZoomFactorSafe() {
-    const zRaw = window.getComputedStyle(document.body).zoom;
-    let z = 1;
-    if (zRaw) z = String(zRaw).includes('%') ? (parseFloat(zRaw) / 100) : parseFloat(zRaw);
-    if (!isFinite(z) || z <= 0) z = 1;
-    return z;
+  const isCharacterRoot = el.classList.contains("characterRoot");
+  const characterId = Number(el.dataset.characterId);
+
+  if (!Number.isFinite(characterId)) return;
+
+  const charObj = gameDialogueMakerProject.characters.find(
+    (c) => Number(c.characterID) === characterId
+  );
+  if (!charObj) return;
+
+  // Get WORLD top-left from screen coords (handles zoom/pan via SVGConnections)
+  const r = el.getBoundingClientRect();
+
+  let newWorldLeft = 0;
+  let newWorldTop = 0;
+
+  if (window.SVGConnections && typeof SVGConnections.screenToWorld === "function") {
+    const w = SVGConnections.screenToWorld(r.left, r.top);
+    newWorldLeft = w.x;
+    newWorldTop = w.y;
+  } else {
+    // fallback (no zoom support)
+    const main = document.getElementById("mainArea")?.getBoundingClientRect();
+    if (!main) return;
+    newWorldLeft = r.left - main.left;
+    newWorldTop = r.top - main.top;
   }
 
-  function getWorldPosRelativeToMainArea($elem) {
-    const mainEl = document.getElementById('mainArea');
-    if (!mainEl || !$elem || !$elem.length) {
-      return { x: $elem.get(0).offsetLeft, y: $elem.get(0).offsetTop };
-    }
-
-    const z = getBodyZoomFactorSafe();
-    const elRect = $elem.get(0).getBoundingClientRect();
-    const mainRect = mainEl.getBoundingClientRect();
-
-    return {
-      x: (elRect.left - mainRect.left) / z,
-      y: (elRect.top - mainRect.top) / z,
-    };
-  }
-
-  // Make sure we always have a jQuery object
-  const $el = (element && element.jquery) ? element : $(element);
-
-  // ---- CHARACTER ROOT DRAG ----
-  if ($el.hasClass('characterRoot')) {
-
-    const characterId =
-      Number($el.attr('data-character-id')) ||
-      Number(($el.attr('id') || '').replace(/\D/g, ''));
-
-    const theNodeObjectToChange = getCharacterById(characterId);
-
-    if (theNodeObjectToChange) {
-      const { x: xPos, y: yPos } = getWorldPosRelativeToMainArea($el);
-      theNodeObjectToChange.characterNodeX = xPos;
-      theNodeObjectToChange.characterNodeY = yPos;
-    }
-
+  if (isCharacterRoot) {
+    charObj.characterNodeX = newWorldLeft;
+    charObj.characterNodeY = newWorldTop;
     return;
   }
 
-  // ---- DIALOGUE NODE DRAG ----
-  const characterId =
-    Number($el.attr('data-character-id')) ||
-    Number(($el.closest('.characterRoot').attr('data-character-id')) || '') ||
-    Number((($el.closest('.characterRoot').attr('id') || '').replace(/\D/g, '')));
+  const dialogueId = Number(el.dataset.dialogueId);
+  if (!Number.isFinite(dialogueId)) return;
 
-  const dialogueId =
-    Number(($el.attr('id') || '').replace(/\D/g, '')) ||
-    Number($el.attr('data-dialogue-id'));
+  const nodeObj = (charObj.dialogueNodes || []).find(
+    (n) => Number(n.dialogueID) === dialogueId
+  );
+  if (!nodeObj) return;
 
-  const theNodeObjectToChange = getDialogueNodeById(characterId, dialogueId);
-
-  if (theNodeObjectToChange) {
-    const { x: xPos, y: yPos } = getWorldPosRelativeToMainArea($el);
-    theNodeObjectToChange.dialogueNodeX = xPos;
-    theNodeObjectToChange.dialogueNodeY = yPos;
-  }
-
-  // IMPORTANT:
-  // Do NOT save/redraw here. This function should ONLY update the master object.
-  // Saving is handled by the drag-stop handler (so we can choose redraw:false).
+  nodeObj.dialogueNodeX = newWorldLeft;
+  nodeObj.dialogueNodeY = newWorldTop;
 }

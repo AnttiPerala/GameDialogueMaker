@@ -421,106 +421,145 @@ function findCharacterIDByPassingInDialogueNode(dialogueNode) {
 
 
 /* UNIVERSAL SYSTEM */
+/* UNIVERSAL SYSTEM (robust for FLAT DOM + clicks on child elements like + buttons) */
 function getInfoByPassingInDialogueNodeOrElement(input) {
-    let dialogueNode = input;
-    let isCharacter = false;
-    let id, characterId;
+  let dialogueNode = input;
+  let isCharacter = false;
 
-    //console.log('inside getInfoByPassingInDialogueNodeOrElement, input is: ', input);
+  // -----------------------------
+  // DOM / jQuery input
+  // -----------------------------
+  if (input && (input.jquery || input instanceof HTMLElement)) {
+    const $raw = input.jquery ? input : $(input);
 
-    // If the input is a jQuery object/DOM element
-    if (input.jquery || input instanceof HTMLElement) {
-        // Check if it has id attribute
-        if ($(input).attr('id')) {
-            id = $(input).attr('id');
-        } else {
-            // Otherwise, find the closest '.blockWrap' and get its id
-            id = $(input).closest('.blockWrap').attr('id');
-            console.log('id is ', id);
-        }
-        isCharacter = id.startsWith("char");
+    // Always resolve to the owning blockWrap
+    const $bw = $raw.hasClass("blockWrap") ? $raw : $raw.closest(".blockWrap");
 
-        // Find the closest .characterRoot and get its id
-        if (!isCharacter) { //the element is not a character root
-            characterId = $(input).closest('.characterRoot').attr('id').replace('char', '');
-        } else {
-            characterId = id.replace('char', ''); //remove "char"
-        }
-
-        let strippedId = id.replace(/(char|dialogue)/, '');
-
-        for (let character of gameDialogueMakerProject.characters) {
-            if (isCharacter) {
-                if (character.characterID == characterId) {
-                    return {
-                        characterID: characterId,
-                        characterName: character.characterName,
-                        characterNode: character,
-                        dialogueID: null,
-                        dialogueNode: null,
-                        isCharacter: true
-                    };
-                }
-            } else {
-                for (let node of character.dialogueNodes) {
-                    if (node.dialogueID == strippedId) {
-                        dialogueNode = node;
-                        break;
-                    }
-                }
-            }
-        }
-
-        // If a matching dialogueNode was found and a characterId was obtained from the DOM
-        if (dialogueNode && characterId) {
-            for (let character of gameDialogueMakerProject.characters) {
-                if (character.characterID == characterId) {
-                    return {
-                        characterID: characterId,
-                        characterName: character.characterName,
-                        characterNode: character,
-                        dialogueID: dialogueNode.dialogueID,
-                        dialogueNode: dialogueNode,
-                        isCharacter: false
-                    };
-                }
-            }
-        }
-    }
-
-
-    // If the input is a dialogueNode object
-    if (dialogueNode && dialogueNode.dialogueID) {
-        for (let character of gameDialogueMakerProject.characters) {
-            if (character.dialogueNodes) {
-                for (let node of character.dialogueNodes) {
-                    if (node === dialogueNode) {
-                        return {
-                            characterID: character.characterID,
-                            characterName: character.characterName,
-                            characterNode: character,
-                            dialogueID: dialogueNode.dialogueID,
-                            dialogueNode: dialogueNode,
-                            isCharacter: false
-                        };
-                    }
-                }
-            }
-        }
-    }
-
-
-    // No matching character or dialogue node was found
-    return {
+    if (!$bw.length) {
+      return {
         characterID: null,
         characterName: null,
         characterNode: null,
         dialogueID: null,
         dialogueNode: null,
-        isCharacter: false
-    };
-}
+        isCharacter: false,
+      };
+    }
 
+    const idAttr = String($bw.attr("id") || "");
+    isCharacter = $bw.hasClass("characterRoot") || idAttr.startsWith("char");
+
+    // ✅ Prefer explicit data attributes (works in flat layout)
+    let characterId =
+      Number($bw.attr("data-character-id")) ||
+      Number($bw.data("character-id"));
+
+    let dialogueId =
+      Number($bw.attr("data-dialogue-id")) ||
+      Number($bw.data("dialogue-id"));
+
+    // Fallbacks (older markup)
+    if (!characterId) {
+      // try from closest character root if exists
+      const $cr = $bw.hasClass("characterRoot") ? $bw : $bw.closest(".characterRoot");
+      const crId = String($cr.attr("id") || "");
+      characterId = Number(crId.replace(/\D/g, "")) || null;
+    }
+
+    if (!isCharacter && !dialogueId) {
+      // derive from id="dialogue7"
+      dialogueId = Number(idAttr.replace(/\D/g, "")) || null;
+    }
+
+    // Find character object
+    let characterObj = null;
+    if (characterId != null) {
+      characterObj = gameDialogueMakerProject.characters.find(
+        (c) => Number(c.characterID) === Number(characterId)
+      ) || null;
+    }
+
+    // If character wasn't found (edge case), try by locating the dialogueId globally
+    if (!characterObj && !isCharacter && dialogueId != null) {
+      characterObj = gameDialogueMakerProject.characters.find((c) =>
+        c.dialogueNodes?.some((n) => Number(n.dialogueID) === Number(dialogueId))
+      ) || null;
+
+      if (characterObj) characterId = characterObj.characterID;
+    }
+
+    if (!characterObj) {
+      return {
+        characterID: characterId ?? null,
+        characterName: null,
+        characterNode: null,
+        dialogueID: isCharacter ? null : (dialogueId ?? null),
+        dialogueNode: null,
+        isCharacter,
+      };
+    }
+
+    // Character root return
+    if (isCharacter) {
+      return {
+        characterID: characterId,
+        characterName: characterObj.characterName,
+        characterNode: characterObj,
+        dialogueID: null,
+        dialogueNode: null,
+        isCharacter: true,
+      };
+    }
+
+    // Dialogue node return
+    let nodeObj = null;
+    if (dialogueId != null) {
+      nodeObj = characterObj.dialogueNodes.find(
+        (n) => Number(n.dialogueID) === Number(dialogueId)
+      ) || null;
+    }
+
+    return {
+      characterID: characterId,
+      characterName: characterObj.characterName,
+      characterNode: characterObj,
+      dialogueID: nodeObj ? nodeObj.dialogueID : (dialogueId ?? null),
+      dialogueNode: nodeObj,
+      isCharacter: false,
+    };
+  }
+
+  // -----------------------------
+  // dialogueNode object input
+  // -----------------------------
+  if (dialogueNode && dialogueNode.dialogueID) {
+    for (let character of gameDialogueMakerProject.characters) {
+      if (!character.dialogueNodes) continue;
+      for (let node of character.dialogueNodes) {
+        if (node === dialogueNode) {
+          return {
+            characterID: character.characterID,
+            characterName: character.characterName,
+            characterNode: character,
+            dialogueID: dialogueNode.dialogueID,
+            dialogueNode: dialogueNode,
+            isCharacter: false,
+          };
+        }
+      }
+    }
+  }
+
+  // No match
+  return {
+    characterID: null,
+    characterName: null,
+    characterNode: null,
+    dialogueID: null,
+    dialogueNode: null,
+    isCharacter: false,
+  };
+}
 
 
 
