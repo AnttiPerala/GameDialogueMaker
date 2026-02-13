@@ -1,58 +1,53 @@
+// storeMasterObjectToLocalStorage.js
+
 let myObjectTest;
 
-function storeMasterObjectToLocalStorage() {
+/**
+ * Save master object to localStorage.
+ * By default it also redraws (old behavior), but you can disable redraw:
+ *   storeMasterObjectToLocalStorage({ redraw: false })
+ */
+function storeMasterObjectToLocalStorage(opts = {}) {
+  const { redraw = true } = opts;
 
-    //console.log('trying to store to local storage');
+  // remove HTML element references from the master object (these should then be recreated by redrawing the entire object)
+  for (let character of gameDialogueMakerProject.characters) {
+    character.nodeElement = '';
+    for (let dialogueNode of character.dialogueNodes) {
+      dialogueNode.nodeElement = '';
+      dialogueNode.nextNodeLineElem = '';
+      for (let outgoingLine of dialogueNode.outgoingLines) {
+        outgoingLine.lineElem = '';
+      }
+    }
+  }
 
-    
-        // remove HTML element references from the master object (these should then be recreated by redrawing the entire object)
-        for (let character of gameDialogueMakerProject.characters) {
-            character.nodeElement = '';
-            for (let dialogueNode of character.dialogueNodes) {
-                dialogueNode.nodeElement = '';
-                dialogueNode.nextNodeLineElem = '';
-                for (let outgoingLine of dialogueNode.outgoingLines) {
-                    outgoingLine.lineElem = '';
-                }
-            }
-        }
+  localStorage.setItem("gameDialogueMakerProject", JSON.stringify(gameDialogueMakerProject));
 
-        //myLog(`Should store object now: ${gameDialogueMakerProject}`, 1, fileInfo = getFileInfo());
+  // visual feedback (if save button exists)
+  const $element = $('#save img');
+  if ($element && $element.length) {
+    $element.addClass('flashgreen');
+    setTimeout(() => {
+      $element.removeClass('flashgreen');
+    }, 1000);
+  }
 
-        localStorage.setItem("gameDialogueMakerProject", JSON.stringify(gameDialogueMakerProject));
+  // put some empty divs back in the object (so the app keeps working without reload)
+  for (let character of gameDialogueMakerProject.characters) {
+    character.nodeElement = $('<div class="blockWrap characterRoot"></div>');
+    for (let dialogueNode of character.dialogueNodes) {
+      dialogueNode.nodeElement = $('<div></div>');
+      for (let outgoingLine of dialogueNode.outgoingLines) {
+        outgoingLine.lineElem = '';
+      }
+    }
+  }
 
-        const $element = $('#save img');
-
-        // Add the class
-        $element.addClass('flashgreen');
-
-        // Remove the class after 1 second
-        setTimeout(() => {
-            $element.removeClass('flashgreen');
-        }, 1000);
-
-
-
-        //put some empty divs back in the object
-        for (let character of gameDialogueMakerProject.characters) {
-            character.nodeElement = $('<div class="blockWrap characterRoot"></div>');
-            for (let dialogueNode of character.dialogueNodes) {
-                dialogueNode.nodeElement = $('<div></div>');
-                for (let outgoingLine of dialogueNode.outgoingLines) {
-                    outgoingLine.lineElem = '';
-                }
-            }
-        }
-
-        //delete everything
-
-        clearCanvasBeforeReDraw();
-
-        //redraw object
-
-        drawDialogueMakerProject();
-    
-    //$('svg').css({ 'zoom': zoomValue + '%' }); //also change the lines zoom
-
-  
+  // IMPORTANT CHANGE:
+  // Only redraw when caller asks for it (e.g. Autolayout, manual Save button).
+  if (redraw) {
+    clearCanvasBeforeReDraw();
+    drawDialogueMakerProject();
+  }
 }

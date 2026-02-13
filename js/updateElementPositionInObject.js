@@ -1,45 +1,74 @@
-function updateElementPositionInObject(draggedElement, blockObject) {
-    // Accept DOM element, jQuery object, or id string
-    let el = draggedElement;
+// updateElementPositionInObject.js
 
-    // If it's a jQuery object, unwrap it
-    if (el && el.jquery) el = el[0];
+function updateElementPositionInObject(element) {
 
-    // If it's an id string, resolve it
-    if (typeof el === "string") el = document.getElementById(el);
+  // Stored positions are "world" coordinates relative to #mainArea.
+  // Nodes can be nested, so offsetLeft/Top is NOT reliable.
+  // The app also uses CSS `zoom` on <body>, so we divide DOMRect by zoom.
+  function getBodyZoomFactorSafe() {
+    const zRaw = window.getComputedStyle(document.body).zoom;
+    let z = 1;
+    if (zRaw) z = String(zRaw).includes('%') ? (parseFloat(zRaw) / 100) : parseFloat(zRaw);
+    if (!isFinite(z) || z <= 0) z = 1;
+    return z;
+  }
 
-    if (!el) return;
-
-    const zoom = (typeof getBodyZoomFactor === "function") ? getBodyZoomFactor() : 1;
-
-    const mainArea = document.getElementById("mainArea");
-    if (!mainArea) return;
-
-    const mainRect = mainArea.getBoundingClientRect();
-    const elRect = el.getBoundingClientRect();
-
-    // World position inside mainArea, compensated for CSS zoom
-    const left = (elRect.left - mainRect.left) / zoom;
-    const top  = (elRect.top  - mainRect.top)  / zoom;
-
-    const id = el.id;
-
-    // Store back to your data model
-    if (blockObject && blockObject[id]) {
-        blockObject[id].left = left;
-        blockObject[id].top = top;
-        return;
+  function getWorldPosRelativeToMainArea($elem) {
+    const mainEl = document.getElementById('mainArea');
+    if (!mainEl || !$elem || !$elem.length) {
+      return { x: $elem.get(0).offsetLeft, y: $elem.get(0).offsetTop };
     }
 
-    if (blockObject && blockObject.blocks && blockObject.blocks[id]) {
-        blockObject.blocks[id].left = left;
-        blockObject.blocks[id].top = top;
-        return;
+    const z = getBodyZoomFactorSafe();
+    const elRect = $elem.get(0).getBoundingClientRect();
+    const mainRect = mainEl.getBoundingClientRect();
+
+    return {
+      x: (elRect.left - mainRect.left) / z,
+      y: (elRect.top - mainRect.top) / z,
+    };
+  }
+
+  // Make sure we always have a jQuery object
+  const $el = (element && element.jquery) ? element : $(element);
+
+  // ---- CHARACTER ROOT DRAG ----
+  if ($el.hasClass('characterRoot')) {
+
+    const characterId =
+      Number($el.attr('data-character-id')) ||
+      Number(($el.attr('id') || '').replace(/\D/g, ''));
+
+    const theNodeObjectToChange = getCharacterById(characterId);
+
+    if (theNodeObjectToChange) {
+      const { x: xPos, y: yPos } = getWorldPosRelativeToMainArea($el);
+      theNodeObjectToChange.characterNodeX = xPos;
+      theNodeObjectToChange.characterNodeY = yPos;
     }
 
-    // Fallback if caller passed the record itself
-    if (blockObject && typeof blockObject === "object") {
-        blockObject.left = left;
-        blockObject.top = top;
-    }
+    return;
+  }
+
+  // ---- DIALOGUE NODE DRAG ----
+  const characterId =
+    Number($el.attr('data-character-id')) ||
+    Number(($el.closest('.characterRoot').attr('data-character-id')) || '') ||
+    Number((($el.closest('.characterRoot').attr('id') || '').replace(/\D/g, '')));
+
+  const dialogueId =
+    Number(($el.attr('id') || '').replace(/\D/g, '')) ||
+    Number($el.attr('data-dialogue-id'));
+
+  const theNodeObjectToChange = getDialogueNodeById(characterId, dialogueId);
+
+  if (theNodeObjectToChange) {
+    const { x: xPos, y: yPos } = getWorldPosRelativeToMainArea($el);
+    theNodeObjectToChange.dialogueNodeX = xPos;
+    theNodeObjectToChange.dialogueNodeY = yPos;
+  }
+
+  // IMPORTANT:
+  // Do NOT save/redraw here. This function should ONLY update the master object.
+  // Saving is handled by the drag-stop handler (so we can choose redraw:false).
 }

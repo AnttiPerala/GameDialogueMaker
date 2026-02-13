@@ -256,21 +256,25 @@ const draggableSettings = {
   },
 
   stop: function (event, ui) {
-    // save new position to master object
-    updateElementPositionInObject(ui.helper);
+  // 1) write new x/y into the master object
+  updateElementPositionInObject(ui.helper);
 
-    // ✅ don't show stale circles; rebuild after SVG updated to new geometry
-    $(".conditionCircle").hide();
+  // 2) persist to localStorage WITHOUT redrawing (critical)
+  if (!eraseMode) storeMasterObjectToLocalStorage({ redraw: false });
+
+  // 3) rebuild circles after SVG updates
+  $(".conditionCircle").hide();
+
+  requestAnimationFrame(() => {
+    if (window.SVGConnections) SVGConnections.requestUpdate();
 
     requestAnimationFrame(() => {
-      if (window.SVGConnections) SVGConnections.requestUpdate();
-
-      requestAnimationFrame(() => {
-        rebuildConditionCirclesFromSvgConnections(window.__gdmAllConnections || []);
-        $(".conditionCircle").show();
-      });
+      rebuildConditionCirclesFromSvgConnections(window.__gdmAllConnections || []);
+      $(".conditionCircle").show();
     });
-  },
+  });
+},
+
 };
 
 

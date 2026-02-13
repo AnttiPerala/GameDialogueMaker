@@ -1,39 +1,48 @@
 function createDialogueHTMLElement(dialogueNode) {
 
-  let nodeInfo = getInfoByPassingInDialogueNodeOrElement(dialogueNode);
-  let dialogueElement = '';
-  let activeNextNode = '';
+    let nodeInfo = getInfoByPassingInDialogueNodeOrElement(dialogueNode);
+    let dialogueElement = ''; //the final product
+    let activeNextNode = '';
 
-  if (dialogueNode.nextNode > 0) {
-    activeNextNode = dialogueNode.nextNode;
-  }
+    if (dialogueNode.nextNode > 0){ //only display the number if it's greater than zero
+        activeNextNode = dialogueNode.nextNode;
+    }
 
-  // if character, return immediately because character nodes are created elsewhere
-  if (nodeInfo.isCharacter === true) {
-    return null;
-  }
 
-  if (dialogueNode.dialogueType == 'question') {
-    dialogueElement = createQuestionBlock(nodeInfo);
-  }
+    //new approach
 
-  if (dialogueNode.dialogueType == 'answer') {
-    dialogueElement = createAnswerBlock(nodeInfo);
-  }
+    //if character, return immediately because character nodes are created inside drawDialogueMakerProject
 
-  if (dialogueNode.dialogueType == 'line') {
-    dialogueElement = createLineBlock(nodeInfo);
-  }
+    if (nodeInfo.isCharacter === true){
+        return;
+    }
 
-  if (dialogueNode.dialogueType == 'fight') {
-    dialogueElement = createFightBlock(nodeInfo);
-  }
+    if (dialogueNode.dialogueType == 'question'){
+       dialogueElement = createQuestionBlock(nodeInfo);
+       
+       
+    }
 
-  // store element reference in object
-  nodeInfo.dialogueNode.nodeElement = dialogueElement;
+    if (dialogueNode.dialogueType == 'answer') {
+        dialogueElement = createAnswerBlock(nodeInfo);
+    }
 
-  return dialogueElement;
+    if (dialogueNode.dialogueType == 'line') {
+       dialogueElement = createLineBlock(nodeInfo);
+    }
+
+    if (dialogueNode.dialogueType == 'fight') {
+        dialogueElement = createFightBlock(nodeInfo);
+    }
+
+    //store element reference in object
+    nodeInfo.dialogueNode.nodeElement = dialogueElement;
+
+    
+
+
+    return dialogueElement;
 }
 
-// ✅ make it accessible across files
 window.createDialogueHTMLElement = createDialogueHTMLElement;
+
