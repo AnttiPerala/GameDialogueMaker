@@ -79,9 +79,7 @@ function drawDialogueMakerProject() {
         $(childElem).css({
           position: "absolute",
           left: (childAbsX - parentAbsX) + "px",
-          top:
-            (childAbsY - parentAbsY +
-              (childNode.dialogueType === "answer" ? 10 : 0)) + "px"
+          top: (childAbsY - parentAbsY) + "px"
         });
 
         $(parentElem).append(childElem);

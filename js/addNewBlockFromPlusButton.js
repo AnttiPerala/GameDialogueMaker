@@ -222,7 +222,7 @@ function positionNewAnswersUnderQuestion(characterId, questionId) {
   // Compute Y below question in world coords
   const qr = qEl.getBoundingClientRect();
   const qBottomWorld = getWorldFromClient(qr.left, qr.top + qr.height).y;
-  const targetY = qBottomWorld + 90;
+  const targetY = qBottomWorld + 110;
 
   // Measure answer width (world) from any existing answer/dialogue node
   const sampleAnswerEl =
