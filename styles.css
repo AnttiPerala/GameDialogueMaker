@@ -105,7 +105,7 @@ body {
 .block {
 
     /* min-width: 200px; */
-    width: 300px;
+    width: 270px;
    /*  background: #4b4b4b; */
     margin: 1rem;
     border-radius: 1rem;
@@ -117,7 +117,7 @@ body {
     z-index: 2;
     transform-origin: 50% 50%;
     overflow: hidden;
-    padding:15px;
+    padding:10px;
     box-shadow: #000000c2 2px 2px 2px 2px;
 
 }
@@ -195,6 +195,7 @@ body {
 
 .dialoguNodeTopRow{
     display: flex;
+    align-items: center;
 }
 
 .eyeImage {

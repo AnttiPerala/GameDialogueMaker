@@ -14,25 +14,49 @@ $(document).ready(function () {
   drawDialogueMakerProject();
 
 $("#mainArea").draggable({
+  // (optional but recommended) prevent text selection weirdness
+  cancel: "input, textarea, select, option, button, .blockPlusButton, .eyeImage, .topConnectionSocket, .conditionCircle",
+
   start: function (event, ui) {
     const z = getBodyZoomFactor();
-    ui.position.left /= z;
-    ui.position.top /= z;
-    if (ui.originalPosition) {
-      ui.originalPosition.left /= z;
-      ui.originalPosition.top /= z;
-    }
 
-    // ✅ hide circles while panning
+    // store starting mouse + starting left/top (numbers)
+    const $el = $(this);
+    const startLeft = parseFloat($el.css("left")) || 0;
+    const startTop  = parseFloat($el.css("top")) || 0;
+
+    $el.data("__panStart", {
+      pageX: event.pageX,
+      pageY: event.pageY,
+      left: startLeft,
+      top: startTop,
+      zoom: z
+    });
+
     $(".conditionCircle").hide();
   },
 
   drag: function (event, ui) {
-    const z = getBodyZoomFactor();
-    ui.position.left /= z;
-    ui.position.top /= z;
+    const $el = $(this);
+    const s = $el.data("__panStart");
+    if (!s) return;
 
-    // ✅ just keep SVG updated; circles stay hidden
+    const z = s.zoom || getBodyZoomFactor();
+
+    // mouse movement in *screen* px → convert to *world* px by dividing by zoom
+    const dx = (event.pageX - s.pageX) / z;
+    const dy = (event.pageY - s.pageY) / z;
+
+    const newLeft = s.left + dx;
+    const newTop  = s.top + dy;
+
+    // set actual position yourself (don’t trust ui.position under zoom)
+    $el.css({ left: newLeft + "px", top: newTop + "px" });
+
+    // keep ui.position in sync so jQuery UI doesn't fight you
+    ui.position.left = newLeft;
+    ui.position.top  = newTop;
+
     if (!window.__panRAF) {
       window.__panRAF = requestAnimationFrame(() => {
         window.__panRAF = null;
@@ -42,10 +66,9 @@ $("#mainArea").draggable({
   },
 
   stop: function (event, ui) {
-    // ✅ save pan position once (if you store it)
+    // save once, no redraw
     if (!eraseMode) storeMasterObjectToLocalStorage({ redraw: false });
 
-    // ✅ update SVG then rebuild circles and show them again
     requestAnimationFrame(() => {
       if (window.SVGConnections) SVGConnections.requestUpdate();
       requestAnimationFrame(() => {
