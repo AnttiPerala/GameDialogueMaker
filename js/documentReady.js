@@ -13,41 +13,50 @@ $(document).ready(function () {
 
   drawDialogueMakerProject();
 
-  // canvas drag (panning)
-  $("#mainArea").draggable({
-    cancel: ".blockWrap, .block, .dialogue, .characterRoot, .topConnectionSocket, .blockPlusButton, input, textarea, select, button, .conditionCircle",
-
-    start: function (event, ui) {
-      // Compensate for CSS zoom to prevent initial jump when panning
-      const zRaw = window.getComputedStyle(document.body).zoom;
-      const z = zRaw ? (String(zRaw).includes('%') ? (parseFloat(zRaw) / 100) : parseFloat(zRaw)) : 1;
-      const zz = (!isFinite(z) || z <= 0) ? 1 : z;
-      ui.position.left /= zz;
-      ui.position.top /= zz;
-    },
-
-    drag: throttle(function (event, ui) {
-      // Keep compensation during panning
-      const zRaw = window.getComputedStyle(document.body).zoom;
-      const z = zRaw ? (String(zRaw).includes('%') ? (parseFloat(zRaw) / 100) : parseFloat(zRaw)) : 1;
-      const zz = (!isFinite(z) || z <= 0) ? 1 : z;
-      ui.position.left /= zz;
-      ui.position.top /= zz;
-
-      $(".conditionCircle").hide();
-      if (window.SVGConnections) SVGConnections.requestUpdate();
-    }, 20),
-
-    stop: function (event, ui) {
-      if (ui.position.left === ui.originalPosition.left && ui.position.top === ui.originalPosition.top) {
-        $(".conditionCircle").show();
-        return;
-      }
-      clearCanvasBeforeReDraw();
-      drawDialogueMakerProject();
-      $(".conditionCircle").show();
+$("#mainArea").draggable({
+  start: function (event, ui) {
+    const z = getBodyZoomFactor();
+    ui.position.left /= z;
+    ui.position.top /= z;
+    if (ui.originalPosition) {
+      ui.originalPosition.left /= z;
+      ui.originalPosition.top /= z;
     }
-  });
+
+    // ✅ hide circles while panning
+    $(".conditionCircle").hide();
+  },
+
+  drag: function (event, ui) {
+    const z = getBodyZoomFactor();
+    ui.position.left /= z;
+    ui.position.top /= z;
+
+    // ✅ just keep SVG updated; circles stay hidden
+    if (!window.__panRAF) {
+      window.__panRAF = requestAnimationFrame(() => {
+        window.__panRAF = null;
+        if (window.SVGConnections) SVGConnections.requestUpdate();
+      });
+    }
+  },
+
+  stop: function (event, ui) {
+    // ✅ save pan position once (if you store it)
+    if (!eraseMode) storeMasterObjectToLocalStorage({ redraw: false });
+
+    // ✅ update SVG then rebuild circles and show them again
+    requestAnimationFrame(() => {
+      if (window.SVGConnections) SVGConnections.requestUpdate();
+      requestAnimationFrame(() => {
+        rebuildConditionCirclesFromSvgConnections(window.__gdmAllConnections || []);
+        $(".conditionCircle").show();
+      });
+    });
+  }
+});
+
+
 
   // ---------------------------------------------------------------------------
   // SVG connection drag behavior:
