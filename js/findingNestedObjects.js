@@ -36,63 +36,83 @@ function getCharacterById(id) {
 }
 
 
-function findDialogueObjectBasedOnPassedInHtmlElement(elem){
+function findDialogueObjectBasedOnPassedInHtmlElement(elem) {
+  const $el = (elem && elem.jquery) ? elem : $(elem);
 
-    console.log('inside findDialogueObjectBasedOnPassedInHtmlElement and elem  is:', elem);
+  // Resolve the owning node wrapper
+  const $bw = $el.hasClass("blockWrap") ? $el : $el.closest(".blockWrap");
+  if (!$bw.length) return null;
 
-    //this one is passed in text fields and inputs from the dialogue node
+  // Character root has no dialogue object (it uses outgoingLines on character)
+  if ($bw.hasClass("characterRoot")) return null;
 
-    let characterID ='';
-    let dialogueID='';
+  // ✅ Prefer data attributes (flat DOM safe)
+  let characterId =
+    Number($bw.attr("data-character-id")) ||
+    Number($bw.data("character-id"));
 
-    //check for character root, both in the situation where the element was the root or one of the direct children 
-    if ($(elem).closest('.blockWrap').hasClass('characterRoot') || $(elem).hasClass('characterRoot')) { //if the element is already the characterRoot
-        
-        if ($(elem).closest('.blockWrap').length > 0){ //whether elem is inside an element with the class .blockWrap.
-            characterID = $(elem).closest('.blockWrap').attr('id').replace(/\D/g, ''); //get just the number from the id
-        } else {
-            characterID = $(elem).attr('id').replace(/\D/g, ''); //get just the number from the id. I think this assumes the element itself is the root
-        }
-        
-        dialogueID = 0;
-    } else {
-        //console.log('not character root, id was: ' + $(elem).closest('.blockWrap').attr('id'));
-          //regular nodes
-        dialogueID = $(elem).closest('.blockWrap').attr('id').replace(/\D/g, ''); //get just the number from the id
+  let dialogueId =
+    Number($bw.attr("data-dialogue-id")) ||
+    Number($bw.data("dialogue-id"));
 
-        characterID = $(elem).closest('.characterRoot').attr('id').replace(/\D/g, ''); //get just the number from the id
-    }
+  // Fallback: parse from id="dialogue7"
+  if (!dialogueId) {
+    const idAttr = String($bw.attr("id") || "");
+    dialogueId = Number(idAttr.replace(/\D/g, "")) || null;
+  }
 
+  if (!dialogueId) return null;
 
-    let dialogueNodeFromObject = getDialogueNodeById(characterID, dialogueID);
+  // Find character object
+  let characterObj = null;
 
-    return dialogueNodeFromObject;
+  if (characterId) {
+    characterObj = gameDialogueMakerProject.characters.find(
+      (c) => Number(c.characterID) === Number(characterId)
+    ) || null;
+  }
 
+  // If characterId missing/incorrect, find by dialogueId globally
+  if (!characterObj) {
+    characterObj = gameDialogueMakerProject.characters.find((c) =>
+      c.dialogueNodes?.some((n) => Number(n.dialogueID) === Number(dialogueId))
+    ) || null;
+  }
+
+  if (!characterObj) return null;
+
+  // Return the dialogue node object
+  return characterObj.dialogueNodes.find(
+    (n) => Number(n.dialogueID) === Number(dialogueId)
+  ) || null;
 }
 
 function findCharacterNodeBasedOnPassedInHtmlElement(elem) {
-    console.log('inside findCharacterNodeBasedOnPassedInHtmlElement, elem is: ', elem);
+  const $el = (elem && elem.jquery) ? elem : $(elem);
 
-    let characterID;
+  // Prefer the nearest owning blockWrap, then use its data-character-id
+  const $bw = $el.hasClass("blockWrap") ? $el : $el.closest(".blockWrap");
+  if (!$bw.length) return null;
 
-    if ($(elem).hasClass('characterRoot') || $(elem).closest('.blockWrap').hasClass('characterRoot')){ //if the element is already the characterRoot
-        if ($(elem).hasClass('characterRoot')){
-            characterID = $(elem).attr('id').replace(/\D/g, ''); //get just the number from the id
-        } else {
-            characterID = $(elem).closest('.blockWrap').attr('id').replace(/\D/g, ''); //get just the number from the id
-        }
-        
-        
-    } else { //the element is not the characterRoot
-        characterID = $(elem).closest('.characterRoot').attr('id').replace(/\D/g, ''); //get just the number from the id
+  // ✅ Get characterId from data attr (works in flat DOM)
+  let characterID =
+    Number($bw.attr("data-character-id")) ||
+    Number($bw.data("character-id"));
 
+  // Fallback: try closest characterRoot if present
+  if (!characterID) {
+    const $cr = $bw.hasClass("characterRoot") ? $bw : $bw.closest(".characterRoot");
+    if ($cr.length) {
+      characterID =
+        Number($cr.attr("data-character-id")) ||
+        Number($cr.data("character-id")) ||
+        Number(String($cr.attr("id") || "").replace(/\D/g, ""));
     }
+  }
 
+  if (!characterID) return null;
 
-    let characterNodeFromObject = getCharacterById(characterID);
-
-    return characterNodeFromObject;
-
+  return getCharacterById(characterID);
 }
 
 //find the connecting line based on the 'toNode' values of lines

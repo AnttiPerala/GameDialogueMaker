@@ -1,3 +1,9 @@
+// drawDialogueMakerProject.js
+// FLAT DOM + real subtree drag + SVGConnections lines + stub dotted hints when hideChildren=true
+
+// ------------------------------
+// Character HTML
+// ------------------------------
 function createCharacterNodeHTML(character) {
 
   let eyeImageSource;
@@ -54,7 +60,10 @@ function createCharacterNodeHTML(character) {
   return characterNodeHTML;
 }
 
-/* DRAWING THE LINES (SVG version: returns a connection descriptor) */
+
+// ------------------------------
+// DRAWING THE LINES (SVGConnections descriptor)
+// ------------------------------
 function drawLines(sourceId, targetId, isCharacter, outgoingLine, characterId) {
 
   let sourceElement, plusButtonElem;
@@ -88,7 +97,6 @@ function drawLines(sourceId, targetId, isCharacter, outgoingLine, characterId) {
   );
 
   if (!targetNode) {
-    // Find the character that owns targetId
     targetCharacter = gameDialogueMakerProject.characters.find((char) =>
       char.dialogueNodes.some((node) => node.dialogueID == targetId)
     );
@@ -102,7 +110,7 @@ function drawLines(sourceId, targetId, isCharacter, outgoingLine, characterId) {
 
   if (!targetNode) return null;
 
-  // --- Mark target top socket as having a line (keeps your existing UI/state behavior) ---
+  // --- Mark target top socket as having a line ---
   let lineEndNodeElement = targetNode.nodeElement;
   let lineEndElementTopSocket = $(lineEndNodeElement).find(".topConnectionSocket").eq(0);
 
@@ -113,7 +121,6 @@ function drawLines(sourceId, targetId, isCharacter, outgoingLine, characterId) {
   // --- Return connection descriptor for SVGConnections ---
   const normalizedSourceId = isCharacter ? 0 : sourceId;
 
-  // Make ID stable + unique even for cross-character connections
   const fromChar = Number(characterId);
   const toChar = Number(targetCharacter.characterID);
   const fromNode = Number(normalizedSourceId);
@@ -124,6 +131,7 @@ function drawLines(sourceId, targetId, isCharacter, outgoingLine, characterId) {
 
   return {
     id: connId,
+    type: "line",
     from: {
       characterId: fromChar,
       dialogueId: fromNode,       // 0 for character root, else dialogueID
@@ -135,45 +143,43 @@ function drawLines(sourceId, targetId, isCharacter, outgoingLine, characterId) {
       dialogueId: toNode,
     },
 
-    // Keep references so you can map back later without re-searching
     _outgoingLineRef: outgoingLine,
     _fromPlusButtonEl: plusButtonElem.get(0),
     _toSocketEl: lineEndElementTopSocket?.get(0) || null,
   };
 }
 
+
+// ------------------------------
+// Condition circles from SVG paths
+// ------------------------------
 function rebuildConditionCirclesFromSvgConnections(allConnections) {
-  // remove old ones
   document.querySelectorAll('.conditionCircle').forEach(e => e.remove());
 
   for (const conn of allConnections) {
     if (!conn) continue;
 
-    // Only real outgoing connections get condition circles (skip "next" dotted)
-    if (conn.type === "next") continue;
+    // Only real outgoing connections get condition circles
+    if (conn.type === "next" || conn.type === "stub") continue;
 
-    // Find the SVG path for this connection
     const path =
-      document.querySelector(`#connectionsSvg g[data-conn-id="${conn.id}"] path.connection-path`)
-      || document.querySelector(`#connectionsSvg g.conn[data-conn-id="${conn.id}"] path.connection-path`)
-      || document.querySelector(`#connectionsSvg g[data-conn-id="${conn.id}"] path`)
-      || document.querySelector(`#connectionsSvg g[data-connid="${conn.id}"] path`);
+      document.querySelector(`#connectionsSvg g[data-conn-id="${conn.id}"] path.connection-path`) ||
+      document.querySelector(`#connectionsSvg g.conn[data-conn-id="${conn.id}"] path.connection-path`) ||
+      document.querySelector(`#connectionsSvg g[data-conn-id="${conn.id}"] path`) ||
+      document.querySelector(`#connectionsSvg g[data-connid="${conn.id}"] path`);
 
     if (!path) continue;
 
-    // ✅ if the connection itself is hidden or rendered as a stub, don't draw a condition circle
+    // If hidden / stub, skip
     const g = path.closest("g");
     if (!g || g.style.display === "none" || g.classList.contains("is-stub")) continue;
 
-    // Match the old data attributes your condition system expects
     const characterId = conn.from.characterId;
     const fromNode = conn.from.dialogueId; // 0 for character root
     const toNode = conn.to.dialogueId;
 
-    // drawConditionCircle must exist in your project already
     drawConditionCircle(path, characterId, fromNode, toNode);
 
-    // Apply withCondition if master object line has conditions
     const outgoing = conn._outgoingLineRef;
     if (outgoing && outgoing.transitionConditions && outgoing.transitionConditions.length > 0) {
       const circle = document.querySelector(
@@ -188,14 +194,11 @@ function rebuildConditionCirclesFromSvgConnections(allConnections) {
 }
 
 
-
-// drawDialogueMakerProject.js
-
-/* This function will loop through the entire project object and write it to the page as nodes (FLAT DOM) */
+// ------------------------------
+// drawDialogueMakerProject (FLAT DOM)
+// ------------------------------
 function drawDialogueMakerProject() {
   let wrapper = $('<div class="wrapper"></div>');
-
-  // Ensure wrapper can host absolute-positioned children
   wrapper.css({ position: "relative" });
 
   // --- 1) Draw nodes (FLAT) ---
@@ -203,7 +206,6 @@ function drawDialogueMakerProject() {
     let characterElem = createCharacterNodeHTML(character);
     wrapper.append(characterElem);
 
-    // All dialogue nodes are appended as siblings (flat)
     (character.dialogueNodes || []).forEach((dialogueNode) => {
       const dialogueElem = createDialogueHTMLElement(dialogueNode);
 
@@ -222,23 +224,19 @@ function drawDialogueMakerProject() {
 
   const main = $("#mainArea");
 
-  // detach the SVG overlay if it exists (keeps event listeners + state)
+  // Detach SVG overlay if it exists
   const svgOverlay = main.children("#connectionsSvg").detach();
 
-  // clear everything else
   main.empty();
 
-  // put SVG back first, then wrapper
   if (svgOverlay.length) main.append(svgOverlay);
   main.append(wrapper);
 
-  SVGConnections.init({ worldId: "mainArea" }); // idempotent
+  SVGConnections.init({ worldId: "mainArea" });
 
-  // Make everything draggable
   $(".characterRoot").draggable(draggableSettings).css({ position: "absolute" });
   $(".dialogue").draggable(draggableSettings).css({ position: "absolute" });
 
-  // Hide system now must be graph-based (because DOM is flat)
   applyHideToElementsGraph();
 
   $(".dialogueTextArea").each(function () {
@@ -248,49 +246,42 @@ function drawDialogueMakerProject() {
   // --- 2) Build connections ---
   const allConnections = [];
 
-  // Helper: should this node be hidden due to an ancestor with hideChildren?
+  // Build graph-hidden set
   const hiddenNodeSetByCharacter = buildHiddenNodeSets();
 
-  gameDialogueMakerProject.characters.forEach((character) => {
-    const charId = Number(character.characterID);
-    const hiddenSet = hiddenNodeSetByCharacter.get(charId) || new Set();
+  // IMPORTANT: we do NOT create our own stubs here unless the SOURCE node itself hides children.
+  // For "target is hidden", we still push the real connection and SVGConnections will render it as a stub.
+  function pushStubForOutgoingLine(outgoingLine, isCharacter, characterId, fromNodeId) {
+    const fromChar = Number(characterId);
+    const fromNode = isCharacter ? 0 : Number(fromNodeId);
+    const fromSocket = Number(outgoingLine.fromSocket) || 0;
 
-    // If character hides children, we still show the character root but hide nodes + lines
-    const characterHides = character.hideChildren === true;
-
-    if (!characterHides) {
-      drawOutgoingLines(character, true, charId, hiddenSet);
-    }
-
-    (character.dialogueNodes || []).forEach((dialogueNode) => {
-      const id = Number(dialogueNode.dialogueID);
-      if (hiddenSet.has(id)) return; // node hidden -> skip its outgoing lines
-      if (dialogueNode.hideChildren === true) {
-        // still allow its own outgoing lines? usually "hideChildren" means hide descendants + lines
-        // so skip
-        return;
-      }
-      drawOutgoingLines(dialogueNode, false, charId, hiddenSet);
+    allConnections.push({
+      id: `stub_${fromChar}_${fromNode}_${fromSocket}_${Date.now()}_${Math.random().toString(16).slice(2)}`,
+      type: "stub",
+      from: {
+        characterId: fromChar,
+        dialogueId: fromNode,
+        socketIndex: fromSocket,
+        isCharacter: !!isCharacter,
+      },
+      to: null,
+      _floatingEnd: null,
     });
-  });
-
-  // keep for drag-end rebuilds
-  window.__gdmAllConnections = allConnections;
-
-  SVGConnections.render(allConnections);
-
-  requestAnimationFrame(() => {
-    SVGConnections.requestUpdate();
-    requestAnimationFrame(() => {
-      rebuildConditionCirclesFromSvgConnections(allConnections);
-    });
-  });
+  }
 
   function drawOutgoingLines(node, isCharacter, characterId, hiddenSet) {
+    const nodeHides = node && node.hideChildren === true;
+
     // Normal outgoingLines
     (node.outgoingLines || []).forEach((outgoingLine) => {
-      const toId = Number(outgoingLine.toNode);
-      if (Number.isFinite(toId) && toId > 0 && hiddenSet && hiddenSet.has(toId)) return;
+      // ✅ DO NOT skip if the TARGET is hidden.
+      // We still push the real connection, SVGConnections will stub it.
+      if (nodeHides) {
+        // If SOURCE is hiding children, show stub hint(s) instead of real lines
+        pushStubForOutgoingLine(outgoingLine, isCharacter, characterId, node.dialogueID);
+        return;
+      }
 
       const c = drawLines(
         (node.dialogueID || node.characterID),
@@ -302,17 +293,18 @@ function drawDialogueMakerProject() {
       if (c) allConnections.push(c);
     });
 
-    // NEXT dotted link (SVG) – dialogue nodes only
-    if (!isCharacter) {
+    // NEXT dotted link:
+    // If node hides children, we hide "next" entirely (you can change this if you want it stubbed too)
+    if (!isCharacter && !nodeHides) {
       const nextNodeValue = Number(node.nextNode);
       if (Number.isFinite(nextNodeValue) && nextNodeValue > 0) {
-        // don't draw next to hidden targets
-        if (hiddenSet && hiddenSet.has(nextNodeValue)) return;
+
+        // If NEXT target is hidden due to ancestor, we still allow SVGConnections to hide it.
+        // But "next" is special: SVGConnections hides it if endpoint missing/hidden anyway.
 
         const fromChar = Number(characterId);
         const fromNodeId = Number(node.dialogueID);
 
-        // Resolve which character actually owns the target node (supports cross-character next)
         let targetCharacter = gameDialogueMakerProject.characters.find((char) =>
           char.dialogueNodes?.some((n) => Number(n.dialogueID) === nextNodeValue)
         );
@@ -337,7 +329,6 @@ function drawDialogueMakerProject() {
           },
         };
 
-        // Dedupe: only one next per from-node
         const existingIndex = allConnections.findIndex(
           (c) =>
             c &&
@@ -352,13 +343,78 @@ function drawDialogueMakerProject() {
     }
   }
 
-  // Plus buttons enable/disable
+  gameDialogueMakerProject.characters.forEach((character) => {
+    const charId = Number(character.characterID);
+    const hiddenSet = hiddenNodeSetByCharacter.get(charId) || new Set();
+
+    // ✅ Always draw root outgoing lines.
+    // If character hides children, SVGConnections will stub because targets are hidden.
+    // But we ALSO want a stub hint even if character has no visible targets (source hides).
+    // We'll treat character.hideChildren like "source hides": render stubs from root sockets.
+    if (character.hideChildren === true) {
+      (character.outgoingLines || []).forEach((outgoingLine) => {
+        pushStubForOutgoingLine(outgoingLine, true, charId, 0);
+      });
+      // Also still render (optional) the real lines so SVGConnections can stub based on hidden target.
+      // If you don't want duplicates, DO NOT push real ones in this branch.
+      // We'll skip drawOutgoingLines() to avoid duplicates.
+      return;
+    }
+
+    // Character root outgoing lines
+    drawOutgoingLines(character, true, charId, hiddenSet);
+
+    // Dialogue nodes outgoing lines
+    (character.dialogueNodes || []).forEach((dialogueNode) => {
+      const id = Number(dialogueNode.dialogueID);
+      if (hiddenSet.has(id)) return;
+
+      // Even if this node has hideChildren, we still call drawOutgoingLines()
+      // so it can render stub hints from its own sockets.
+      drawOutgoingLines(dialogueNode, false, charId, hiddenSet);
+    });
+  });
+
+  // keep for drag-end rebuilds
+  window.__gdmAllConnections = allConnections;
+
+  SVGConnections.render(allConnections);
+
+  // After render, set stub endpoints (short dotted hint)
+  requestAnimationFrame(() => {
+    const STUB_LEN = 28;
+    const worldEl = document.getElementById("mainArea");
+
+    allConnections.forEach((conn) => {
+      if (!conn || conn.type !== "stub") return;
+
+      const fromChar = conn.from.characterId;
+      const fromNode = conn.from.dialogueId;
+
+      const isRoot = !!conn.from.isCharacter || Number(fromNode) === 0;
+      const nodeEl = isRoot
+        ? document.querySelector(`.characterRoot[data-character-id="${fromChar}"]`)
+        : document.querySelector(`.blockWrap.dialogue[data-character-id="${fromChar}"][data-dialogue-id="${fromNode}"]`);
+
+      if (!nodeEl) return;
+
+      const btn = nodeEl.querySelector(`.blockPlusButton[data-buttonindex="${conn.from.socketIndex}"]`);
+      if (!btn) return;
+
+      const p = SVGConnections.getWorldPointOfElement(btn, worldEl);
+      conn._floatingEnd = { x: p.x, y: p.y + STUB_LEN };
+    });
+
+    SVGConnections.requestUpdate();
+
+    requestAnimationFrame(() => {
+      rebuildConditionCirclesFromSvgConnections(allConnections);
+    });
+  });
+
   $(".blockPlusButton").each(function () {
     checkIfPlusButtonShouldBeTurnedOff(this);
   });
-
-  // Top socket drag-to-connect (your SVG preview system attaches globally)
-  // so we do NOT bind old leaderline handlers here.
 
 } // end drawDialogueMakerProject
 
@@ -377,8 +433,7 @@ function getBodyZoomFactor() {
 
 
 // ---------------------------------------------------------------------------
-// Subtree drag (LIVE): while dragging a node, move its descendants visually;
-// on stop, commit positions to master object + localStorage.
+// Subtree drag (LIVE) for flat DOM
 // ---------------------------------------------------------------------------
 
 let __subtreeDrag = null;
@@ -431,10 +486,6 @@ function getDialogueEl(characterId, dialogueId) {
   );
 }
 
-function getCharacterEl(characterId) {
-  return document.querySelector(`.characterRoot[data-character-id="${Number(characterId)}"]`);
-}
-
 function applyDeltaToEl(el, startX, startY, dx, dy) {
   if (!el) return;
   el.style.left = (startX + dx) + "px";
@@ -473,7 +524,6 @@ const draggableSettings = {
       rootKey: isChar ? `char:${characterId}` : `dlg:${characterId}:${Number(el.dataset.dialogueId)}`,
     };
 
-    // Root start pos (DOM left/top are WORLD coords because we're flat)
     const rootStartX = ui.originalPosition ? ui.originalPosition.left : parseFloat(el.style.left) || 0;
     const rootStartY = ui.originalPosition ? ui.originalPosition.top : parseFloat(el.style.top) || 0;
 
@@ -481,7 +531,7 @@ const draggableSettings = {
     __subtreeDrag.elements.set(__subtreeDrag.rootKey, el);
 
     if (isChar) {
-      // Affect ALL dialogue nodes of this character
+      // affect ALL dialogue nodes of this character
       (charObj.dialogueNodes || []).forEach((n) => {
         const key = `dlg:${characterId}:${Number(n.dialogueID)}`;
         const nodeEl = getDialogueEl(characterId, n.dialogueID);
@@ -527,7 +577,6 @@ const draggableSettings = {
     const dx = ui.position.left - root.x;
     const dy = ui.position.top - root.y;
 
-    // Move every affected element live
     for (const [key, startPos] of __subtreeDrag.start.entries()) {
       const el = __subtreeDrag.elements.get(key);
       applyDeltaToEl(el, startPos.x, startPos.y, dx, dy);
@@ -538,7 +587,6 @@ const draggableSettings = {
   },
 
   stop: function (event, ui) {
-    // Commit subtree positions into master object + localStorage
     if (__subtreeDrag) {
       const root = __subtreeDrag.start.get(__subtreeDrag.rootKey);
       const el = ui.helper.get(0);
@@ -554,17 +602,14 @@ const draggableSettings = {
 
       if (charObj) {
         if (__subtreeDrag.type === "character") {
-          // move character root
           charObj.characterNodeX = (Number(charObj.characterNodeX) || 0) + dx;
           charObj.characterNodeY = (Number(charObj.characterNodeY) || 0) + dy;
 
-          // move all nodes
           (charObj.dialogueNodes || []).forEach((n) => {
             n.dialogueNodeX = (Number(n.dialogueNodeX) || 0) + dx;
             n.dialogueNodeY = (Number(n.dialogueNodeY) || 0) + dy;
           });
         } else {
-          // move the root dialogue node itself
           const rootId = Number(__subtreeDrag.rootDialogueId);
           const rootNode = (charObj.dialogueNodes || []).find((n) => Number(n.dialogueID) === rootId);
           if (rootNode) {
@@ -572,7 +617,6 @@ const draggableSettings = {
             rootNode.dialogueNodeY = (Number(rootNode.dialogueNodeY) || 0) + dy;
           }
 
-          // move descendants
           const descendants = collectDescendants(charObj, rootId);
           descendants.forEach((n) => {
             n.dialogueNodeX = (Number(n.dialogueNodeX) || 0) + dx;
@@ -583,7 +627,7 @@ const draggableSettings = {
 
       __subtreeDrag = null;
     } else {
-      // fallback: single element update
+      // fallback single element
       updateElementPositionInObject(ui.helper);
     }
 
@@ -607,22 +651,19 @@ const draggableSettings = {
 // ---------------------------------------------------------------------------
 
 function buildHiddenNodeSets() {
-  const map = new Map(); // charId -> Set(dialogueId hidden due to ancestor)
+  const out = new Map(); // charId -> Set(hidden dialogue IDs)
 
   gameDialogueMakerProject.characters.forEach((character) => {
     const charId = Number(character.characterID);
-    const charObj = character;
     const hidden = new Set();
 
-    // If character hides children: hide ALL dialogue nodes
-    if (charObj.hideChildren === true) {
-      (charObj.dialogueNodes || []).forEach((n) => hidden.add(Number(n.dialogueID)));
-      map.set(charId, hidden);
+    if (character.hideChildren === true) {
+      (character.dialogueNodes || []).forEach((n) => hidden.add(Number(n.dialogueID)));
+      out.set(charId, hidden);
       return;
     }
 
-    // Hide descendants of any dialogue node with hideChildren===true
-    const { map: kidsMap } = buildChildrenMapForCharacter(charObj);
+    const { map: kidsMap } = buildChildrenMapForCharacter(character);
 
     function dfsHide(fromId) {
       const kids = kidsMap[Number(fromId)] || [];
@@ -634,18 +675,17 @@ function buildHiddenNodeSets() {
       });
     }
 
-    (charObj.dialogueNodes || []).forEach((n) => {
+    (character.dialogueNodes || []).forEach((n) => {
       if (n.hideChildren === true) dfsHide(Number(n.dialogueID));
     });
 
-    map.set(charId, hidden);
+    out.set(charId, hidden);
   });
 
-  return map;
+  return out;
 }
 
 function applyHideToElementsGraph() {
-  // clear previous hide class
   document.querySelectorAll(".blockWrap.hide").forEach((e) => e.classList.remove("hide"));
 
   const hiddenSets = buildHiddenNodeSets();
@@ -654,7 +694,6 @@ function applyHideToElementsGraph() {
     const charId = Number(character.characterID);
     const hidden = hiddenSets.get(charId) || new Set();
 
-    // hide dialogue nodes
     hidden.forEach((dlgId) => {
       const el = document.querySelector(
         `.blockWrap.dialogue[data-character-id="${charId}"][data-dialogue-id="${dlgId}"]`
@@ -666,7 +705,7 @@ function applyHideToElementsGraph() {
 
 
 // ---------------------------------------------------------------------------
-// Existing small helpers (unchanged)
+// Small helper
 // ---------------------------------------------------------------------------
 
 function autoGrowTextArea(element) {

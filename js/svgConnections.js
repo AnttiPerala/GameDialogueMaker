@@ -4,6 +4,7 @@
    Key behavior:
    - Dragging the end circle visually detaches during drag
    - Real detach is handled by host on pointerup via onDropCancel / onDropConnect
+   - If TO endpoint is hidden/missing (e.g. children hidden), we render a short dotted "stub"
 */
 
 (() => {
@@ -27,14 +28,13 @@
     setZoom,
 
     // Hooks user code can override:
-    // NOTE: we no longer call onDetach automatically on pointerdown.
-    onDetach: (conn) => { },
+    onDetach: (conn) => {},
 
     // Called on pointerup if dropped on a plus button.
     onDropConnect: (conn, dropTarget) => false,
 
     // Called on pointerup if not dropped on a valid target OR if onDropConnect returns false.
-    onDropCancel: (conn) => { },
+    onDropCancel: (conn) => {},
 
     getWorldPointOfElement,
     screenToWorld,
@@ -67,7 +67,7 @@
       g.setAttribute("id", "connectionsGroup");
       svg.appendChild(g);
 
-      // Insert behind nodes (optional)
+      // Insert behind nodes
       state.worldEl.insertBefore(svg, state.worldEl.firstChild);
     }
 
@@ -86,6 +86,7 @@
 
   function injectDefaultStyles() {
     if (document.getElementById("svgConnectionsStyles")) return;
+
     const style = document.createElement("style");
     style.id = "svgConnectionsStyles";
     style.textContent = `
@@ -106,28 +107,19 @@
         vector-effect: non-scaling-stroke;
         pointer-events:all;
       }
-      #connectionsSvg .endpoint.end{
-        cursor: grab;
-      }
-      #connectionsSvg .endpoint.end.dragging{
-        cursor: grabbing;
-      }
-      #connectionsSvg .connection-path.dim{
-        opacity:0.35;
-      }
-      /* Dotted/next connections have NO endpoints (purely controlled by "next" input) */
-      #connectionsSvg g.is-next .endpoint{
-        display:none;
-      }
-              /* stub = short dotted hint that node has hidden children */
+      #connectionsSvg .endpoint.end{ cursor: grab; }
+      #connectionsSvg .endpoint.end.dragging{ cursor: grabbing; }
+      #connectionsSvg .connection-path.dim{ opacity:0.35; }
+
+      /* "next" dotted connections have NO endpoints */
+      #connectionsSvg g.is-next .endpoint{ display:none; }
+
+      /* stub = short dotted hint that node continues but is hidden */
       #connectionsSvg g.is-stub .connection-path{
         stroke-dasharray: 6 8;
         opacity: 0.7;
       }
-      #connectionsSvg g.is-stub .endpoint{
-        display:none;
-      }
-
+      #connectionsSvg g.is-stub .endpoint{ display:none; }
     `;
     document.head.appendChild(style);
   }
@@ -156,7 +148,7 @@
   }
 
   function syncSvgElementsToConnections() {
-    const keep = new Set(state.connections.map(c => c.id));
+    const keep = new Set(state.connections.map((c) => c.id));
 
     for (const [id, el] of state.svgByConnId.entries()) {
       if (!keep.has(id)) {
@@ -175,7 +167,7 @@
 
     const g = document.createElementNS(NS, "g");
     g.classList.add("conn");
-    g.setAttribute("data-conn-id", conn.id); // ✅ matches selector
+    g.setAttribute("data-conn-id", conn.id);
 
     const isNext = conn.type === "next";
     if (isNext) g.classList.add("is-next");
@@ -183,10 +175,9 @@
     const path = document.createElementNS(NS, "path");
     path.classList.add("connection-path");
     if (isNext) path.classList.add("dashed");
-
     g.appendChild(path);
 
-    // ✅ IMPORTANT: do NOT create endpoint circles for dotted/next connections
+    // No endpoints for "next". Endpoints for normal connections only.
     let cStart = null;
     let cEnd = null;
 
@@ -199,7 +190,7 @@
       cEnd.classList.add("endpoint", "end");
       cEnd.setAttribute("r", "7");
 
-      // Only normal (non-next) connections are draggable
+      // Only normal (non-next, non-stub) connections are draggable
       cEnd.addEventListener("pointerdown", (e) => startDragEnd(e, conn.id));
 
       g.appendChild(cStart);
@@ -219,72 +210,100 @@
     }
   }
 
-function updateConnSvg(conn) {
-  const rec = state.svgByConnId.get(conn.id) || ensureConnSvg(conn);
+  function updateConnSvg(conn) {
+    const rec = state.svgByConnId.get(conn.id) || ensureConnSvg(conn);
 
-  const fromEl = getFromPortEl(conn);
+    const fromEl = getFromPortEl(conn);
 
-  // If FROM is missing/hidden, we cannot draw anything useful
-  if (!fromEl || isHidden(fromEl)) {
-    rec.g.style.display = "none";
-    rec.g.classList.remove("is-stub");
-    return;
-  }
-
-  // Special: dotted/next is always normal line (no circles), but hide if endpoints missing
-  const isNext = conn.type === "next";
-
-  // If dragging, allow floating end
-  if (state.drag && state.drag.connId === conn.id && conn._floatingEnd) {
-    rec.g.style.display = "";
-    rec.g.classList.remove("is-stub");
-    if (isNext) rec.path.classList.add("dashed");
-    else rec.path.classList.remove("dashed");
-
-    const p1 = getWorldPointOfElement(fromEl, state.worldEl);
-    const p2 = conn._floatingEnd;
-
-    rec.path.setAttribute("d", `M ${p1.x} ${p1.y} L ${p2.x} ${p2.y}`);
-
-    if (rec.cStart) {
-      rec.cStart.setAttribute("cx", p1.x);
-      rec.cStart.setAttribute("cy", p1.y);
-    }
-    if (rec.cEnd) {
-      rec.cEnd.setAttribute("cx", p2.x);
-      rec.cEnd.setAttribute("cy", p2.y);
-    }
-
-    rec.path.classList.add("dim");
-    if (rec.cEnd) rec.cEnd.classList.add("dragging");
-    return;
-  }
-
-  // Normal endpoint
-  const toEl = conn.to ? getToPortEl(conn) : null;
-
-  // If TO is missing/hidden:
-  // - for NEXT: hide it
-  // - for normal: draw a short dotted stub from FROM downward
-  if (!toEl || isHidden(toEl)) {
-    if (isNext) {
+    // If FROM is missing/hidden, hide whole connection
+    if (!fromEl || isHidden(fromEl)) {
       rec.g.style.display = "none";
       rec.g.classList.remove("is-stub");
       return;
     }
 
-    const p1 = getWorldPointOfElement(fromEl, state.worldEl);
-    const STUB_LEN = 35; // tweak: 25–50
-    const p2 = { x: p1.x, y: p1.y + STUB_LEN };
+    const isNext = conn.type === "next";
+    const isStubConn = conn.type === "stub";
 
+    // Dragging preview (floating end)
+    if (state.drag && state.drag.connId === conn.id && conn._floatingEnd) {
+      rec.g.style.display = "";
+      rec.g.classList.remove("is-stub");
+
+      if (isNext) rec.path.classList.add("dashed");
+      else rec.path.classList.remove("dashed");
+
+      const p1 = getWorldPointOfElement(fromEl, state.worldEl);
+      const p2 = conn._floatingEnd;
+
+      rec.path.setAttribute("d", `M ${p1.x} ${p1.y} L ${p2.x} ${p2.y}`);
+
+      if (rec.cStart) {
+        rec.cStart.setAttribute("cx", p1.x);
+        rec.cStart.setAttribute("cy", p1.y);
+      }
+      if (rec.cEnd) {
+        rec.cEnd.setAttribute("cx", p2.x);
+        rec.cEnd.setAttribute("cy", p2.y);
+      }
+
+      rec.path.classList.add("dim");
+      if (rec.cEnd) rec.cEnd.classList.add("dragging");
+      return;
+    }
+
+    // Resolve TO endpoint for normal/next (stub uses special draw below)
+    const toEl = conn.to ? getToPortEl(conn) : null;
+
+    // If TO missing/hidden:
+    // - for NEXT: hide it
+    // - for normal: draw a short dotted stub from FROM downward
+    // - for explicit stub connections: always stub
+    if (isStubConn || !toEl || isHidden(toEl)) {
+      if (isNext) {
+        rec.g.style.display = "none";
+        rec.g.classList.remove("is-stub");
+        return;
+      }
+
+      const p1 = getWorldPointOfElement(fromEl, state.worldEl);
+      const STUB_LEN = 35;
+      const p2 = { x: p1.x, y: p1.y + STUB_LEN };
+
+      rec.g.style.display = "";
+      rec.g.classList.add("is-stub");
+
+      // stub is dotted hint; don't use "dashed" class
+      rec.path.classList.remove("dashed");
+      rec.path.setAttribute("d", `M ${p1.x} ${p1.y} L ${p2.x} ${p2.y}`);
+
+      // endpoints hidden by CSS for is-stub, but keep positions sane
+      if (rec.cStart) {
+        rec.cStart.setAttribute("cx", p1.x);
+        rec.cStart.setAttribute("cy", p1.y);
+      }
+      if (rec.cEnd) {
+        rec.cEnd.setAttribute("cx", p2.x);
+        rec.cEnd.setAttribute("cy", p2.y);
+      }
+
+      rec.path.classList.remove("dim");
+      if (rec.cEnd) rec.cEnd.classList.remove("dragging");
+      return;
+    }
+
+    // Normal visible connection
     rec.g.style.display = "";
-    rec.g.classList.add("is-stub");
+    rec.g.classList.remove("is-stub");
 
-    // stub is dotted hint; don't use normal dashed class here
-    rec.path.classList.remove("dashed");
+    if (isNext) rec.path.classList.add("dashed");
+    else rec.path.classList.remove("dashed");
+
+    const p1 = getWorldPointOfElement(fromEl, state.worldEl);
+    const p2 = getWorldPointOfElement(toEl, state.worldEl);
+
     rec.path.setAttribute("d", `M ${p1.x} ${p1.y} L ${p2.x} ${p2.y}`);
 
-    // endpoints are hidden by CSS for is-stub, but keep them positioned safely
     if (rec.cStart) {
       rec.cStart.setAttribute("cx", p1.x);
       rec.cStart.setAttribute("cy", p1.y);
@@ -294,71 +313,24 @@ function updateConnSvg(conn) {
       rec.cEnd.setAttribute("cy", p2.y);
     }
 
-    // no drag visuals on stub
-    rec.path.classList.remove("dim");
-    if (rec.cEnd) rec.cEnd.classList.remove("dragging");
-    return;
-  }
-
-  // Normal visible connection
-  rec.g.style.display = "";
-  rec.g.classList.remove("is-stub");
-
-  if (isNext) rec.path.classList.add("dashed");
-  else rec.path.classList.remove("dashed");
-
-  const p1 = getWorldPointOfElement(fromEl, state.worldEl);
-  const p2 = getWorldPointOfElement(toEl, state.worldEl);
-
-  rec.path.setAttribute("d", `M ${p1.x} ${p1.y} L ${p2.x} ${p2.y}`);
-
-  if (rec.cStart) {
-    rec.cStart.setAttribute("cx", p1.x);
-    rec.cStart.setAttribute("cy", p1.y);
-  }
-  if (rec.cEnd) {
-    rec.cEnd.setAttribute("cx", p2.x);
-    rec.cEnd.setAttribute("cy", p2.y);
-  }
-
-  if (state.drag && state.drag.connId === conn.id) {
-    rec.path.classList.add("dim");
-    if (rec.cEnd) rec.cEnd.classList.add("dragging");
-  } else {
-    rec.path.classList.remove("dim");
-    if (rec.cEnd) rec.cEnd.classList.remove("dragging");
-  }
-}
-
-// helper
-function isHidden(el) {
-  // hidden if element or any parent has display:none OR has class hide
-  if (!el || !el.isConnected) return true;
-  const node = el.closest(".blockWrap");
-  if (node && node.classList.contains("hide")) return true;
-  const cs = getComputedStyle(el);
-  if (cs.display === "none" || cs.visibility === "hidden" || cs.opacity === "0") return true;
-  return false;
-}
-
-  function getFromPoint(conn) {
-    const el = getFromPortEl(conn);
-    if (!el) return { x: 0, y: 0 };
-    return getWorldPointOfElement(el, state.worldEl);
-  }
-
-  function getToPoint(conn) {
-    if (state.drag && state.drag.connId === conn.id && conn._floatingEnd) {
-      return conn._floatingEnd;
+    if (state.drag && state.drag.connId === conn.id) {
+      rec.path.classList.add("dim");
+      if (rec.cEnd) rec.cEnd.classList.add("dragging");
+    } else {
+      rec.path.classList.remove("dim");
+      if (rec.cEnd) rec.cEnd.classList.remove("dragging");
     }
+  }
 
-    if (!conn.to) {
-      return conn._floatingEnd || getFromPoint(conn);
-    }
+  // Single, consistent hidden check (NO duplicates)
+  function isHidden(el) {
+    if (!el || !el.isConnected) return true;
 
-    const el = getToPortEl(conn);
-    if (!el) return conn._floatingEnd || getFromPoint(conn);
-    return getWorldPointOfElement(el, state.worldEl);
+    const node = el.closest(".blockWrap, .characterRoot");
+    if (node && node.classList.contains("hide")) return true;
+
+    const cs = getComputedStyle(el);
+    return cs.display === "none" || cs.visibility === "hidden" || cs.opacity === "0";
   }
 
   function getFromPortEl(conn) {
@@ -367,7 +339,7 @@ function isHidden(el) {
     const node = findNodeEl(conn.from?.characterId, conn.from?.dialogueId, isRoot);
     if (!node) return null;
 
-    // ✅ NEXT port starts at the "next" input field
+    // NEXT port starts at the "next" input field (if you have one)
     if (conn.from?.port === "next") {
       return node.querySelector(".next");
     }
@@ -412,16 +384,6 @@ function isHidden(el) {
     return { x: (clientX - w.left) / z, y: (clientY - w.top) / z };
   }
 
-  function isHidden(el) {
-  if (!el || !el.isConnected) return true;
-
-  const node = el.closest(".blockWrap, .characterRoot");
-  if (node && node.classList.contains("hide")) return true;
-
-  const cs = getComputedStyle(el);
-  return (cs.display === "none" || cs.visibility === "hidden" || cs.opacity === "0");
-}
-
   // --- Drag interaction (visual detach during drag; real detach on release) ---
 
   function startDragEnd(e, connId) {
@@ -429,11 +391,11 @@ function isHidden(el) {
     e.stopPropagation();
     window.__svgEdgeDragging = true;
 
-    const conn = state.connections.find(c => c.id === connId);
+    const conn = state.connections.find((c) => c.id === connId);
     if (!conn) return;
 
-    // Safety: don't allow dragging next/dotted connections even if someone attached a listener by mistake
-    if (conn.type === "next") return;
+    // Don't allow dragging next or stub
+    if (conn.type === "next" || conn.type === "stub") return;
 
     // Remember original target so host can delete/reconnect correctly on release
     conn._detachedTo = conn.to ? { ...conn.to } : null;
@@ -455,7 +417,7 @@ function isHidden(el) {
     if (!state.drag) return;
     e.preventDefault();
 
-    const conn = state.connections.find(c => c.id === state.drag.connId);
+    const conn = state.connections.find((c) => c.id === state.drag.connId);
     if (!conn) return;
 
     conn._floatingEnd = screenToWorld(e.clientX, e.clientY);
@@ -468,7 +430,7 @@ function isHidden(el) {
     if (!state.drag) return;
     e.preventDefault();
 
-    const conn = state.connections.find(c => c.id === state.drag.connId);
+    const conn = state.connections.find((c) => c.id === state.drag.connId);
     if (!conn) {
       state.drag = null;
       window.__svgEdgeDragging = false;
@@ -479,12 +441,20 @@ function isHidden(el) {
 
     if (drop) {
       let ok = false;
-      try { ok = !!API.onDropConnect(conn, drop); } catch (_) { ok = false; }
+      try {
+        ok = !!API.onDropConnect(conn, drop);
+      } catch (_) {
+        ok = false;
+      }
       if (!ok) {
-        try { API.onDropCancel(conn); } catch (_) { }
+        try {
+          API.onDropCancel(conn);
+        } catch (_) {}
       }
     } else {
-      try { API.onDropCancel(conn); } catch (_) { }
+      try {
+        API.onDropCancel(conn);
+      } catch (_) {}
     }
 
     state.drag = null;
@@ -493,13 +463,13 @@ function isHidden(el) {
 
   function findPlusButtonUnderPointer(clientX, clientY) {
     const els = document.elementsFromPoint(clientX, clientY);
-    const btn = els.find(el => el && el.classList && el.classList.contains("blockPlusButton"));
+    const btn = els.find((el) => el && el.classList && el.classList.contains("blockPlusButton"));
     if (!btn) return null;
 
     const accept = btn.dataset.acceptclicks;
     if (accept === "false") return null;
 
-    // Allow BOTH character root and dialogue nodes
+    // Character root drop
     const charRoot = btn.closest(".characterRoot");
     if (charRoot) {
       return {
