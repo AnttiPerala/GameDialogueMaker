@@ -16,6 +16,10 @@ function exportDialogueToText(dialogueData) {
                     const condition = node.outgoingLines[0].transitionConditions[0];
                     currentText += `   CONDITION: If ${condition.variableName} ${condition.comparisonOperator} ${condition.variableValue}\n`;
                 }
+                // Optional next jump (only meaningful when there is no outgoing line)
+                if ((node.outgoingLines || []).length < 1 && Number(node.nextNode) > 0) {
+                    currentText += `   NEXT: ${Number(node.nextNode)}\n`;
+                }
                 outputText += currentText;
                 break;
             case 'question':
@@ -30,6 +34,10 @@ function exportDialogueToText(dialogueData) {
                 break;
             case 'answer':
                 currentText = `${number}. Answer: ${node.dialogueText}\n`;
+                // Optional next jump (only meaningful when there is no outgoing line)
+                if ((node.outgoingLines || []).length < 1 && Number(node.nextNode) > 0) {
+                    currentText += `   NEXT: ${Number(node.nextNode)}\n`;
+                }
                 outputText += currentText;
                 break;
         }

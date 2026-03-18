@@ -15,6 +15,17 @@ function loadFile() {
                     try {
                         const jsonData = JSON.parse(e.target.result);
                         gameDialogueMakerProject = jsonData;
+                        // Normalize: ensure optional fields exist and enforce \"outgoing wins over next\" for answers
+                        for (const character of (gameDialogueMakerProject.characters || [])) {
+                            for (const node of (character.dialogueNodes || [])) {
+                                if (node.nextNode === undefined || node.nextNode === null || node.nextNode === "") {
+                                    node.nextNode = -1;
+                                }
+                                if (node.dialogueType === 'answer' && (node.outgoingLines || []).length > 0) {
+                                    node.nextNode = -1;
+                                }
+                            }
+                        }
                         addEmptyDivsToTheObject();
                         clearCanvasBeforeReDraw();
                         drawDialogueMakerProject();
@@ -48,7 +59,42 @@ function loadFile() {
 //TEXT TO JSON CONVERTER
 
 function convertTextToJSON(text) {
-    let lines = text.split('\n').filter(line => line.trim() !== '');
+    const rawLines = text.split('\n').filter(line => line.trim() !== '');
+
+    // Collect metadata (CONDITION/NEXT) that follows a numbered dialogue line.
+    // Keyed by the prefix token (e.g. "1.2.") from the exported plain-text format.
+    const metaByPrefix = new Map();
+    let latestPrefixToken = null;
+
+    for (const raw of rawLines) {
+        const trimmedStart = raw.trimStart();
+
+        // Hierarchy/content line starts with a number token, like "1.2."
+        const prefixToken = trimmedStart.split(' ')[0];
+        const isHierarchyLine = /^\d/.test(prefixToken);
+
+        if (isHierarchyLine) {
+            latestPrefixToken = prefixToken;
+            if (!metaByPrefix.has(prefixToken)) metaByPrefix.set(prefixToken, {});
+            continue;
+        }
+
+        if (!latestPrefixToken) continue;
+        const meta = metaByPrefix.get(latestPrefixToken) || {};
+
+        if (trimmedStart.startsWith('NEXT:')) {
+            const v = Number(trimmedStart.replace('NEXT:', '').trim());
+            if (Number.isFinite(v) && v > 0) meta.nextNode = v;
+        } else if (trimmedStart.startsWith('CONDITION:')) {
+            // Keep existing behavior: we don't currently parse conditions into outgoingLines here.
+            // This branch is intentionally a no-op for now.
+        }
+
+        metaByPrefix.set(latestPrefixToken, meta);
+    }
+
+    // Only keep the actual numbered dialogue lines for tree parsing.
+    let lines = rawLines.filter(line => /^\d/.test(line.trimStart().split(' ')[0]));
 
     // Extract the name dynamically from the first line
     let characterName = lines[0].split('. ')[1].split(':')[0].trim();
@@ -56,10 +102,13 @@ function convertTextToJSON(text) {
     let dialogueIDCounter = 1;
     let dialogueNodes = [];
 
-    function createNode(line, id, type, childrenCount) {
+    function createNode(line, id, type, childrenCount, prefixToken) {
         let parts = line.split(': ');
         let name = parts[0].trim();
         let content = parts[1].trim();
+
+        const meta = prefixToken ? (metaByPrefix.get(prefixToken) || {}) : {};
+        const importedNextNode = (meta.nextNode !== undefined) ? meta.nextNode : -1;
 
         return {
             dialogueID: id,
@@ -73,7 +122,7 @@ function convertTextToJSON(text) {
             nodeElement: "",
             outgoingLines: [],
             nextNodeLineElem: "",
-            nextNode: -1
+            nextNode: importedNextNode
         };
     }
 
@@ -109,7 +158,7 @@ function convertTextToJSON(text) {
         let childDepth = childPrefix.split('.').length;
 
         let childrenCount = countChildren(index, childDepth + 1);
-        let node = createNode(currentLine, id, type, childrenCount);
+        let node = createNode(currentLine, id, type, childrenCount, childPrefix);
 
         dialogueNodes.push(node);
 

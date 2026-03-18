@@ -62,6 +62,17 @@ function createAnswerBlock(nodeInfo){
     let determinedEyeImageSource = determineEyeImageSource(nodeInfo);
     let nodeBg = (nodeInfo.dialogueNode && nodeInfo.dialogueNode.bgColor) ? nodeInfo.dialogueNode.bgColor : '#4b4b4b';
 
+    let activeNextNode = '';
+    if (nodeInfo.dialogueNode.nextNode > 0) {
+        activeNextNode = nodeInfo.dialogueNode.nextNode;
+    }
+
+    let option3content = '';
+    if (nodeInfo.dialogueNode.outgoingLines.length < 1){
+        option3content = `<span style="text-align: right;" title="Optional value. Use this if you want to take the conversation to some other node from here.">Next:</span><input class="next"
+    style="display:inline-block;" type="number" value="${activeNextNode}">`;
+    }
+
     let plusButtonHTML = `<div class="blockPlusButton" data-buttonindex=0 data-acceptclicks=true>+</div>`;
 
     let blockHTML = `<div data-character-id="${nodeInfo.characterID}" data-dialogue-id="${nodeInfo.dialogueID}" data-hidechildren="${nodeInfo.dialogueNode.hideChildren}" id="dialogue${nodeInfo.dialogueID}" class="blockWrap dialogue ui-draggable ui-draggable-handle" style="top: ${nodeInfo.dialogueNode.dialogueNodeY}px; left: ${nodeInfo.dialogueNode.dialogueNodeX}px; position: absolute;">
@@ -87,7 +98,7 @@ function createAnswerBlock(nodeInfo){
                         <div class="optionsUnderDialogue" style="text-align: right;">
                             <div class="option1"></div>
                             <div class="option2"></div>
-                            <div class="option3"></div>
+                            <div class="option3">${option3content}</div>
                         </div>
 
                 </div>

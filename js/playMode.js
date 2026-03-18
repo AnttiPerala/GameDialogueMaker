@@ -73,13 +73,31 @@ function renderPlayMode(nodeInfo) {
             let outgoingLine = nodeInfo.dialogueNode.outgoingLines[i];
             let answerNode = character.dialogueNodes.find(node => node.dialogueID == outgoingLine.toNode);
             if (answerNode) {
-                let reactionNodeId = answerNode.outgoingLines[0]?.toNode;
+                const reactionNodeId = answerNode.outgoingLines?.[0]?.toNode;
+                const answerNextNodeId = answerNode.nextNode;
 
-                // If the answer has no reaction/next node, make it an end-of-branch button (no crash)
-                if (reactionNodeId === undefined || reactionNodeId === null || reactionNodeId === "" || reactionNodeId === -1) {
-                    answerElements += `<button class="answerButton btn" data-reaction-node="">${answerNode.dialogueText}</button>`;
+                const hasReaction =
+                    reactionNodeId !== undefined &&
+                    reactionNodeId !== null &&
+                    reactionNodeId !== "" &&
+                    Number(reactionNodeId) > 0;
+
+                const hasAnswerNext =
+                    answerNode.outgoingLines?.length < 1 &&
+                    answerNextNodeId !== undefined &&
+                    answerNextNodeId !== null &&
+                    answerNextNodeId !== "" &&
+                    Number(answerNextNodeId) > 0;
+
+                if (hasReaction) {
+                    // Prefer outgoing line over nextNode (even if both exist somehow)
+                    answerElements += `<button class="answerButton btn" data-transition="line" data-from-node="${answerNode.dialogueID}" data-to-node="${reactionNodeId}">${answerNode.dialogueText}</button>`;
+                } else if (hasAnswerNext) {
+                    // Answer has no outgoing line, but has a nextNode jump
+                    answerElements += `<button class="answerButton btn" data-transition="next" data-from-node="${answerNode.dialogueID}" data-to-node="${answerNextNodeId}">${answerNode.dialogueText}</button>`;
                 } else {
-                    answerElements += `<button class="answerButton btn" data-reaction-node="${reactionNodeId}">${answerNode.dialogueText}</button>`;
+                    // End of branch
+                    answerElements += `<button class="answerButton btn" data-transition="none" data-from-node="${answerNode.dialogueID}" data-to-node="">${answerNode.dialogueText}</button>`;
                 }
             }
         }
@@ -160,21 +178,23 @@ function renderPlayMode(nodeInfo) {
 
     $(document).off('click', '.answerButton');
     $(document).on('click', '.answerButton', function () {
-        let reactionNodeId = $(this).data('reaction-node');
+        const transitionType = $(this).attr('data-transition');
+        const fromNodeID = $(this).attr('data-from-node');
+        const toNodeID = $(this).attr('data-to-node');
 
-        if (reactionNodeId === "" || reactionNodeId === undefined || reactionNodeId === null) {
-            // End of branch (no reaction defined)
+        if (transitionType === "none" || toNodeID === "" || toNodeID === undefined || toNodeID === null) {
             $('.answerLine').append('<span class="playModeExplainer">No reaction node defined for this answer.</span><button id="restartButton" class="btn">Restart Dialogue</button>');
             return;
         }
-        let character = gameDialogueMakerProject.characters.find(character => character.characterID == playModeCharID);
-        let reactionNode = character.dialogueNodes.find(node => node.dialogueID == reactionNodeId);
-        if (reactionNode) {
-            playModeNodeInfo = getInfoByPassingInDialogueNodeOrElement(reactionNode);
-            renderPlayMode(playModeNodeInfo);
-        } else {
-            console.error(`Could not find reaction node with ID: ${reactionNodeId}`);
+
+        if (transitionType === "next") {
+            // Dotted \"next\" transition: skip line lookup/conditions
+            moveNext(-1, toNodeID);
+            return;
         }
+
+        // Normal answer->reaction transition: go through moveNext() so conditions apply
+        moveNext(fromNodeID, toNodeID);
     });
 
     latestPlayModeNodeInfo = nodeInfo;

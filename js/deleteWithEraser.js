@@ -19,92 +19,72 @@ $('#eraser').on('click', function () {
 //CLICKING ON A BLOCK WITH ERASEMODE ON
 //DELETING STUFF WITH THE DELETE TOOL
 
-$('body').on('mousedown', '.block, .line', function () {
-    if (eraseMode) {
-        //console.log(`erase ${this}`);
+function deleteBlockWrap(blockWrapEl) {
+    const $blockWrap = $(blockWrapEl);
+    if (!$blockWrap || $blockWrap.length === 0) return;
 
-        //delete the corresponding node from the object
+    const blockWrapId = $blockWrap.attr('id');
+    const dialogueId = $blockWrap.attr('data-dialogue-id');
+    const characterId = $blockWrap.attr('data-character-id');
 
-        //lets first check if the clicked node (or it's immediate 2nd parent) was a character root node
-        if ($(this).hasClass('characterRoot') || $(this).parent().parent().hasClass('characterRoot')) {
-            //console.log(`clicked node was character root`);
+    // Character root deletion => remove the whole character tree
+    if ($blockWrap.hasClass('characterRoot')) {
+        const characterIDToErase = String(characterId || blockWrapId || '').replace(/\D/g, '');
+        if (!characterIDToErase) return;
 
-            //i think it's not safe to let nodes exists without a characterRoot parent so I think we need to delete the entire character tree from the gameDialogueMakerProject
+        const characterIndex = gameDialogueMakerProject.characters.findIndex(char => char.characterID == characterIDToErase);
+        if (characterIndex < 0) return;
 
-            let characterIDToErase = $(this).closest('.characterRoot').attr('id').replace(/\D/g, '');
+        gameDialogueMakerProject.characters.splice(characterIndex, 1);
 
-            let characterObjectToErase = getCharacterById(characterIDToErase);
+        // decrement character IDs to avoid gaps
+        for (let i = characterIndex; i < gameDialogueMakerProject.characters.length; i++) {
+            gameDialogueMakerProject.characters[i].characterID--;
+        }
 
-            //this gives us the correct character
-            const characterIndex = gameDialogueMakerProject.characters.findIndex(char => char.characterID == characterIDToErase);
+        clearCanvasBeforeReDraw();
+        drawDialogueMakerProject();
+        return;
+    }
 
-            gameDialogueMakerProject.characters.splice(characterIndex, 1);
+    // Dialogue node deletion
+    const characterToEraseFrom = String(characterId || '').replace(/\D/g, '');
+    const idToBeErased = String(dialogueId || blockWrapId || '').replace(/\D/g, '');
+    if (!characterToEraseFrom || !idToBeErased) return;
 
-            // Loop through the characters and decrement the characterID of each character starting from the deleted index
-            for (let i = characterIndex; i < gameDialogueMakerProject.characters.length; i++) {
-                gameDialogueMakerProject.characters[i].characterID--;
-            }
+    const characterObjectToEraseFrom = getCharacterById(characterToEraseFrom);
+    if (!characterObjectToEraseFrom) return;
 
-            clearCanvasBeforeReDraw();
-            drawDialogueMakerProject();
+    const nodeIndex = characterObjectToEraseFrom.dialogueNodes.findIndex(node => node.dialogueID == idToBeErased);
+    if (nodeIndex < 0) return;
 
-        } else {
+    characterObjectToEraseFrom.dialogueNodes.splice(nodeIndex, 1);
+    deleteLinesByToNode(characterObjectToEraseFrom, idToBeErased);
 
-            //console.log(`clicked node was not character root, but had classes  ${$(this).attr('class')}`);
+    // decrement dialogue IDs to avoid gaps
+    for (let i = nodeIndex; i < characterObjectToEraseFrom.dialogueNodes.length; i++) {
+        characterObjectToEraseFrom.dialogueNodes[i].dialogueID--;
+    }
 
-            //find the right characterRoot
-            let characterToEraseFrom = $(this).closest('.characterRoot').attr('id').replace(/\D/g, '');
-
-            let characterObjectToEraseFrom = getCharacterById(characterToEraseFrom);
-
-            //find the node ID
-            let idToBeErased = $(this).closest('.blockWrap').attr('id').replace(/\D/g, '');
-
-            //based on the character id and the node id we can find the correct node from the master object:
-            let nodeTOErase = getDialogueNodeById(characterToEraseFrom, idToBeErased);
-
-            //this gives us the correct character
-            const characterIndex = gameDialogueMakerProject.characters.findIndex(char => char.characterID == characterToEraseFrom);
-            //this give us the correct dialogue node from the character
-            const nodeIndex = characterObjectToEraseFrom.dialogueNodes.findIndex(node => node.dialogueID == idToBeErased);
-
-
-            //remove the clicked node from the dialogueNodes array
-            characterObjectToEraseFrom.dialogueNodes.splice(nodeIndex, 1);
-
-            //figure out which lines were connected to the deleted node, because they should go too
-            deleteLinesByToNode(characterObjectToEraseFrom, idToBeErased);
-
-            //update all the ids that come after the deleted node to avoid leaving gaps in the numbering. Note that this should be done for all characters if the nodes will all have unique values. But do they need to have unique values? Because maybe it doesn't even make sense to be able to go from a node under character 1 to a node under character 2. What would that even mean? But we should be able to go to any node under the same character by changing the next value.
-
-            // Loop through the dialogueNodes and decrement the dialogueID of each node starting from the deleted index
-            for (let i = nodeIndex; i < characterObjectToEraseFrom.dialogueNodes.length; i++) {
-                characterObjectToEraseFrom.dialogueNodes[i].dialogueID--;
-            }
-
-        
-
-            //myLog(`should erase now ${idToBeErased}`,0,fileInfo = getFileInfo());
-
-            clearCanvasBeforeReDraw();
-
-            //now we should shift the line numbers before the redraw since the node id's have also been shifted
-            //maybe it's enought to shift things inside the master object since dom elements will be redrawn anywas
-
-            shiftObjecElementsThatAreGreaterThanDeletedIDDownByOne(characterObjectToEraseFrom, idToBeErased); //the passed in character is the actual object here
-
-            drawDialogueMakerProject();
-
-        } //end else
-
-       
-
-       
-
-
-    } //end if eraseMode
+    clearCanvasBeforeReDraw();
+    shiftObjecElementsThatAreGreaterThanDeletedIDDownByOne(characterObjectToEraseFrom, idToBeErased);
+    drawDialogueMakerProject();
 }
-);
+
+window.deleteBlockWrap = deleteBlockWrap;
+
+$('body').on('mousedown', '.block, .line', function (event) {
+    if (!eraseMode) return;
+
+    // Don't accidentally delete while interacting with condition UI
+    if ($(event.target).closest('.conditionCircle').length) return;
+
+    // Only operate on real node wrappers; `.line` clicks have no `.blockWrap`.
+    const blockWrap = $(event.target).closest('.blockWrap');
+    if (!blockWrap || blockWrap.length === 0) return;
+
+    deleteBlockWrap(blockWrap.get(0));
+});
 
 
 function deleteLinesByToNode(characterObjectToEraseFrom,toNodeId) {

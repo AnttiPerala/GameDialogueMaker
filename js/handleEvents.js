@@ -706,6 +706,22 @@ $(document).keydown(function (event) {
         
 
     }
+
+    // Delete key: delete the currently selected node (in addition to the eraser tool).
+    if (event.key === 'Delete' || event.keyCode === 46) {
+        // Avoid interfering with text/number editing.
+        const $t = $(event.target);
+        if ($t.is('input, textarea, select, button')) return;
+
+        if (playModeActive == true) return;
+
+        const selectedBlockWrap = $('.selected').closest('.blockWrap').get(0);
+        if (!selectedBlockWrap) return;
+
+        if (typeof window.deleteBlockWrap === 'function') {
+            window.deleteBlockWrap(selectedBlockWrap);
+        }
+    }
 });
 
 //CLOSE CONDITION CIRCLES WHEN CLICKING ON AN EMPTY SPOT IN #mainArea

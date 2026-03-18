@@ -139,6 +139,17 @@ $('body').on('click', '.blockPlusButton', function () {
   } else {
     // --- NORMAL NODE + ---
 
+    // If an answer node had a manual nextNode, but is now getting a real outgoing connection,
+    // prefer the outgoing line and clear nextNode to enforce \"one or the other\".
+    if (
+      previousDialogueNodeInMasterObject &&
+      previousDialogueNodeInMasterObject.dialogueType === "answer" &&
+      previousDialogueNodeInMasterObject.outgoingLines &&
+      previousDialogueNodeInMasterObject.outgoingLines.length === 0
+    ) {
+      previousDialogueNodeInMasterObject.nextNode = -1;
+    }
+
     // Connect parent node -> new node
     previousDialogueNodeInMasterObject.outgoingLines.push({
       fromNode: previousDialogueNodeInMasterObject.dialogueID,
