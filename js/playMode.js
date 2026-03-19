@@ -165,12 +165,18 @@ function renderPlayMode(nodeInfo) {
         console.log('nodeInfo.nextNode !== undefined:', nodeInfo.dialogueNode.nextNode !== undefined);
         console.log('Combined condition:', (nodeInfo.dialogueNode.nextNode !== -1 && nodeInfo.dialogueNode.nextNode !== "" && nodeInfo.dialogueNode.nextNode !== null && nodeInfo.dialogueNode.nextNode !== undefined));
 
-        //we have a next value. Notice how we set fromNode to -1, that is needed for moveNext
-        if ((nodeInfo.dialogueNode.nextNode !== -1 && nodeInfo.dialogueNode.nextNode !== "" &&
-            nodeInfo.dialogueNode.nextNode !== null && nodeInfo.dialogueNode.nextNode !== undefined)) {
-            $('.answerLine').append(`<span class="playModeExplainer">You reached the end of this branch, but a "next" value has been defined. Click on the button to go there.</span><button class="nextButton" data-from-node="-1" data-to-node="${nodeInfo.dialogueNode.nextNode}">Next</button>`);
+        const nextValue = Number(nodeInfo.dialogueNode.nextNode);
+        const hasNextValue = Number.isFinite(nextValue) && nextValue > 0;
+        const isBranchEnd = (nodeInfo.dialogueNode.outgoingLines || []).length === 0;
+
+        // If the user reached a branch end and a nextNode is defined, automatically advance.
+        // (We intentionally do not show a "Next" button.)
+        if (isBranchEnd && hasNextValue) {
+            moveNext(-1, nextValue);
+            return;
         }
-        else if (nodeInfo.dialogueNode.outgoingLines.length === 0) {
+
+        if (isBranchEnd) {
             $('.answerLine').append('<span class="playModeExplainer">No more nodes to progress.</span><button id="restartButton" class="btn">Restart Dialogue</button>');
         }
     });

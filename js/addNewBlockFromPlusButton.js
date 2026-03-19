@@ -201,6 +201,10 @@ $('body').on('click', '.blockPlusButton', function () {
       // Spread all answers under this question under their sockets
       // (do it AFTER node exists)
       positionNewAnswersUnderQuestion(characterObject.characterID, previousDialogueNodeInMasterObject.dialogueID);
+
+      // Ensure spacing matches the same algorithm used by the AUTO LAYOUT button.
+      // This fixes cases where socket-based placement results in answers stacking vertically.
+      autoLayoutAllCharacters();
     }
   }
 
@@ -233,7 +237,8 @@ function positionNewAnswersUnderQuestion(characterId, questionId) {
   // Compute Y below question in world coords
   const qr = qEl.getBoundingClientRect();
   const qBottomWorld = getWorldFromClient(qr.left, qr.top + qr.height).y;
-  const targetY = qBottomWorld + 110;
+  // Extra spacing to match AUTO LAYOUT's question->answer vertical offset.
+  const targetY = qBottomWorld + 130;
 
   // Measure answer width (world) from any existing answer/dialogue node
   const sampleAnswerEl =

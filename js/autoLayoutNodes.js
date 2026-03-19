@@ -3,7 +3,24 @@ function autoLayoutAllCharacters() {
     const Y_GAP = 180;
     const ROOT_OFFSET_Y = 140;
 
+    function getDialogueNodeWidthPx() {
+        const anyNode = document.querySelector('.blockWrap.dialogue');
+        if (!anyNode) return 360;
+
+        const rect = anyNode.getBoundingClientRect();
+
+        // compensate for body zoom (CSS zoom affects rect values)
+        let zoom = 1;
+        const zRaw = getComputedStyle(document.body).zoom;
+        if (zRaw) zoom = String(zRaw).includes('%') ? parseFloat(zRaw) / 100 : parseFloat(zRaw);
+        if (!isFinite(zoom) || zoom <= 0) zoom = 1;
+
+        const w = rect.width / zoom;
+        return (isFinite(w) && w > 50) ? w : 360;
+    }
+
     gameDialogueMakerProject.characters.forEach(character => {
+        const NODE_W = getDialogueNodeWidthPx();
         const nodeMap = new Map(character.dialogueNodes.map(n => [String(n.dialogueID), n]));
 
         // roots = not targeted
@@ -14,7 +31,8 @@ function autoLayoutAllCharacters() {
         if (!roots.length) return;
 
         // Anchor X under the character's plus button (socket 0), fallback to characterNodeX
-        let anchorX = Number(character.characterNodeX) || 0;
+        // We treat layout X as a *center* coordinate.
+        let anchorCenterX = (Number(character.characterNodeX) || 0) + NODE_W / 2;
         const charEl = document.querySelector(`.characterRoot[data-character-id="${character.characterID}"]`);
         const plus = charEl ? charEl.querySelector(`.blockPlusButton[data-buttonindex="0"]`) : null;
         const main = document.getElementById("mainArea");
@@ -27,23 +45,23 @@ function autoLayoutAllCharacters() {
             const zRaw = getComputedStyle(document.body).zoom;
             if (zRaw) zoom = String(zRaw).includes('%') ? parseFloat(zRaw) / 100 : parseFloat(zRaw);
             if (!isFinite(zoom) || zoom <= 0) zoom = 1;
-            anchorX = ((pr.left + pr.width / 2) - mr.left) / zoom;
+            anchorCenterX = ((pr.left + pr.width / 2) - mr.left) / zoom;
         }
 
         const startY = (Number(character.characterNodeY) || 0) + ROOT_OFFSET_Y;
 
-        // Pack multiple roots tightly around anchorX
+        // Pack multiple roots tightly around anchor center X
         const widths = roots.map(r => measureWidthUnits(r, nodeMap));
         const totalUnits = widths.reduce((a, b) => a + b, 0);
         const totalPx = (totalUnits - 1) * X_GAP;
 
-        let cursor = anchorX - totalPx / 2;
+        let cursor = anchorCenterX - totalPx / 2;
 
         roots.forEach((root, i) => {
             const w = widths[i];
-            const rootX = cursor + ((w - 1) * X_GAP) / 2;
+            const rootCenterX = cursor + ((w - 1) * X_GAP) / 2;
 
-            layoutMinLines(root, rootX, startY, nodeMap, X_GAP, Y_GAP);
+            layoutMinLines(root, rootCenterX, startY, nodeMap, X_GAP, Y_GAP, NODE_W);
 
             cursor += w * X_GAP;
         });
@@ -177,7 +195,9 @@ function layoutMinLines(node, x, y, nodeMap, X_GAP, Y_GAP) {
     { x, y }
   );
 
-  node.dialogueNodeX = x;
+  // `x` is treated as a center coordinate; store left position in the model.
+  const nodeW = arguments.length >= 7 ? arguments[6] : 360;
+  node.dialogueNodeX = x - nodeW / 2;
   node.dialogueNodeY = y;
 
   const kids = getChildrenFromMap(node, nodeMap);
@@ -196,7 +216,8 @@ function layoutMinLines(node, x, y, nodeMap, X_GAP, Y_GAP) {
     console.log(
       `[PLACE] node ${node.dialogueID} → vertical child ${kids[0].dialogueID}`
     );
-    layoutMinLines(kids[0], x, y + Y_GAP, nodeMap, X_GAP, Y_GAP);
+    const childYOffset = node.dialogueType === 'question' ? (Y_GAP + 20) : Y_GAP;
+    layoutMinLines(kids[0], x, y + childYOffset, nodeMap, X_GAP, Y_GAP, nodeW);
     return;
   }
 
@@ -219,7 +240,8 @@ function layoutMinLines(node, x, y, nodeMap, X_GAP, Y_GAP) {
       { cx, parentX: x, widthUnits: w }
     );
 
-    layoutMinLines(kids[i], cx, y + Y_GAP, nodeMap, X_GAP, Y_GAP);
+    const childYOffset = node.dialogueType === 'question' ? (Y_GAP + 20) : Y_GAP;
+    layoutMinLines(kids[i], cx, y + childYOffset, nodeMap, X_GAP, Y_GAP, nodeW);
     cursor += w * X_GAP;
   }
 }
