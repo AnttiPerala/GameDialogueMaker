@@ -1,3 +1,37 @@
+#nodeContextMenu {
+    position: fixed;
+    z-index: 20000;
+    min-width: 180px;
+    padding: 6px;
+    background: #222936;
+    border: 1px solid #57657a;
+    border-radius: 8px;
+    box-shadow: 0 8px 24px #0006;
+    font: 14px/1.4 Arial, sans-serif;
+}
+#nodeContextMenu[hidden] { display: none; }
+#nodeContextMenu button {
+    box-sizing: border-box;
+    height: auto;
+    margin: 0;
+    box-shadow: none;
+    text-transform: none;
+    transform: none;
+    transition: none;
+    display: block;
+    width: 100%;
+    padding: 9px 12px;
+    border: 0;
+    border-radius: 4px;
+    background: transparent;
+    color: #f1f5fa;
+    text-align: left;
+    font: inherit;
+    cursor: pointer;
+}
+#nodeContextMenu button:hover, #nodeContextMenu button:focus-visible { background: #3b4f6c; outline: none; }
+#nodeContextMenu .node-menu-delete { color: #ffb2ac; }
+
 body {
     background-color: rgb(127, 127, 127) !important;
     color: rgb(205, 205, 205);
@@ -608,4 +642,22 @@ button {
 }
 
   
-   
+#exportDialog {
+    width: min(560px, calc(100vw - 48px));
+    padding: 28px;
+    box-sizing: border-box;
+    border: 1px solid #7384a0;
+    border-radius: 12px;
+    background: #202733;
+    color: #f5f7fc;
+    font: 16px/1.5 Arial, sans-serif;
+    box-shadow: 0 20px 80px #0008;
+}
+#exportDialog::backdrop { background: #0009; }
+#exportDialog h2 { margin: 0 0 20px; }
+#exportDialog label { display: block; margin-bottom: 8px; }
+#exportDialog select { width: 100%; padding: 10px; font: inherit; }
+#exportDialog p { margin: 16px 0; }
+#exportDialog [role="alert"] { color: #ffb4ab; }
+.exportDialogActions { display: flex; gap: 12px; justify-content: flex-end; }
+.exportDialogActions button { padding: 10px 16px; font: inherit; cursor: pointer; }

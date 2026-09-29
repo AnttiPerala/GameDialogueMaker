@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<title>Dialogue runtime harness (not Construct)</title>
+<style>body{margin:0;background:#121724}canvas{display:block}#harness{position:fixed;bottom:0;left:0;background:white;color:black;font:12px sans-serif;padding:4px}</style>
+<canvas width="960" height="640"></canvas>
+<span id="harness">Test harness: simulated Construct sprite API <button id="walk">Walk to Mira</button><button id="rowan">Walk to Rowan</button><button id="apple">Walk to apple</button></span>
+<script src="../js/constructRuntime.js"></script>
+<script>
+// Exercises the SAME runner shipped in C3P, with a tiny simulated sprite API.
+// This tests browser controls/DOM only and does not prove Construct compatibility.
+fetch('../artifacts/dialogue-fixture.json').then(response => response.json()).then(project => {
+    const player = {x:140,y:240}, npcs = project.characters.map((_,i) => ({x:140+i*220,y:280}));
+    const playerLabel = {x:55,y:196};
+    const apple = {x:580,y:180,dead:false,destroy(){this.dead=true}};
+    const appleImage = new Image(); appleImage.src = '../artifacts/gdevelop-playground/assets/apple.png';
+    player.addChild = (child, options) => {
+        const dx = child.x-player.x, dy = child.y-player.y;
+        if (options.transformX) Object.defineProperty(child, 'x', {get:()=>player.x+dx});
+        if (options.transformY) Object.defineProperty(child, 'y', {get:()=>player.y+dy});
+    };
+    const events = new Map();
+    const runtime = {dt:1/60, layout:{width:960,height:640,scrollTo(){},addEventListener(){},removeEventListener(){}},
+        objects:{Player:{getFirstInstance:()=>player},PlayerLabel:{getFirstInstance:()=>playerLabel},Apple:{getFirstInstance:()=>apple}},
+        addEventListener(name, callback){events.set(name,callback)}, removeEventListener(name){events.delete(name)}};
+    npcs.forEach((sprite,i) => runtime.objects[`NPC_${i+1}`] = {getFirstInstance:()=>sprite});
+    startConstructDialogueGame(runtime, project, createConstructDialogueSession);
+    document.querySelector('#walk').onclick = () => {
+        player.x = 140; player.y = 240; events.get('tick')?.();
+        window.dispatchEvent(new KeyboardEvent('keydown', {code:'ArrowDown'}));
+        for(let i=0;i<12;i++) events.get('tick')?.();
+        window.dispatchEvent(new KeyboardEvent('keyup', {code:'ArrowDown'}));
+    };
+    document.querySelector('#rowan').onclick = () => {
+        player.x = npcs[1].x; player.y = npcs[1].y-40;
+        events.get('tick')?.();
+        player.y = npcs[1].y-28; events.get('tick')?.();
+    };
+    document.querySelector('#apple').onclick = () => { player.x=580;player.y=180;events.get('tick')?.(); };
+    const canvas = document.querySelector('canvas'), ctx = canvas.getContext('2d');
+    function frame() {
+        events.get('tick')?.();
+        ctx.clearRect(0,0,960,640);
+        if(project.demoAppleQuest && !apple.dead && appleImage.complete) ctx.drawImage(appleImage,apple.x-16,apple.y-16,32,32);
+        [player,...npcs].forEach((sprite,index) => {
+            ctx.fillStyle=index?project.characters[index-1].bgColor:'#6ccaff';ctx.fillRect(sprite.x-16,sprite.y-16,32,32);
+            ctx.fillStyle='white';ctx.font='16px Arial';ctx.textAlign='center';
+            if (index) ctx.fillText(project.characters[index-1].characterName,sprite.x,sprite.y+40);
+            else ctx.fillText('Player',playerLabel.x+85,playerLabel.y+16);
+        });
+        requestAnimationFrame(frame);
+    }
+    frame();
+});
+</script>
+</html>

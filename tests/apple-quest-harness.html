@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en"><meta charset="utf-8"><title>Apple quest runtime tests</title>
+<style>body{font:16px system-ui;background:#121724;color:white;margin:24px}pre{white-space:pre-wrap}img{image-rendering:pixelated}</style>
+<h1>Apple quest runtime tests</h1>
+<p>Real exported JavaScript runners with simulated engine sprites and collision APIs.</p>
+<img src="../artifacts/gdevelop-playground/assets/apple.png" width="96" height="96" alt="Red pixel apple with green leaves">
+<pre id="results">Running…</pre>
+<script src="../js/constructRuntime.js"></script><script src="../js/gdevelopRuntime.js"></script>
+<script>
+(async () => {
+    const lines = [], result = document.querySelector('#results');
+    function check(condition, message) { if (!condition) throw Error(message); lines.push('PASS: '+message); }
+    const project = await (await fetch('../artifacts/dialogue-fixture.json')).json();
+    for (const engine of ['Construct','GDevelop']) {
+        const sprite = (x,y) => ({x,y,dead:false,getX(){return this.x},getY(){return this.y},
+            setPosition(x,y){this.x=x;this.y=y},setColor(){},destroy(){this.dead=true},deleteFromScene(){this.dead=true},addChild(){}});
+        const player=sprite(140,140), apple=sprite(580,180);
+        const objects={Player:player,PlayerLabel:sprite(55,96),Apple:apple,NPC_1:sprite(140,280),NPC_2:sprite(360,280)};
+        let tick, cleanup, variables;
+        if(engine==='Construct') {
+            const runtime={dt:1/60,objects:Object.fromEntries(Object.entries(objects).map(([name,s])=>[name,{getFirstInstance:()=>s}])),
+                layout:{width:960,height:640,scrollTo(){},addEventListener(n,f){cleanup=f},removeEventListener(){}},
+                addEventListener(n,f){tick=f},removeEventListener(){}};
+            startConstructDialogueGame(runtime,project,createConstructDialogueSession);
+            variables=globalThis.gdmDialogueVariables;
+        } else {
+            const scene={getObjects:n=>[objects[n]],getTimeManager:()=>({getElapsedTime:()=>1000/60}),
+                getGame:()=>({getInputManager:()=>({isKeyPressed:()=>false})}),getLayer:()=>({setCameraX(){},setCameraY(){}})};
+            const gdjs={RuntimeObject:{collisionTest:(a,b)=>!b.dead&&Math.abs(a.x-b.x)<32&&Math.abs(a.y-b.y)<32},
+                registerRuntimeSceneUnloadedCallback(){},registerRuntimeScenePausedCallback(){},registerRuntimeSceneResumedCallback(){}};
+            const state=startGDevelopDialogueGame(scene,project,createConstructDialogueSession,gdjs);
+            tick=state.tick;cleanup=state.dispose;variables=state.variables;
+        }
+        const contact=(x,y)=>{player.setPosition(x,y);tick()};
+        const text=()=>document.querySelector('[role="dialog"]').textContent;
+        const close=()=>[...document.querySelectorAll('[role="dialog"] button')].find(b=>b.textContent==='Finish').click();
+        check(variables.hasApple===0,engine+': starts with no apple');
+        contact(140,280);check(text().includes('Could you bring me an apple?'),engine+': first collision selects request');close();
+        contact(140,180);contact(140,280);check(text().includes('Could you bring me an apple?'),engine+': returning without pickup still selects request');close();
+        contact(580,180);check(apple.dead && variables.hasApple===1,engine+': collision removes apple and sets numeric hasApple=1');
+        check(document.querySelector('input').value==='1',engine+': variable editor reflects pickup');
+        tick();check(variables.hasApple===1,engine+': pickup happens only once');
+        contact(140,280);check(text().includes('You found the apple!'),engine+': returning selects thank-you condition');close();
+        cleanup();
+    }
+    result.textContent=lines.join('\n')+'\nALL APPLE QUEST TESTS PASSED';
+})().catch(error=>{document.querySelector('#results').textContent='FAIL: '+error.stack;console.error(error)});
+</script></html>

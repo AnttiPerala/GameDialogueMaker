@@ -37,13 +37,8 @@ function deleteBlockWrap(blockWrapEl) {
 
         gameDialogueMakerProject.characters.splice(characterIndex, 1);
 
-        // decrement character IDs to avoid gaps
-        for (let i = characterIndex; i < gameDialogueMakerProject.characters.length; i++) {
-            gameDialogueMakerProject.characters[i].characterID--;
-        }
-
-        clearCanvasBeforeReDraw();
-        drawDialogueMakerProject();
+        // Keep surviving IDs stable; new characters use the maximum ID + 1.
+        storeMasterObjectToLocalStorage();
         return;
     }
 
@@ -59,16 +54,11 @@ function deleteBlockWrap(blockWrapEl) {
     if (nodeIndex < 0) return;
 
     characterObjectToEraseFrom.dialogueNodes.splice(nodeIndex, 1);
-    deleteLinesByToNode(characterObjectToEraseFrom, idToBeErased);
-
-    // decrement dialogue IDs to avoid gaps
-    for (let i = nodeIndex; i < characterObjectToEraseFrom.dialogueNodes.length; i++) {
-        characterObjectToEraseFrom.dialogueNodes[i].dialogueID--;
+    for (const source of [characterObjectToEraseFrom, ...characterObjectToEraseFrom.dialogueNodes]) {
+        source.outgoingLines = (source.outgoingLines || []).filter(line => String(line.toNode) !== String(idToBeErased));
+        if (String(source.nextNode) === String(idToBeErased)) source.nextNode = -1;
     }
-
-    clearCanvasBeforeReDraw();
-    shiftObjecElementsThatAreGreaterThanDeletedIDDownByOne(characterObjectToEraseFrom, idToBeErased);
-    drawDialogueMakerProject();
+    storeMasterObjectToLocalStorage();
 }
 
 window.deleteBlockWrap = deleteBlockWrap;

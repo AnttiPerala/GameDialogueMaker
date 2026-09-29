@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en"><meta charset="utf-8"><title>GDevelop dialogue harness — simulated engine</title>
+<style>body{margin:0;background:#121724}canvas{display:block}#test-tools{position:fixed;bottom:0;left:0;background:white;color:black;font:12px sans-serif;z-index:2000}button{margin:3px}</style>
+<canvas width="960" height="640"></canvas>
+<div id="test-tools">Simulated GDevelop API
+<button id="walk">Walk to first NPC</button><button id="leave">Leave NPC</button>
+<button id="empty">Touch Rowan</button><button id="apple">Touch apple</button><button id="pause">Pause scene</button>
+<button id="resume">Resume scene</button><button id="unload">Unload scene</button>
+<span id="status">Loading</span></div>
+<script src="../js/constructRuntime.js"></script><script src="../js/gdevelopRuntime.js"></script>
+<script>
+fetch('../artifacts/gdevelop-playground/dialogue-source.json').then(r=>r.json()).then(project=>{
+    const sprite=(x,y)=>({x,y,color:'',getX(){return this.x},getY(){return this.y},setPosition(x,y){this.x=x;this.y=y},setColor(c){this.color=c}});
+    const player=sprite(140,140),npcs=project.characters.map((c,i)=>sprite(140+i*220,280));
+    const apple=sprite(580,180); apple.dead=false; apple.deleteFromScene=()=>apple.dead=true;
+    const appleImage=new Image();appleImage.src='../artifacts/gdevelop-playground/assets/apple.png';
+    const keys=new Set(), callbacks={};
+    const gdjs={RuntimeObject:{collisionTest:(a,b)=>Math.abs(a.x-b.x)<=32&&Math.abs(a.y-b.y)<=32},
+        registerRuntimeSceneUnloadedCallback:f=>callbacks.unload=f,registerRuntimeScenePausedCallback:f=>callbacks.pause=f,registerRuntimeSceneResumedCallback:f=>callbacks.resume=f};
+    const scene={getObjects:n=>n==='Player'?[player]:n==='Apple'?[apple]:[npcs[Number(n.slice(4))-1]],getTimeManager:()=>({getElapsedTime:()=>1000/60}),
+        getGame:()=>({getInputManager:()=>({isKeyPressed:k=>keys.has(k)})}),getLayer:()=>({setCameraX(){},setCameraY(){}})};
+    scene.__gdmDialogue=startGDevelopDialogueGame(scene,project,createConstructDialogueSession,gdjs);
+    const tick=()=>scene.__gdmDialogue?.tick();
+    document.querySelector('#walk').onclick=()=>{keys.add(40);for(let i=0;i<45;i++)tick();keys.clear();};
+    document.querySelector('#leave').onclick=()=>{player.setPosition(140,140);tick();};
+    document.querySelector('#empty').onclick=()=>{player.setPosition(360,280);tick();};
+    document.querySelector('#apple').onclick=()=>{player.setPosition(580,180);tick();};
+    for(const name of ['pause','resume','unload'])document.querySelector('#'+name).onclick=()=>callbacks[name](scene);
+    const canvas=document.querySelector('canvas'),ctx=canvas.getContext('2d');
+    function frame(){tick();ctx.clearRect(0,0,960,640);if(project.demoAppleQuest&&!apple.dead&&appleImage.complete)ctx.drawImage(appleImage,apple.x-16,apple.y-16,32,32);[player,...npcs].forEach((s,i)=>{ctx.fillStyle='rgb('+s.color.replaceAll(';',',')+')';ctx.fillRect(s.x-16,s.y-16,32,32);ctx.fillStyle='white';ctx.font='16px Arial';ctx.textAlign='center';ctx.fillText(i?project.characters[i-1].characterName:'YOU',s.x,s.y+40);});requestAnimationFrame(frame);}frame();
+    document.querySelector('#status').textContent='Ready';
+});
+</script></html>

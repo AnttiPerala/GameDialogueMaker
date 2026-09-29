@@ -1,0 +1,7 @@
+{
+  "FileVersion": 3,
+  "EngineAssociation": "",
+  "Category": "Games",
+  "Description": "Game Dialogue Maker playable dialogue playground",
+  "Modules": [{ "Name": "DialoguePlayground", "Type": "Runtime", "LoadingPhase": "Default" }]
+}

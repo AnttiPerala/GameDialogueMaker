@@ -8,11 +8,10 @@ let charName;
 
 
 // Start Play Mode
-function startPlayMode() {
-    playModeActive = true;
+function startPlayMode(blockWrap) {
     console.log('start playmode');
 
-    const selectedElement = $('.selected');
+    const selectedElement = blockWrap instanceof HTMLElement ? $(blockWrap) : $('.block.selected').first();
     if (selectedElement.length === 0) {
         drawDialogueBox('Select a node for playback.');
         return;
@@ -25,13 +24,18 @@ function startPlayMode() {
 
     // If character, navigate to the next node
     if (playModeNodeInfo.isCharacter) {
-        let nextNodeID = playModeNodeInfo.characterNode.outgoingLines[0].toNode;
+        let nextNodeID = playModeNodeInfo.characterNode.outgoingLines?.[0]?.toNode;
         let nextNodeInObject = getDialogueNodeById(playModeNodeInfo.characterID, nextNodeID);
+        if (!nextNodeInObject) {
+            drawDialogueBox('Connect this character to a dialogue node before playing.');
+            return;
+        }
         playModeNodeInfo = getInfoByPassingInDialogueNodeOrElement(nextNodeInObject);
         console.log('is char');
     }
 
     playModeCharID = playModeNodeInfo.characterID;
+    playModeActive = true;
     charName = playModeNodeInfo.characterName;
 
     console.log('playModeNodeInfo now', playModeNodeInfo);

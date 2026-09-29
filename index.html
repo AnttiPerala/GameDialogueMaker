@@ -82,7 +82,7 @@
             </div>
 
             <div id="export" class="uiElem">
-                <p class="uiElemTitle" title="Export the data in your desired format. The export format can be changed under settings.">EXPORT FILE</p>
+                <p class="uiElemTitle" title="Choose JSON, plain text, Construct, Godot, Unity, Unreal Engine, GameMaker, or GDevelop.">EXPORT FILE</p>
                 <img src="img/iconmonstr-log-out-18-32.png" width="32" alt="" class="btnSmall">
             </div>
 
@@ -103,7 +103,7 @@
 
             <div id="settingsArea">
                 <div id="settingExportFormat" class="individualSetting">
-                    Export format:
+                    Default export format:
                     <form id="formatSelection">
                         <label>
                             <input type="radio" name="format" value="json" checked> JSON
@@ -111,6 +111,30 @@
                         <br>
                         <label>
                             <input type="radio" name="format" value="plainText"> Plain text
+                        </label>
+                        <br>
+                        <label>
+                            <input type="radio" name="format" value="construct"> Construct (.c3p)
+                        </label>
+                        <br>
+                        <label>
+                            <input type="radio" name="format" value="godot"> Godot 4 (.zip)
+                        </label>
+                        <br>
+                        <label>
+                            <input type="radio" name="format" value="unity"> Unity (.zip)
+                        </label>
+                        <br>
+                        <label>
+                            <input type="radio" name="format" value="unreal"> Unreal Engine (.zip)
+                        </label>
+                        <br>
+                        <label>
+                            <input type="radio" name="format" value="gamemaker"> GameMaker (.zip)
+                        </label>
+                        <br>
+                        <label>
+                            <input type="radio" name="format" value="gdevelop"> GDevelop (.zip)
                         </label>
                     </form>
                 </div>
@@ -142,13 +166,22 @@
                 in the node. You can also change the type of the node to "question" in order to add a question with
                 branching answers.</p>
 
-            <p>When you are done with you dialogue tree, you can export it as a JSON file from the export button at the
-                top bar. You should be able to then take this file to Construct 3 and especially to the tutorial
-                .c3p-file created by Laura_D. Simply import as a project file and replace the existing json file import
-                in the eGame event sheet on even 2 (action: -> AJAX: Request dialogue.json (tag "LoadDialogue"))</p>
+            <p>Use EXPORT FILE to choose JSON, plain text, Construct 3, Godot 4, Unity, Unreal Engine, GameMaker, or GDevelop. Engine exports include
+                a player and a labeled NPC sprite for each character. Open the downloaded .c3p in Construct and
+                press Preview, then move with arrows or WASD and touch an NPC to talk. Use Test variables to try
+                conditional paths. The generated project requires a Construct plan with sufficient JavaScript capacity.</p>
+            <p>For Godot, extract the exported ZIP, import project.godot in Godot 4.5 or newer, and press F5.
+                The Godot project uses native scenes and dialogue controls, with the same movement and contact interaction.</p>
+            <p>For Unity, copy Assets/GameDialogueMaker from the ZIP into a 2D project, then choose
+                Tools &gt; Game Dialogue Maker &gt; Create or Open Playground and press Play.</p>
+            <p>For Unreal Engine, extract the ZIP, open DialoguePlayground.uproject with UE 5.3 or newer,
+                build the C++ module, and press Play. Requires Unreal's C++ development tools.</p>
+            <p>For GameMaker, extract the ZIP, open DialoguePlayground.yyp in GameMaker 2026.x,
+                select a desktop VM target, and press F5.</p>
+            <p>For GDevelop, extract the ZIP, open game.json in the GDevelop 5 desktop editor, and click Preview.</p>
 
-            <p>The characters get assigned a dialogue from the JSON based on their "SceneID" instance variable value.
-            </p>
+            <p>In the generated Construct project, NPC_1, NPC_2, and so on map to the characters in order.
+                Their displayed names are preserved, including duplicate names.</p>
 
             <h3>Some things to note:</h3>
             <p>You can drag the dialogues around to arrange them the way you prefer. Dragging a parent dialogue will
@@ -196,6 +229,64 @@
 
 
         </div>
+    <dialog id="exportDialog" aria-labelledby="exportTitle">
+        <form>
+            <h2 id="exportTitle">Export dialogue</h2>
+            <label for="exportTarget">Export format</label>
+            <select id="exportTarget" name="exportTarget">
+                <option value="json">JSON — editable dialogue data</option>
+                <option value="plainText">Plain text — readable dialogue</option>
+                <option value="construct">Construct 3 — playable project (.c3p)</option>
+                <option value="godot">Godot 4 — playable project (.zip)</option>
+                <option value="unity">Unity — 2D playground kit (.zip)</option>
+                <option value="unreal">Unreal Engine 5 — C++ playground project (.zip)</option>
+                <option value="gamemaker">GameMaker — GML playground project (.zip)</option>
+                <option value="gdevelop">GDevelop — playable project (.zip)</option>
+            </select>
+            <div data-export-info="construct" hidden>
+            <p>Construct includes a player and a labeled NPC sprite for every character.
+                Open the .c3p in Construct and press Preview. Move with arrows or WASD and touch an NPC to talk.</p>
+            <p>Questions have selectable answers. Fight outcomes and condition variables can be tested in preview.
+                Requires a Construct plan that supports the included JavaScript runtime.</p>
+            </div>
+            <div data-export-info="godot" hidden>
+                <p>Includes a movable 2D player, labeled NPCs, and a dialogue interface.
+                    Move with arrows or WASD and touch an NPC to talk.</p>
+                <p>Extract the ZIP, import project.godot in Godot 4.5 or newer, and press F5.
+                    Branching answers, condition variables, and fight outcomes are ready to test.</p>
+            </div>
+            <div data-export-info="unity" hidden>
+                <p>Includes a movable 2D player, NPC sprites for all characters, and branching dialogue with test variables.</p>
+                <p>Copy the ZIP's Assets/GameDialogueMaker folder into a Unity 2022.3 LTS or Unity 6 project.
+                    Choose Tools &gt; Game Dialogue Maker &gt; Create or Open Playground, then press Play.
+                    Move with arrows or WASD and touch an NPC to talk.</p>
+            </div>
+            <div data-export-info="unreal" hidden>
+                <p>Includes a top-down player, NPC contact triggers for every character, branching dialogue,
+                    and test variables. Move with WASD or arrows and touch an NPC to talk.</p>
+                <p>Extract the ZIP, open DialoguePlayground.uproject with UE 5.3 or newer, build the module,
+                    and press Play. Requires Unreal's C++ toolchain (Visual Studio and Windows SDK on Windows).
+                    The playground appears when Play starts.</p>
+            </div>
+            <div data-export-info="gamemaker" hidden>
+                <p>Includes a movable 2D player, an NPC per character, branching dialogue, and test variables.
+                    Move with WASD or arrows and touch an NPC to talk.</p>
+                <p>Extract the ZIP, open DialoguePlayground.yyp in GameMaker 2026.x, select a desktop VM target,
+                    and press F5. Click choices and scroll long dialogue with the mouse wheel.</p>
+            </div>
+            <div data-export-info="gdevelop" hidden>
+                <p>Includes a movable player, an NPC sprite per character, branching dialogue, and test variables.
+                    Move with WASD or arrows and touch an NPC to talk.</p>
+                <p>Extract the ZIP, open game.json in the current GDevelop 5 desktop editor, and click Preview.
+                    Dialogue uses an included JavaScript event and scrollable interface.</p>
+            </div>
+            <p role="alert"></p>
+            <div class="exportDialogActions">
+                <button type="button" data-close-export>Cancel</button>
+                <button type="submit">Download export</button>
+            </div>
+        </form>
+    </dialog>
     <div id="mainArea">
 
        
@@ -242,13 +333,30 @@
 
 <script src="js/autoLayoutNodes.js"></script>
 <script src="js/exportJson.js"></script>
+<script src="js/exportCommon.js"></script>
+<script src="js/constructTemplate.js"></script>
+<script src="js/constructRuntime.js"></script>
+<script src="js/exportConstruct.js"></script>
+<script src="js/godotTemplate.js"></script>
+<script src="js/exportGodot.js"></script>
+<script src="js/unityTemplate.js"></script>
+<script src="js/exportUnity.js"></script>
+<script src="js/unrealTemplate.js"></script>
+<script src="js/exportUnreal.js"></script>
+<script src="js/gameMakerTemplate.js"></script>
+<script src="js/exportGameMaker.js"></script>
+<script src="js/gdevelopTemplate.js"></script>
+<script src="js/gdevelopRuntime.js"></script>
+<script src="js/exportGDevelop.js"></script>
+<script src="js/exportDialog.js?v=20260930-export-defaults"></script>
 <script src="js/exportAsText.js"></script>
 <script src="js/loadFile.js"></script>
 <script src="js/undo.js"></script>
 <script src="js/playMode.js"></script>
+<script src="js/nodeContextMenu.js"></script>
 <script src="js/debug.js"></script>
 
-<script src="js/handleEvents.js"></script>
+<script src="js/handleEvents.js?v=20260930-export-defaults"></script>
 <script src="js/main2.js"></script>
 
 <!-- ✅ MUST BE LAST -->

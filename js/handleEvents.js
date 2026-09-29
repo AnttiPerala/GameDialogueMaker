@@ -7,7 +7,7 @@ $('.plus').on('click', function () {
 
     let newCharacterNode = {
         characterName: 'Name the character',
-        characterID: charactersSoFar+1,
+        characterID: Math.max(0, ...gameDialogueMakerProject.characters.map(character => Number(character.characterID))) + 1,
         characterNodeX: 271 * (charactersSoFar + 1),
         characterNodeY: 85,
         bgColor: '#4b4b4b',
@@ -346,24 +346,7 @@ $(document).on('change', '.next', function () {
 
 //CLICKED ON THE EXPORT JSON BUTTON (code handled in separate exportJson.js file)
 jQuery(document).on('click', '#export', function () {
-
-    var selectedFormat = jQuery('input[name="format"]:checked').val();
-
-    switch (selectedFormat) {
-        case 'json':
-               //console.log(`Export json ${this}`);
-                exportJson(); //defined in separate exportJson.js file
-            break;
-        case 'plainText':
-            //console.log(`Export json ${this}`);
-            exportDialogueToText(gameDialogueMakerProject); //defined in separateexportDialogueToText.js file
-            break;
-        default:
-            exportJson();
-            break;
-    }
-
-
+    openExportDialog();
 })
 
 //FUNCTION TO ADD EMPTY DIVS TO A LOADED JSON OBJECT
