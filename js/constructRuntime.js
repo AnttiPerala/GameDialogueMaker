@@ -1,7 +1,7 @@
 // Kept independent of the editor and Construct APIs so traversal can be tested.
 function createConstructDialogueSession(character, variables) {
     const nodes = new Map(character.dialogueNodes.map(node => [String(node.dialogueID), node]));
-    let current = null;
+    let current = null, waiting = [];
     const allows = line => (line.transitionConditions || []).every(condition => {
         const actual = variables[condition.variableName];
         const expected = condition.variableValue;
@@ -15,7 +15,12 @@ function createConstructDialogueSession(character, variables) {
             default: return false;
         }
     });
-    const go = id => { current = nodes.get(String(id)) || null; return current; };
+    const go = id => {
+        current = nodes.get(String(id)) || null;
+        waiting = (current?.outgoingLines || []).filter(line =>
+            (line.transitionConditions || []).some(c => c.waitUntilMet !== false) && !allows(line));
+        return current;
+    };
     const next = node => {
         const lines = node.outgoingLines || [];
         if (lines.length) {
@@ -27,6 +32,12 @@ function createConstructDialogueSession(character, variables) {
     return {
         get current() { return current; },
         start() {
+            if (current && waiting.length) {
+                // Reopen at the checkpoint; never select a player response automatically.
+                const unlocked = waiting.find(allows);
+                if (unlocked && !['question','fight'].includes(current.dialogueType)) return go(unlocked.toNode);
+                return current;
+            }
             const lines = character.outgoingLines || [];
             return go(lines.find(allows)?.toNode);
         },
@@ -70,10 +81,15 @@ function startConstructDialogueGame(runtime, project, createSession) {
     const variables = Object.create(null);
     const conditions = project.characters.flatMap(character => [character, ...character.dialogueNodes]
         .flatMap(node => (node.outgoingLines || []).flatMap(line => line.transitionConditions || [])));
-    for (const condition of conditions) {
-        variables[condition.variableName] = typeof condition.variableValue === 'number' ? 0 : '';
+    const bindings = project.constructVariables || [...new Set(conditions.map(c => c.variableName))].map(name => ({dialogueName:name, name}));
+    for (const binding of bindings) {
+        Object.defineProperty(variables, binding.dialogueName, {
+            enumerable:true,
+            get:() => runtime.globalVars[binding.name],
+            set:value => { runtime.globalVars[binding.name] = value; }
+        });
     }
-    // Exposed for game-specific scripts to update conditions without editing this runner.
+    // Compatibility alias: values are native Construct globals, never a second store.
     globalThis.gdmDialogueVariables = variables;
     let apple = project.demoAppleQuest === true ? runtime.objects.Apple.getFirstInstance() : null;
     const style = document.createElement('style');
@@ -115,11 +131,11 @@ function startConstructDialogueGame(runtime, project, createSession) {
     variablePanel.className = 'gdm-vars';
     variablePanel.hidden = true;
     const hint = document.createElement('p');
-    hint.textContent = 'Set game variables to test conditional paths. Fights offer simulated win/loss choices.';
+    hint.textContent = 'Edit native Construct global variables. Event-sheet changes also update dialogue conditions.';
     variablePanel.append(hint);
     for (const name of Object.keys(variables)) {
         const label = document.createElement('label');
-        label.textContent = name;
+        label.textContent = bindings.find(binding => binding.dialogueName === name).name;
         const input = document.createElement('input');
         const numeric = typeof variables[name] === 'number';
         input.type = numeric ? 'number' : 'text';
@@ -133,24 +149,35 @@ function startConstructDialogueGame(runtime, project, createSession) {
     }
     if (!Object.keys(variables).length) variablePanel.append(document.createTextNode('No conditions in this dialogue.'));
     document.body.append(variablePanel);
-    variableButton.onclick = () => { variablePanel.hidden = !variablePanel.hidden; };
+    variableButton.onclick = () => { refreshVariableInputs(); variablePanel.hidden = !variablePanel.hidden; };
     const refreshVariableInputs = () => {
         [...variablePanel.querySelectorAll('input')].forEach((input, index) => {
             input.value = variables[Object.keys(variables)[index]];
         });
     };
+    const sessions = new Map();
     let session = null, activeNPC = null, page = 0;
     let previousContacts = new Set();
     const keys = new Set();
-    const close = () => { panel.hidden = true; session = null; activeNPC = null; keys.clear(); };
-    function button(text, action, enabled = true) {
+    const contactsNow = () => new Set(npcs.filter(npc => Math.abs(npc.sprite.x - player.x) < 32 && Math.abs(npc.sprite.y - player.y) < 32));
+    const close = () => { previousContacts = contactsNow(); panel.hidden = true; session = null; activeNPC = null; keys.clear(); };
+    let numberedButtons = [];
+    function button(text, action, enabled = true, numbered = true) {
         const element = document.createElement('button');
         element.textContent = text;
+        if (numbered) {
+            const badge = document.createElement('span');
+            badge.textContent = String(numberedButtons.length + 1);
+            badge.style.cssText = 'display:inline-block;min-width:1.6em;opacity:.45;font-size:.8em;vertical-align:baseline';
+            element.prepend(badge);
+            numberedButtons.push(element);
+        }
         element.disabled = !enabled;
         element.onclick = action;
         panel.append(element);
     }
     function render() {
+        numberedButtons = [];
         panel.replaceChildren();
         panel.hidden = false;
         const title = document.createElement('h2');
@@ -164,14 +191,25 @@ function startConstructDialogueGame(runtime, project, createSession) {
             button('Try again', () => { session.start(); page = 0; render(); });
         } else {
             const pages = String(node.dialogueText || '').split(/\r?\n/);
+            const role = session.current.dialogueSpeakers?.[page] || (session.current.dialogueType === 'answer' ? 'player' : 'npc');
+            title.textContent = role === 'player' ? 'You' : role === 'scene' ? 'Scene' : activeNPC.character.characterName;
+            text.style.fontStyle = role === 'scene' ? 'italic' : 'normal';
             text.textContent = pages[page];
             panel.append(text);
             if (page < pages.length - 1) {
                 button('Continue', () => { page++; render(); });
             } else {
+                if (session.current.dialogueType === 'question') {
+                    const speaker = document.createElement('h3');
+                    speaker.textContent = 'You';
+                    speaker.style.cssText = 'font-size:14px;color:#9bd9ff;margin:16px 0 4px';
+                    panel.append(speaker);
+                }
                 const options = session.options();
-                for (const option of options) button(option.text, () => {
-                    option.choose();
+                for (const [index, option] of options.entries()) button(option.text, () => {
+                    const currentOption = session.options()[index];
+                    if (!currentOption?.enabled) { render(); return; }
+                    currentOption.choose();
                     page = 0;
                     if (session.current) render(); else close();
                 }, option.enabled);
@@ -182,10 +220,20 @@ function startConstructDialogueGame(runtime, project, createSession) {
                 }
             }
         }
-        button('Close conversation (Esc)', close);
+        button('Close conversation (Esc)', close, true, false);
         panel.scrollTop = 0;
     }
     function keydown(event) {
+        const digit = /^(?:Digit|Numpad)([1-9])$/.exec(event.code);
+        if (digit && session && variablePanel.hidden && !event.repeat && !event.ctrlKey && !event.altKey && !event.metaKey && !event.shiftKey &&
+            !event.target.closest?.('input,textarea,select,[contenteditable]')) {
+            event.preventDefault();
+            numberedButtons[Number(digit[1]) - 1]?.click();
+            return;
+        }
+        if (session && variablePanel.hidden && !event.repeat &&
+            !event.target.closest?.('input,textarea,select,[contenteditable]') &&
+            ['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','KeyW','KeyA','KeyS','KeyD'].includes(event.code)) close();
         if (event.code === 'Escape') { close(); variablePanel.hidden = true; return; }
         if (event.target instanceof HTMLInputElement) return;
         if (['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Space'].includes(event.code)) event.preventDefault();
@@ -200,8 +248,15 @@ function startConstructDialogueGame(runtime, project, createSession) {
     window.addEventListener('keydown', keydown);
     window.addEventListener('keyup', keyup);
     window.addEventListener('blur', blur);
+    let lastVariableValues = Object.values(variables);
     const tick = () => {
-        if (session || !variablePanel.hidden) return;
+        const values = Object.values(variables);
+        if (values.some((value, index) => value !== lastVariableValues[index])) {
+            lastVariableValues = values;
+            refreshVariableInputs();
+            if (session) render();
+        }
+        if (session || !variablePanel.hidden) { previousContacts = contactsNow(); return; }
         let dx = Number(keys.has('ArrowRight') || keys.has('KeyD')) - Number(keys.has('ArrowLeft') || keys.has('KeyA'));
         let dy = Number(keys.has('ArrowDown') || keys.has('KeyS')) - Number(keys.has('ArrowUp') || keys.has('KeyW'));
         const distance = Math.hypot(dx, dy) || 1;
@@ -215,12 +270,13 @@ function startConstructDialogueGame(runtime, project, createSession) {
             questStatus.textContent = ' · Apple collected! Return to Mira.';
             refreshVariableInputs();
         }
-        const contacts = new Set(npcs.filter(npc => Math.abs(npc.sprite.x - player.x) < 32 && Math.abs(npc.sprite.y - player.y) < 32));
+        const contacts = contactsNow();
         const entered = [...contacts].find(npc => !previousContacts.has(npc));
         previousContacts = contacts;
         if (entered) {
             activeNPC = entered;
-            session = createSession(entered.character, variables);
+            if (!sessions.has(entered.character)) sessions.set(entered.character, createSession(entered.character, variables));
+            session = sessions.get(entered.character);
             session.start();
             page = 0;
             keys.clear();

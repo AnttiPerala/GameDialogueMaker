@@ -15,7 +15,7 @@ module.exports = function sample() {
     data.characters[1].bgColor = '#2ecc71';
     data.characters[1].outgoingLines = [{ toNode: 100, transitionConditions: [] }];
     data.characters[1].dialogueNodes = [
-        { dialogueID: 100, dialogueType: 'line', dialogueText: 'Hello! I am Rowan. Welcome to our village.', outgoingLines: [{ toNode: 110, transitionConditions: [] }], nextNode: -1 },
+        { dialogueID: 100, dialogueType: 'line', dialogueText: 'Hello! Welcome to our village.', outgoingLines: [{ toNode: 110, transitionConditions: [] }], nextNode: -1 },
         { dialogueID: 110, dialogueType: 'line', dialogueText: 'Mira is looking for an apple. I saw one nearby. Walk into it to pick it up, then return to her!', outgoingLines: [], nextNode: -1 }
     ];
     return data;

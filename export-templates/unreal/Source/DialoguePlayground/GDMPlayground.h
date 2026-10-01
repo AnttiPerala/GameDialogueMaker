@@ -33,7 +33,8 @@ public:
     AGDMNpc();
     UPROPERTY(VisibleAnywhere) USphereComponent* Trigger;
     UPROPERTY(VisibleAnywhere) UStaticMeshComponent* Mesh;
-    UPROPERTY(EditAnywhere, Category="Dialogue") int32 CharacterIndex = 0;
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Dialogue") FString CharacterId;
+    int32 CharacterIndex = -1;
     UFUNCTION() void Contact(UPrimitiveComponent* Component, AActor* Other, UPrimitiveComponent* OtherComponent,
         int32 BodyIndex, bool bSweep, const FHitResult& Hit);
 };
@@ -58,15 +59,18 @@ public:
     virtual void BeginPlay() override;
     virtual void PlayerTick(float DeltaTime) override;
     virtual void EndPlay(const EEndPlayReason::Type Reason) override;
+    UFUNCTION(BlueprintCallable, Category="Dialogue") void OpenCharacterById(const FString& Id);
     void OpenCharacter(int32 Index);
     bool IsBusy() const { return Session.IsValid() || bVariables; }
     GDM::Variables Variables;
 private:
-    TUniquePtr<GDM::Session> Session;
+    TMap<int32, TSharedPtr<GDM::Session>> Sessions;
+    TSharedPtr<GDM::Session> Session;
     TSharedPtr<SOverlay> RootWidget;
     TSharedPtr<SVerticalBox> DialogueBox, VariableBox;
     bool bVariables = false;
     int32 Page = 0;
+    void SelectOption(int32 Index);
     void RefreshDialogue();
     void RefreshVariables();
     void CloseDialogue();
@@ -88,6 +92,9 @@ public:
     AGDMGameMode();
     virtual void BeginPlay() override;
     std::vector<GDM::Character> Characters;
+    UPROPERTY(EditAnywhere, Category="Dialogue") bool bCreateDemoWorld = true;
+    bool bDemoAppleQuest = false;
+    FString DialogueError;
     UPROPERTY() TArray<AGDMNpc*> Npcs;
     UPROPERTY() AGDMApple* Apple = nullptr;
 };

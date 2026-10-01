@@ -1,8 +1,14 @@
 // Serialized into a native GDevelop JavaScript event. No editor or module globals.
-function startGDevelopDialogueGame(runtimeScene, project, createSession, gdjs) {
+function startGDevelopDialogueGame(runtimeScene, project, createSession, gdjs, bindings = project.characters.map((c,i)=>({characterId:String(c.characterID),object:`NPC_${i+1}`}))) {
     const player = runtimeScene.getObjects('Player')[0];
     let apple = project.demoAppleQuest === true ? runtimeScene.getObjects('Apple')[0] : null;
-    const npcs = project.characters.map((character, index) => ({character, sprite:runtimeScene.getObjects(`NPC_${index + 1}`)[0]}));
+    const npcs = bindings.flatMap(binding => {
+        const character = project.characters.find(c=>String(c.characterID) === binding.characterId);
+        if (!character) return [];
+        const label = binding.label && runtimeScene.getObjects(binding.label)[0];
+        if (label?.setString) label.setString(character.characterName || 'Unnamed character');
+        return runtimeScene.getObjects(binding.object).map(sprite=>({character,sprite}));
+    });
     if (!player || npcs.some(npc => !npc.sprite)) throw new Error('The playground scene is missing a player or NPC.');
     player.setColor('85;200;255');
     for (const npc of npcs) {
@@ -62,13 +68,24 @@ function startGDevelopDialogueGame(runtimeScene, project, createSession, gdjs) {
     closeVariables.onclick = () => { variablePanel.hidden = true; };
     variablePanel.append(closeVariables);
     root.append(style,hud,panel,variablePanel); document.body.append(root);
+    const sessions = new Map();
     let session = null, activeNPC = null, page = 0, previousContacts = new Set();
-    const close = () => { session = null; activeNPC = null; panel.hidden = true; };
-    function button(text, action, enabled = true) {
+    const contactsNow = () => new Set(npcs.filter(npc => gdjs.RuntimeObject.collisionTest(player,npc.sprite,false)));
+    const close = () => { previousContacts = contactsNow(); session = null; activeNPC = null; panel.hidden = true; };
+    let numberedButtons = [];
+    function button(text, action, enabled = true, numbered = true) {
         const element = document.createElement('button'); element.textContent = text;
+        if (numbered) {
+            const badge = document.createElement('span');
+            badge.textContent = String(numberedButtons.length + 1);
+            badge.style.cssText = 'display:inline-block;min-width:1.6em;opacity:.45;font-size:.8em;vertical-align:baseline';
+            element.prepend(badge);
+            numberedButtons.push(element);
+        }
         element.disabled = !enabled; element.onclick = action; panel.append(element);
     }
     function render() {
+        numberedButtons = [];
         panel.replaceChildren(); panel.hidden = false;
         const title = document.createElement('h2'); title.textContent = activeNPC.character.characterName; panel.append(title);
         const text = document.createElement('p'); panel.append(text);
@@ -77,9 +94,18 @@ function startGDevelopDialogueGame(runtimeScene, project, createSession, gdjs) {
             button('Try again', () => { session.start(); page = 0; render(); });
         } else {
             const pages = String(session.current.dialogueText || '').split(/\r?\n/);
+            const role = session.current.dialogueSpeakers?.[page] || (session.current.dialogueType === 'answer' ? 'player' : 'npc');
+            title.textContent = role === 'player' ? 'You' : role === 'scene' ? 'Scene' : activeNPC.character.characterName;
+            text.style.fontStyle = role === 'scene' ? 'italic' : 'normal';
             text.textContent = pages[page];
             if (page + 1 < pages.length) button('Continue', () => { page++; render(); });
             else {
+                if (session.current.dialogueType === 'question') {
+                    const speaker = document.createElement('h3');
+                    speaker.textContent = 'You';
+                    speaker.style.cssText = 'font-size:14px;color:#9bd9ff;margin:16px 0 4px';
+                    panel.append(speaker);
+                }
                 const options = session.options();
                 for (const option of options) button(option.text, () => {
                     option.choose(); page = 0;
@@ -90,10 +116,21 @@ function startGDevelopDialogueGame(runtimeScene, project, createSession, gdjs) {
                 }
             }
         }
-        button('Close conversation (Esc)', close); panel.scrollTop = 0;
+        button('Close conversation (Esc)', close, true, false); panel.scrollTop = 0;
     }
     function keydown(event) {
         if (root.hidden) return;
+        const digit = /^(?:Digit|Numpad)([1-9])$/.exec(event.code);
+        if (digit && session && variablePanel.hidden && !event.repeat && !event.ctrlKey && !event.altKey && !event.metaKey && !event.shiftKey &&
+            !event.target.closest?.('input,textarea,select,[contenteditable]')) {
+            event.preventDefault();
+            numberedButtons[Number(digit[1]) - 1]?.click();
+            return;
+        }
+
+        if (session && variablePanel.hidden && !event.repeat &&
+            !event.target.closest?.('input,textarea,select,[contenteditable]') &&
+            ['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','KeyW','KeyA','KeyS','KeyD'].includes(event.code)) close();
         if (event.code === 'Escape') { close(); variablePanel.hidden = true; }
         if (event.target.tagName !== 'INPUT' && ['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Space'].includes(event.code)) event.preventDefault();
     }
@@ -103,7 +140,7 @@ function startGDevelopDialogueGame(runtimeScene, project, createSession, gdjs) {
         variables, root, render,
         get busy() { return !!session || !variablePanel.hidden; },
         tick() {
-            if (root.hidden || state.busy) return;
+            if (root.hidden || state.busy) { previousContacts = contactsNow(); return; }
             const input = runtimeScene.getGame().getInputManager();
             const down = key => input.isKeyPressed(key);
             const dx = Number(down(39) || down(68)) - Number(down(37) || down(65));
@@ -122,10 +159,12 @@ function startGDevelopDialogueGame(runtimeScene, project, createSession, gdjs) {
                     input.value = variables[Object.keys(variables)[index]];
                 });
             }
-            const contacts = new Set(npcs.filter(npc => gdjs.RuntimeObject.collisionTest(player,npc.sprite,false)));
+            const contacts = contactsNow();
             const entered = [...contacts].find(npc => !previousContacts.has(npc)); previousContacts = contacts;
             if (entered) {
-                activeNPC = entered; session = createSession(entered.character,variables); session.start(); page = 0; render();
+                activeNPC = entered;
+                if (!sessions.has(entered.character)) sessions.set(entered.character, createSession(entered.character,variables));
+                session = sessions.get(entered.character); session.start(); page = 0; render();
             }
         },
         dispose() { window.removeEventListener('keydown',keydown); root.remove(); delete runtimeScene.__gdmDialogue; }

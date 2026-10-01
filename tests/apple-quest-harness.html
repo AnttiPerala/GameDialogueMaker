@@ -18,7 +18,7 @@
         const objects={Player:player,PlayerLabel:sprite(55,96),Apple:apple,NPC_1:sprite(140,280),NPC_2:sprite(360,280)};
         let tick, cleanup, variables;
         if(engine==='Construct') {
-            const runtime={dt:1/60,objects:Object.fromEntries(Object.entries(objects).map(([name,s])=>[name,{getFirstInstance:()=>s}])),
+            const runtime={globalVars:{hasApple:0},dt:1/60,objects:Object.fromEntries(Object.entries(objects).map(([name,s])=>[name,{getFirstInstance:()=>s}])),
                 layout:{width:960,height:640,scrollTo(){},addEventListener(n,f){cleanup=f},removeEventListener(){}},
                 addEventListener(n,f){tick=f},removeEventListener(){}};
             startConstructDialogueGame(runtime,project,createConstructDialogueSession);

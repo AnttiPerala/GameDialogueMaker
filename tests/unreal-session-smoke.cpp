@@ -57,5 +57,13 @@ int main()
     assert(Escaped->Edges[0].Conditions[1].Expected.Number == -1.23456789e-100);
     S.Go("90");
     assert(!S.Options()[0].Enabled && S.Choose(0)->Id == "90");
+    auto& Request = People[0].Nodes[5];
+    Request.Edges = {{"70", {{"apple", "=", {true, 1, ""}, true}}}};
+    Vars["apple"] = {true, 0, ""};
+    S.Go("60"); assert(S.Start()->Id == "60");
+    Vars["apple"].Number = 1; assert(S.Start()->Id == "70");
+    assert(S.Start()->Id == "10");
+    Request.Edges[0].Conditions[0].WaitUntilMet = false; Vars["apple"].Number = 0;
+    S.Go("60"); assert(S.Start()->Id == "10");
     std::cout << "UNREAL_SESSION_PASS\n";
 }

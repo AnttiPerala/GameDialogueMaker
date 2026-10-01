@@ -7,6 +7,7 @@ const { spawnSync } = require('node:child_process');
 const fixture = require('./dialogue-fixture');
 const template = require('../js/unrealTemplate');
 const { buildUnrealProject, unrealString } = require('../js/exportUnreal');
+const {buildUnrealFixtureHeader} = require('./unreal-fixture');
 const { createExportZip } = require('../js/exportCommon');
 const root = 'Source/DialoguePlayground/';
 
@@ -17,7 +18,7 @@ test('Unreal exports preserve live editor state and original data with a self-co
     const files = buildUnrealProject(source, template);
     assert.equal(source.characters[0].nodeElement, dom);
     delete source.characters[0].nodeElement;
-    assert.deepEqual(JSON.parse(files['DialogueSource/dialogue.json']), source);
+    assert.deepEqual(JSON.parse(files['Content/Dialogue/dialogue.json']), source);
     const project = JSON.parse(files['DialoguePlayground.uproject']);
     assert.equal(project.Modules[0].Name, 'DialoguePlayground');
     assert.ok(files[root + 'DialoguePlayground.Build.cs']);
@@ -26,7 +27,8 @@ test('Unreal exports preserve live editor state and original data with a self-co
         for (const [, include] of files[name].matchAll(/#include "(Dialogue[^"\n]+|GDM[^"\n]+)"/g))
             if (!include.endsWith('.generated.h')) assert.ok(files[root + include], `Missing ${include}`);
     assert.match(files['Config/DefaultEngine.ini'], /GlobalDefaultGameMode=\/Script\/DialoguePlayground.GDMGameMode/);
-    assert.ok(files[root + 'DialogueData.h'].includes(unrealString(source.characters[0].characterName)));
+    assert.equal(files[root + 'DialogueData.h'],undefined,'dialogue is no longer compiled into the game');
+    assert.match(files[root+'GDMPlayground.cpp'],/GDM::LoadDialogue/);
 });
 
 test('Unreal rejects invalid graphs, unsupported condition values, and embedded nulls', () => {
@@ -37,7 +39,7 @@ test('Unreal rejects invalid graphs, unsupported condition values, and embedded 
         assert.throws(() => buildUnrealProject(source, template), /finite number or text/);
     }
     condition.variableValue = '001';
-    assert.ok(buildUnrealProject(source, template)[root + 'DialogueData.h'].includes('{false,0.0,' + unrealString('001')));
+    assert.ok(buildUnrealFixtureHeader(source).includes('{false,0.0,' + unrealString('001')));
     source.characters[0].characterName = 'bad\0name';
     assert.throws(() => buildUnrealProject(source, template), /null characters/);
     source.characters[0].characterName = 'okay';
@@ -57,6 +59,7 @@ function writeProject(output, source = fixture()) {
         fs.mkdirSync(path.dirname(target), {recursive:true});
         fs.writeFileSync(target, content);
     }
+    fs.writeFileSync(path.join(output,root,'DialogueData.h'),buildUnrealFixtureHeader(source));
     return files;
 }
 

@@ -3,6 +3,7 @@ const godotExportHelpers = typeof module !== 'undefined' ? require('./exportComm
 
 function buildGodotProject(source, template) {
     const data = godotExportHelpers.cleanDialogueProject(source);
+    const plainJson = JSON.stringify(data);
     for (const character of data.characters || []) {
         character.dialogueNodes = character.dialogueNodes || [];
         character.outgoingLines = character.outgoingLines || [];
@@ -11,7 +12,7 @@ function buildGodotProject(source, template) {
     godotExportHelpers.validateDialogueProject(data);
     const files = { ...template };
     files['art/apple.png'] = godotExportHelpers.createDemoApplePng();
-    files['dialogue.json'] = JSON.stringify(data, null, 2);
+    files['dialogue.json'] = plainJson;
     const height = Math.max(640, 260 + Math.ceil(data.characters.length / 4) * 150);
     let scene = `[gd_scene load_steps=5 format=3]
 
@@ -38,6 +39,7 @@ world_size = Vector2(960, ${height})
 [node name="NPC_${index + 1}" parent="NPCs" instance=ExtResource("3")]
 position = Vector2(${x}, ${y})
 character_index = ${index}
+character_id = ${JSON.stringify(String(character.characterID))}
 tint = Color(${color.join(', ')}, 1)
 `;
     });

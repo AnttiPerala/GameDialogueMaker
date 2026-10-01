@@ -4,18 +4,6 @@ const gameMakerExportHelpers = typeof module !== 'undefined' ? require('./export
 function buildGameMakerProject(source, template) {
     const data = gameMakerExportHelpers.cleanDialogueProject(source);
     gameMakerExportHelpers.validateDialogueProject(data);
-    const edges = lines => (lines || []).map(line => ({target:String(line.toNode), conditions:(line.transitionConditions || []).map(c => {
-        if (typeof c.variableValue !== 'string' && (typeof c.variableValue !== 'number' || !Number.isFinite(c.variableValue)))
-            throw new Error(`Condition ${c.variableName}: use a finite number or text value.`);
-        return {name:c.variableName, op:c.comparisonOperator, value:c.variableValue};
-    })}));
-    const runtime = {demoAppleQuest:data.demoAppleQuest === true, characters:data.characters.map(c => {
-        const hex = /^#[0-9a-f]{6}$/i.test(c.bgColor) ? c.bgColor : '#b68af7';
-        const rgb = [1,3,5].map(start => Math.max(90, parseInt(hex.slice(start, start + 2), 16)));
-        return {name:c.characterName || 'Unnamed character', color:rgb[0] + rgb[1] * 256 + rgb[2] * 65536,
-            start:edges(c.outgoingLines), nodes:(c.dialogueNodes || []).map(n => ({id:String(n.dialogueID), type:n.dialogueType,
-                text:String(n.dialogueText || ''), next:Number(n.nextNode) > 0 ? String(n.nextNode) : '', edges:edges(n.outgoingLines)}))};
-    })};
     const files = {...template};
     const json = (name, value) => { files[name] = JSON.stringify(value, null, 2); };
     const resource = (type, name, version = '') => ({['$' + type]:version, '%Name':name, name, resourceType:type, resourceVersion:'2.0'});
@@ -63,7 +51,7 @@ function buildGameMakerProject(source, template) {
         sequenceId:null,views:Array.from({length:8}, () => ({hborder:32,hport:640,hspeed:-1,hview:640,inherit:false,objectId:null,
             vborder:32,visible:false,vspeed:-1,wport:960,wview:960,xport:0,xview:0,yport:0,yview:0})),
         viewSettings:{clearDisplayBuffer:true,clearViewBackground:false,enableViews:false,inheritViewSettings:false},volume:1});
-    const included = ['gdm_dialogue.json','dialogue-source.json','character.png'];
+    const included = ['dialogue.json','character.png'];
     if (data.demoAppleQuest === true) { included.push('apple.png'); files['datafiles/apple.png'] = gameMakerExportHelpers.createDemoApplePng(); }
     json('DialoguePlayground.yyp', {...resource('GMProject','DialoguePlayground','v1'),
         AudioGroups:[{...resource('GMAudioGroup','audiogroup_default','v1'),exportDir:'',targets:-1}],
@@ -77,8 +65,7 @@ function buildGameMakerProject(source, template) {
         option_gameguid:crypto.randomUUID(),option_gameid:'0',option_game_speed:60,option_mips_for_3d_textures:false,
         option_draw_colour:4294967295,option_window_colour:255,option_steam_app_id:'0',option_sci_usesci:false,
         option_author:'',option_collision_compatibility:false,option_copy_on_write_enabled:false,option_spine_licence:false});
-    json('datafiles/gdm_dialogue.json',runtime);
-    json('datafiles/dialogue-source.json',data);
+    files['datafiles/dialogue.json'] = JSON.stringify(data);
     files['datafiles/character.png'] = Uint8Array.from(atob('iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAKUlEQVR4nO3OIQEAAAACIP+f1hkWWEB6FgEBAQEBAQEBAQEBAQEBgXdgl/rw4unIZ5cAAAAASUVORK5CYII='), c => c.charCodeAt(0));
     return files;
 }

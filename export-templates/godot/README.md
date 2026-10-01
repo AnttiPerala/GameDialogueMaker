@@ -1,4 +1,4 @@
-# Dialogue Playground — Godot 4
+# Dialogue Playground â€” Godot 4
 
 The downloadable apple-quest demo: talk to Mira, close the conversation, touch
 the red apple with green leaves, then return to Mira. Pickup removes the apple
@@ -30,8 +30,18 @@ NPCs use Area2D.body_entered to detect the CharacterBody2D player. Movement paus
 while a conversation or test panel is open. The areas are contact triggers;
 they do not act as solid obstacles.
 
-Dialogue is in dialogue.json. NPC character_index maps to its characters array.
+Dialogue is in dialogue.json: replace it with the ordinary JSON export and restart the game. Preserve your .tscn scenes, scripts, sprites and themes. NPC character_id is the stable Dialogue Maker ID; character_index is resolved at runtime so reordering characters is safe.
 Export again after adding or removing characters. To integrate with your game,
 set DialogueUI.variables, replace the test panel with your own game state,
 and use dialogue_session.gd for traversal. The exporter preserves original
 names and text in JSON rather than treating them as scene names or script code.
+
+Dialogue shortcuts: press 1–9 (top row or numeric keypad) to select the corresponding numbered option. Press 1 to continue a line or finish a conversation. Numbers appear separately from dialogue text; locked options cannot be selected. Shortcuts pause while Test variables is open. Options above 9 remain clickable.
+
+Waiting conditions: waitUntilMet defaults to true. Blocked waiting connections remember their upstream node per character for the current game runtime. On returning, the same node is displayed until its condition passes, then the connection is followed. Questions and fights still require a choice. Uncheck this setting to restart normally. This progress is in memory; add your own save-game integration for persistence across reloads.
+
+## Updating an existing integration
+
+Export once to bootstrap the engine project. Afterwards export ordinary JSON and replace only `dialogue.json`. Keep character/node IDs stable. Updates take effect at the next run, not mid-conversation; game saves need their own migration policy if nodes are deleted. Variable dictionaries remain game-owned while running; setting a condition never changes a variable automatically. New condition variables need wiring to your gameplay.
+
+Older exports require a one-time integration upgrade. Merge scripts/main.gd, scripts/npc.gd and scripts/dialogue_ui.gd, then set each existing NPC character_id to its original Dialogue Maker ID. Keep your scenes and themes. Custom interactions can call open_character_id. When packaging, include *.json in the export preset non-resource file filter.

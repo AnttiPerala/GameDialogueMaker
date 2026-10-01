@@ -10,6 +10,7 @@
     font: 14px/1.4 Arial, sans-serif;
 }
 #nodeContextMenu[hidden] { display: none; }
+#nodeContextMenu button[hidden] { display: none; }
 #nodeContextMenu button {
     box-sizing: border-box;
     height: auto;
@@ -661,3 +662,6 @@ button {
 #exportDialog [role="alert"] { color: #ffb4ab; }
 .exportDialogActions { display: flex; gap: 12px; justify-content: flex-end; }
 .exportDialogActions button { padding: 10px 16px; font: inherit; cursor: pointer; }
+
+.conditionInputsWrap .waitConditionLabel { display: flex; align-items: center; gap: .5rem; text-align: left; font-size: .9rem; }
+.conditionInputsWrap input.waitUntilMet { width: auto; margin: 0; flex: 0 0 auto; }

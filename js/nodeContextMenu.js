@@ -41,6 +41,7 @@ if (typeof document !== 'undefined') (() => {
     // Outside the zoomed/panned canvas and body so pointer coordinates stay literal.
     document.documentElement.append(menu);
     let target = null;
+    let canvasPosition = null;
     let returnFocus = null;
     const select = wrapper => {
         $('.selected').removeClass('selected');
@@ -49,6 +50,7 @@ if (typeof document !== 'undefined') (() => {
     const close = (restore = false) => {
         menu.hidden = true;
         target = null;
+        canvasPosition = null;
         if (restore && returnFocus?.isConnected) returnFocus.focus({preventScroll:true});
     };
     const actions = [
@@ -76,31 +78,68 @@ if (typeof document !== 'undefined') (() => {
         };
         menu.append(button);
     }
+    const nodeButtons = [...menu.querySelectorAll('button')];
+    const newCharacterButton = document.createElement('button');
+    newCharacterButton.type = 'button';
+    newCharacterButton.role = 'menuitem';
+    newCharacterButton.textContent = 'New Character';
+    newCharacterButton.hidden = true;
+    newCharacterButton.onclick = () => {
+        const position = canvasPosition;
+        close();
+        if (!position) return;
+        const character = addCharacterAt(position.x, position.y);
+        const wrapper = document.querySelector(`.characterRoot[data-character-id="${character.characterID}"]`);
+        if (wrapper) {
+            select(wrapper);
+            const name = wrapper.querySelector('.characterName');
+            name?.focus({preventScroll:true});
+            name?.select();
+        }
+    };
+    menu.append(newCharacterButton);
+    const isEmptyCanvas = element => element === document.getElementById('mainArea') || element === document.body;
     // Prevent right clicks from activating eraser/style brushes or drag handlers.
     for (const name of ['pointerdown', 'mousedown']) document.addEventListener(name, event => {
-        if (event.button === 2 && event.target.closest('#mainArea .blockWrap')) event.stopImmediatePropagation();
+        if (event.button === 2 && (event.target.closest('#mainArea .blockWrap') || isEmptyCanvas(event.target))) event.stopImmediatePropagation();
     }, true);
     document.addEventListener('contextmenu', event => {
         const wrapper = event.target.closest('#mainArea .blockWrap');
-        if (!wrapper) { close(); return; }
+        if (!wrapper && !isEmptyCanvas(event.target)) { close(); return; }
         event.preventDefault(); event.stopPropagation();
         // Commit any text currently being edited before a copy/delete redraw.
         if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
-        target = wrapper; select(wrapper);
-        returnFocus = wrapper.querySelector('.block');
+        target = wrapper;
+        canvasPosition = null;
+        for (const button of nodeButtons) button.hidden = !wrapper;
+        newCharacterButton.hidden = !!wrapper;
+        menu.setAttribute('aria-label', wrapper ? 'Node actions' : 'Canvas actions');
+        if (wrapper) {
+            select(wrapper);
+            returnFocus = wrapper.querySelector('.block');
+        } else {
+            const canvas = document.getElementById('mainArea');
+            const bounds = canvas.getBoundingClientRect();
+            const zoom = getBodyZoomFactor();
+            canvasPosition = {
+                x:(event.clientX - bounds.left) / zoom - canvas.clientLeft,
+                y:(event.clientY - bounds.top) / zoom - canvas.clientTop
+            };
+            returnFocus = canvas;
+        }
         returnFocus.tabIndex = -1;
         menu.hidden = false;
-        const anchor = wrapper.getBoundingClientRect();
+        const anchor = returnFocus.getBoundingClientRect();
         const x = event.clientX || anchor.left + 20, y = event.clientY || anchor.top + 20;
         menu.style.left = `${Math.max(8, Math.min(x, window.innerWidth - menu.offsetWidth - 8))}px`;
         menu.style.top = `${Math.max(8, Math.min(y, window.innerHeight - menu.offsetHeight - 8))}px`;
-        menu.querySelector('button').focus({preventScroll:true});
+        menu.querySelector('button:not([hidden])').focus({preventScroll:true});
     });
     document.addEventListener('pointerdown', event => {
         if (!menu.hidden && !menu.contains(event.target)) close();
     }, true);
     menu.addEventListener('keydown', event => {
-        const buttons = [...menu.querySelectorAll('button')];
+        const buttons = [...menu.querySelectorAll('button:not([hidden])')];
         const index = buttons.indexOf(document.activeElement);
         if (event.key === 'Escape' || event.key === 'Tab') { close(true); if (event.key === 'Escape') event.preventDefault(); }
         else if (['ArrowDown','ArrowUp','Home','End'].includes(event.key)) {

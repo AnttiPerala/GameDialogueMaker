@@ -12,7 +12,13 @@ func _ready() -> void:
 	$DialogueUI.configure(data.characters)
 	$DialogueUI.busy_changed.connect(_on_busy_changed)
 	for npc in $NPCs.get_children():
-		if npc.character_index >= data.characters.size():
+		if not npc.character_id.is_empty():
+			npc.character_index = -1
+			for index in range(data.characters.size()):
+				if str(int(data.characters[index].get("characterID", -1))) == npc.character_id:
+					npc.character_index = index
+					break
+		if npc.character_index < 0 or npc.character_index >= data.characters.size():
 			continue
 		npc.set_character_name(str(data.characters[npc.character_index].get("characterName", "Unnamed character")))
 		npc.talk_requested.connect($DialogueUI.open_character)

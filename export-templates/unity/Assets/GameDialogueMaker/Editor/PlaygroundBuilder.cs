@@ -35,10 +35,10 @@ namespace GameDialogueMakerUnity.Editor
         // Build the scene through Unity's serializer; do not hand-author scene YAML.
         public static void Create()
         {
-            TextAsset asset = AssetDatabase.LoadAssetAtPath<TextAsset>(Root + "/Resources/GDMDialogue.json");
+            TextAsset asset = AssetDatabase.LoadAssetAtPath<TextAsset>(Root + "/Resources/dialogue.json");
             if (asset == null) throw new InvalidOperationException("Import the complete GameDialogueMaker folder first.");
-            DialogueData data = JsonUtility.FromJson<DialogueData>(asset.text);
-            if (data == null || data.characters == null) throw new InvalidOperationException("Invalid GDMDialogue.json.");
+            DialogueData data = DialogueJson.Parse(asset.text);
+            if (data == null || data.characters == null) throw new InvalidOperationException("Invalid dialogue.json.");
             string spritePath = Root + "/Art/character.png";
             TextureImporter importer = AssetImporter.GetAtPath(spritePath) as TextureImporter;
             if (importer == null) throw new InvalidOperationException("The character PNG is missing.");
@@ -90,6 +90,7 @@ namespace GameDialogueMakerUnity.Editor
                 npc.AddComponent<BoxCollider2D>().isTrigger = true;
                 DialogueNpc contact = npc.AddComponent<DialogueNpc>();
                 contact.characterIndex = i;
+                contact.characterId = data.characters[i].id;
                 contact.displayName = data.characters[i].name;
                 contact.controller = controller;
             }

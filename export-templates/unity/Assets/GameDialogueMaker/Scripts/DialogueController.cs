@@ -13,6 +13,7 @@ namespace GameDialogueMakerUnity
         public readonly Dictionary<string, VariableValue> Variables = new Dictionary<string, VariableValue>();
         public bool IsBusy { get { return session != null || showVariables || error != null; } }
         readonly Dictionary<string, string> variableInputs = new Dictionary<string, string>();
+        readonly Dictionary<int, DialogueSession> sessions = new Dictionary<int, DialogueSession>();
         DialogueSession session;
         DialogueNpc[] npcs;
         int page;
@@ -25,8 +26,8 @@ namespace GameDialogueMakerUnity
         {
             try
             {
-                if (dialogueFile == null) throw new Exception("Assign the exported GDMDialogue JSON asset.");
-                Data = JsonUtility.FromJson<DialogueData>(dialogueFile.text);
+                if (dialogueFile == null) throw new Exception("Assign the exported dialogue.json TextAsset.");
+                Data = DialogueJson.Parse(dialogueFile.text);
                 if (Data == null || Data.characters == null) throw new Exception("Invalid dialogue data.");
                 foreach (CharacterData character in Data.characters)
                 {
@@ -35,8 +36,11 @@ namespace GameDialogueMakerUnity
                 }
                 npcs = GetComponentsInChildren<DialogueNpc>();
                 foreach (DialogueNpc npc in npcs)
+                {
+                    if (!string.IsNullOrEmpty(npc.characterId)) npc.characterIndex = Array.FindIndex(Data.characters, c => c.id == npc.characterId);
                     if (npc.characterIndex >= 0 && npc.characterIndex < Data.characters.Length)
                         npc.displayName = Data.characters[npc.characterIndex].name;
+                }
             }
             catch (Exception exception) { error = exception.Message; Debug.LogError(error, this); }
         }
@@ -54,7 +58,16 @@ namespace GameDialogueMakerUnity
 
         void Update()
         {
-            if (DialogueInput.ClosePressed()) { session = null; showVariables = false; }
+            if (DialogueInput.ClosePressed()) { session = null; showVariables = false; return; }
+            if (session == null || showVariables) return;
+            if (DialogueInput.MovementPressed()) { session = null; return; }
+            int index = DialogueInput.AnswerPressed();
+            if (index < 0) return;
+            if (session.Current == null) { if (index == 0) { session.Start(); page = 0; } return; }
+            string[] pages = session.Current.text.Replace("\r\n", "\n").Split('\n');
+            if (page < pages.Length - 1) { if (index == 0) { page++; dialogueScroll = Vector2.zero; } return; }
+            var choices = session.Options();
+            if (index < choices.Count && choices[index].Enabled) Choose(index);
         }
 
         public void CollectApple()
@@ -65,10 +78,15 @@ namespace GameDialogueMakerUnity
             variableInputs["hasApple"] = "1";
         }
 
+        public void OpenCharacterId(string characterId)
+        {
+            if (Data != null) OpenCharacter(Array.FindIndex(Data.characters, c => c.id == characterId));
+        }
+
         public void OpenCharacter(int index)
         {
             if (IsBusy || Data == null || index < 0 || index >= Data.characters.Length) return;
-            session = new DialogueSession(Data.characters[index], Variables);
+            if (!sessions.TryGetValue(index, out session)) { session = new DialogueSession(Data.characters[index], Variables); sessions.Add(index, session); }
             session.Start();
             page = 0;
             dialogueScroll = Vector2.zero;
@@ -80,6 +98,20 @@ namespace GameDialogueMakerUnity
             page = 0;
             dialogueScroll = Vector2.zero;
             if (session.Current == null) session = null;
+        }
+
+        bool NumberedButton(string text, int index, GUIStyle style)
+        {
+            var answerStyle = new GUIStyle(style) { alignment = TextAnchor.MiddleLeft };
+            answerStyle.padding.left = 36;
+            bool clicked = GUILayout.Button(text, answerStyle, GUILayout.MinHeight(36));
+            Rect rect = GUILayoutUtility.GetLastRect();
+            var numberStyle = new GUIStyle(GUI.skin.label) { fontSize = 12, alignment = TextAnchor.MiddleLeft };
+            Color previous = GUI.color;
+            GUI.color = new Color(previous.r, previous.g, previous.b, previous.a * 0.45f);
+            GUI.Label(new Rect(rect.x + 10, rect.y, 24, rect.height), (index + 1).ToString(), numberStyle);
+            GUI.color = previous;
+            return clicked;
         }
 
         void OnGUI()
@@ -114,11 +146,13 @@ namespace GameDialogueMakerUnity
                 float height = Mathf.Min(340, Screen.height * 0.6f);
                 GUILayout.BeginArea(new Rect((Screen.width - width) / 2, Screen.height - height - 16, width, height), GUI.skin.box);
                 dialogueScroll = GUILayout.BeginScrollView(dialogueScroll);
-                GUILayout.Label(session.Character.name, titleStyle);
+                string role = session.Current != null && session.Current.speakers != null && page < session.Current.speakers.Length
+                    ? session.Current.speakers[page] : session.Current != null && session.Current.type == "answer" ? "player" : "npc";
+                GUILayout.Label(role == "player" ? "You" : role == "scene" ? "Scene" : session.Character.name, titleStyle);
                 if (session.Current == null)
                 {
                     GUILayout.Label("No available starting dialogue. Check the root connection and test variables.", labelStyle);
-                    if (GUILayout.Button("Try again", buttonStyle)) pendingAction = delegate { session.Start(); page = 0; };
+                    if (NumberedButton("Try again", 0, buttonStyle)) pendingAction = delegate { session.Start(); page = 0; };
                 }
                 else
                 {
@@ -126,17 +160,18 @@ namespace GameDialogueMakerUnity
                     GUILayout.Label(pages[page], labelStyle);
                     if (page < pages.Length - 1)
                     {
-                        if (GUILayout.Button("Continue", buttonStyle, GUILayout.MinHeight(36))) pendingAction = delegate { page++; dialogueScroll = Vector2.zero; };
+                        if (NumberedButton("Continue", 0, buttonStyle)) pendingAction = delegate { page++; dialogueScroll = Vector2.zero; };
                     }
                     else
                     {
+                        if (session.Current.type == "question") GUILayout.Label("You", titleStyle);
                         List<DialogueChoice> choices = session.Options();
                         bool blocked = false;
                         for (int i = 0; i < choices.Count; i++)
                         {
                             int choiceIndex = i;
                             GUI.enabled = choices[i].Enabled;
-                            if (GUILayout.Button(choices[i].Text, buttonStyle, GUILayout.MinHeight(36))) pendingAction = delegate { Choose(choiceIndex); };
+                            if (NumberedButton(choices[i].Text, i, buttonStyle)) pendingAction = delegate { Choose(choiceIndex); };
                             blocked |= !choices[i].Enabled;
                         }
                         GUI.enabled = true;

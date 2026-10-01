@@ -1,5 +1,6 @@
 #include "GDMPlayground.h"
-#include "DialogueData.h"
+#include "DialogueJson.h"
+#include "Kismet/GameplayStatics.h"
 #include "Camera/CameraComponent.h"
 #include "Components/SphereComponent.h"
 #include "Components/StaticMeshComponent.h"
@@ -30,6 +31,14 @@ namespace
 FString Display(const std::string& Text) { return FString(UTF8_TO_TCHAR(Text.c_str())); }
 FText Label(const std::string& Text) { return FText::FromString(Display(Text)); }
 AGDMGameMode* Mode(const UWorld* World) { return World ? World->GetAuthGameMode<AGDMGameMode>() : nullptr; }
+TSharedRef<SHorizontalBox> NumberedText(int32 Number, const FText& Value)
+{
+    return SNew(SHorizontalBox)
+        + SHorizontalBox::Slot().AutoWidth().Padding(0, 0, 12, 0)
+        [ SNew(STextBlock).Text(FText::AsNumber(Number)).ColorAndOpacity(FLinearColor(1, 1, 1, 0.45f)) ]
+        + SHorizontalBox::Slot().FillWidth(1)
+        [ SNew(STextBlock).Text(Value).AutoWrapText(true).ColorAndOpacity(FLinearColor::White) ];
+}
 TSharedRef<STextBlock> Text(const FText& Value)
 { return SNew(STextBlock).Text(Value).AutoWrapText(true).ColorAndOpacity(FLinearColor::White); }
 }
@@ -81,7 +90,7 @@ void AGDMApple::Contact(UPrimitiveComponent*, AActor* Other, UPrimitiveComponent
 void AGDMNpc::Contact(UPrimitiveComponent*, AActor* Other, UPrimitiveComponent*, int32, bool, const FHitResult&)
 {
     if (AGDMPlayer* Player = Cast<AGDMPlayer>(Other))
-        if (AGDMController* PC = Cast<AGDMController>(Player->GetController())) PC->OpenCharacter(CharacterIndex);
+        if (AGDMController* PC = Cast<AGDMController>(Player->GetController())) PC->OpenCharacterById(CharacterId);
 }
 
 AGDMPlayer::AGDMPlayer()
@@ -117,11 +126,22 @@ AGDMGameMode::AGDMGameMode()
     DefaultPawnClass = AGDMPlayer::StaticClass();
     PlayerControllerClass = AGDMController::StaticClass();
     HUDClass = AGDMHud::StaticClass();
-    Characters = GDM::MakeCharacters();
+    GDM::LoadDialogue(Characters, bDemoAppleQuest, DialogueError);
 }
 void AGDMGameMode::BeginPlay()
 {
     Super::BeginPlay();
+    if (!bCreateDemoWorld) {
+        TArray<AActor*> Placed;
+        UGameplayStatics::GetAllActorsOfClass(GetWorld(), AGDMNpc::StaticClass(), Placed);
+        for (AActor* Actor : Placed) {
+            AGDMNpc* Npc = Cast<AGDMNpc>(Actor); Npc->CharacterIndex = -1;
+            for (int32 I = 0; I < static_cast<int32>(Characters.size()); ++I)
+                if (Npc->CharacterId == Display(Characters[I].Id)) { Npc->CharacterIndex = I; break; }
+            Npcs.Add(Npc);
+        }
+        return;
+    }
     const float Rows = FMath::Max(1, FMath::DivideAndRoundUp(static_cast<int32>(Characters.size()), 4));
     AStaticMeshActor* Floor = GetWorld()->SpawnActor<AStaticMeshActor>();
     Floor->GetStaticMeshComponent()->SetMobility(EComponentMobility::Movable);
@@ -137,11 +157,12 @@ void AGDMGameMode::BeginPlay()
     Sky->GetLightComponent()->SetMobility(EComponentMobility::Movable);
     Sky->GetLightComponent()->SetIntensity(1);
     Sky->GetLightComponent()->RecaptureSky();
-    if (GDM::DemoAppleQuest()) Apple = GetWorld()->SpawnActor<AGDMApple>(FVector(300, 300, 50), FRotator::ZeroRotator);
+    if (bDemoAppleQuest) Apple = GetWorld()->SpawnActor<AGDMApple>(FVector(300, 300, 50), FRotator::ZeroRotator);
     for (int32 I = 0; I < static_cast<int32>(Characters.size()); ++I)
     {
         AGDMNpc* Npc = GetWorld()->SpawnActor<AGDMNpc>(FVector(-(I / 4) * 400, -600 + (I % 4) * 400, 50), FRotator::ZeroRotator);
         Npc->CharacterIndex = I;
+        Npc->CharacterId = Display(Characters[I].Id);
         Npcs.Add(Npc);
     }
 }
@@ -182,6 +203,19 @@ void AGDMController::BeginPlay()
 void AGDMController::PlayerTick(float DeltaTime)
 {
     Super::PlayerTick(DeltaTime);
+    if (Session.IsValid() && !bVariables) {
+        const FKey MovementKeys[] = {EKeys::Left, EKeys::Right, EKeys::Up, EKeys::Down, EKeys::W, EKeys::A, EKeys::S, EKeys::D};
+        for (const FKey& Key : MovementKeys) if (WasInputKeyJustPressed(Key)) { CloseDialogue(); break; }
+    }
+    if (Session.IsValid() && !bVariables)
+    {
+        const FKey Digits[] = {EKeys::One, EKeys::Two, EKeys::Three, EKeys::Four, EKeys::Five, EKeys::Six, EKeys::Seven, EKeys::Eight, EKeys::Nine};
+        const FKey Keypad[] = {EKeys::NumPadOne, EKeys::NumPadTwo, EKeys::NumPadThree, EKeys::NumPadFour, EKeys::NumPadFive, EKeys::NumPadSix, EKeys::NumPadSeven, EKeys::NumPadEight, EKeys::NumPadNine};
+        const bool Modified = IsInputKeyDown(EKeys::LeftControl) || IsInputKeyDown(EKeys::RightControl) || IsInputKeyDown(EKeys::LeftAlt) || IsInputKeyDown(EKeys::RightAlt) || IsInputKeyDown(EKeys::LeftShift) || IsInputKeyDown(EKeys::RightShift) || IsInputKeyDown(EKeys::LeftCommand) || IsInputKeyDown(EKeys::RightCommand);
+        if (!Modified) for (int32 I = 0; I < 9; ++I)
+            if (WasInputKeyJustPressed(Digits[I]) || WasInputKeyJustPressed(Keypad[I])) { SelectOption(I); break; }
+        return;
+    }
     APawn* Player = GetPawn();
     if (!Player || IsBusy()) return;
     const float X = (IsInputKeyDown(EKeys::W) || IsInputKeyDown(EKeys::Up) ? 1.f : 0.f) -
@@ -196,28 +230,66 @@ void AGDMController::PlayerTick(float DeltaTime)
     Player->SetActorLocation(Position, true);
 }
 
+void AGDMController::OpenCharacterById(const FString& Id)
+{
+    const AGDMGameMode* GM = Mode(GetWorld());
+    if (!GM) return;
+    for (int32 I = 0; I < static_cast<int32>(GM->Characters.size()); ++I)
+        if (Display(GM->Characters[I].Id) == Id) { OpenCharacter(I); return; }
+}
+
 void AGDMController::OpenCharacter(int32 Index)
 {
     AGDMGameMode* GM = Mode(GetWorld());
     if (IsBusy() || !DialogueBox.IsValid() || !GM || Index < 0 || Index >= static_cast<int32>(GM->Characters.size())) return;
-    Session = MakeUnique<GDM::Session>(GM->Characters[Index], Variables);
+    if (!Sessions.Contains(Index)) Sessions.Add(Index, MakeShared<GDM::Session>(GM->Characters[Index], Variables));
+    Session = Sessions[Index];
     Session->Start(); Page = 0;
     RefreshDialogue();
 }
 void AGDMController::CloseDialogue() { Session.Reset(); RefreshDialogue(); }
+
+void AGDMController::SelectOption(int32 Index)
+{
+    if (!Session.IsValid() || bVariables || Index < 0) return;
+    if (!Session->Current)
+    {
+        if (Index != 0) return;
+        Session->Start(); Page = 0;
+    }
+    else
+    {
+        TArray<FString> Pages;
+        Display(Session->Current->Text).Replace(TEXT("\r\n"), TEXT("\n")).ParseIntoArray(Pages, TEXT("\n"), false);
+        if (Page + 1 < Pages.Num()) { if (Index != 0) return; ++Page; }
+        else
+        {
+            const auto Choices = Session->Options();
+            if (Index >= static_cast<int32>(Choices.size()) || !Choices[Index].Enabled) return;
+            Session->Choose(Index); Page = 0;
+            if (!Session->Current) Session.Reset();
+        }
+    }
+    RefreshDialogue();
+}
 
 void AGDMController::RefreshDialogue()
 {
     if (!DialogueBox.IsValid()) return;
     DialogueBox->ClearChildren();
     if (!Session.IsValid()) return;
-    DialogueBox->AddSlot().AutoHeight().Padding(4) [ Text(Label(Session->Person.Name)) ];
+    const std::string Role = Session->Current && Page < static_cast<int32>(Session->Current->Speakers.size())
+        ? Session->Current->Speakers[Page] : Session->Current && Session->Current->Type == "answer" ? "player" : "npc";
+    DialogueBox->AddSlot().AutoHeight().Padding(4)
+        [ SNew(STextBlock).Text(Label(Role == "player" ? "You" : Role == "scene" ? "Scene" : Session->Person.Name))
+          .ColorAndOpacity(FLinearColor(0.61f, 0.85f, 1.f)) ];
     if (!Session->Current)
     {
         DialogueBox->AddSlot().AutoHeight().Padding(4) [ Text(FText::FromString(TEXT("No available starting dialogue. Check root connections and test variables."))) ];
         DialogueBox->AddSlot().AutoHeight().Padding(4)
-        [ SNew(SButton).IsFocusable(false).Text(FText::FromString(TEXT("Try again")))
-          .OnClicked_Lambda([this]() { Session->Start(); Page = 0; RefreshDialogue(); return FReply::Handled(); }) ];
+        [ SNew(SButton).IsFocusable(false)
+          .OnClicked_Lambda([this]() { SelectOption(0); return FReply::Handled(); })
+          [ NumberedText(1, FText::FromString(TEXT("Try again"))) ] ];
     }
     else
     {
@@ -228,19 +300,21 @@ void AGDMController::RefreshDialogue()
         DialogueBox->AddSlot().AutoHeight().Padding(4) [ Text(FText::FromString(Pages[Page])) ];
         if (Page + 1 < Pages.Num())
             DialogueBox->AddSlot().AutoHeight().Padding(4)
-            [ SNew(SButton).IsFocusable(false).Text(FText::FromString(TEXT("Continue")))
-              .OnClicked_Lambda([this]() { ++Page; RefreshDialogue(); return FReply::Handled(); }) ];
+            [ SNew(SButton).IsFocusable(false)
+              .OnClicked_Lambda([this]() { SelectOption(0); return FReply::Handled(); })
+              [ NumberedText(1, FText::FromString(TEXT("Continue"))) ] ];
         else
         {
+            if (Session->Current->Type == "question")
+                DialogueBox->AddSlot().AutoHeight().Padding(4)
+                    [ SNew(STextBlock).Text(FText::FromString(TEXT("You"))).ColorAndOpacity(FLinearColor(0.61f, 0.85f, 1.f)) ];
             const auto Choices = Session->Options();
             for (size_t I = 0; I < Choices.size(); ++I)
                 DialogueBox->AddSlot().AutoHeight().Padding(4)
                 [ SNew(SButton).IsFocusable(false).IsEnabled(Choices[I].Enabled)
                   .OnClicked_Lambda([this, I]() {
-                      Session->Choose(I); Page = 0;
-                      if (!Session->Current) Session.Reset();
-                      RefreshDialogue(); return FReply::Handled(); })
-                  [ Text(Label(Choices[I].Text)) ] ];
+                      SelectOption(static_cast<int32>(I)); return FReply::Handled(); })
+                  [ NumberedText(static_cast<int32>(I) + 1, Label(Choices[I].Text)) ] ];
         }
     }
     DialogueBox->AddSlot().AutoHeight().Padding(4)
@@ -287,7 +361,8 @@ void AGDMHud::DrawHUD()
     Super::DrawHUD();
     AGDMGameMode* GM = Mode(GetWorld());
     if (!Canvas || !PlayerOwner || !GM) return;
-    if (GDM::DemoAppleQuest())
+    if (!GM->DialogueError.IsEmpty()) DrawText(GM->DialogueError, FLinearColor::Red, 28, 160);
+    if (GM->bDemoAppleQuest)
     {
         DrawText(IsValid(GM->Apple) ? TEXT("Apple: not collected. Talk to Mira, then touch the apple.") : TEXT("Apple collected! Return to Mira."),
             FLinearColor::White, 28, 120);

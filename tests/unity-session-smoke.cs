@@ -9,7 +9,7 @@ class UnitySessionSmoke
     static void Check(bool value, string message) { if (!value) throw new Exception(message); }
     static void Main(string[] args)
     {
-        DialogueData data = new JavaScriptSerializer().Deserialize<DialogueData>(File.ReadAllText(args[0]));
+        DialogueData data = DialogueJson.Parse(File.ReadAllText(args[0]));
         var variables = new Dictionary<string, VariableValue>();
         if (data.demoAppleQuest)
         {
@@ -58,6 +58,24 @@ class UnitySessionSmoke
             edge.conditions[0].op = ops[i];
             Check(session.Allows(edge) == expected[i], "operator " + ops[i]);
         }
+        var gate = new ConditionData { name = "apple", kind = "number", op = "=", number = 1 };
+        var request = session.Character.nodes[5]; // Node 60.
+        request.edges = new [] { new EdgeData { target = "70", conditions = new [] { gate } } };
+        variables["apple"] = VariableValue.Numeric(0);
+        session.Go("60"); Check(session.Start().id == "60", "waiting resumes request");
+        variables["apple"] = VariableValue.Numeric(1);
+        Check(session.Start().id == "70", "unlock resumes downstream");
+        Check(session.Start().id == "10", "checkpoint consumed");
+        gate.waitUntilMet = false; variables["apple"] = VariableValue.Numeric(0);
+        session.Go("60"); Check(session.Start().id == "10", "opt-out restarts");
+        var raw = Newtonsoft.Json.Linq.JObject.Parse(File.ReadAllText(args[0]));
+        var people = (Newtonsoft.Json.Linq.JArray)raw["characters"];
+        var first = people[0]; people.RemoveAt(0); people.Add(first);
+        first["dialogueNodes"][0]["dialogueText"] = "Updated princess greeting";
+        var updated = DialogueJson.Parse(raw.ToString());
+        int characterIndex = Array.FindIndex(updated.characters, c => c.id == "9");
+        Check(characterIndex == 1, "existing character ID survives reordering");
+        Check(new DialogueSession(updated.characters[characterIndex], variables).Start().text == "Updated princess greeting", "plain JSON replacement loads updated text");
         Console.WriteLine("UNITY_SESSION_PASS");
     }
 }

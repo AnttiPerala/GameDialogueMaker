@@ -4,6 +4,7 @@ let latestPlayModeNodeInfo;
 let currentNode = null;
 let playModeCharID;
 let charName;
+const playModeWaitingNodes = new WeakMap();
 
 
 
@@ -24,7 +25,7 @@ function startPlayMode(blockWrap) {
 
     // If character, navigate to the next node
     if (playModeNodeInfo.isCharacter) {
-        let nextNodeID = playModeNodeInfo.characterNode.outgoingLines?.[0]?.toNode;
+        let nextNodeID = playModeWaitingNodes.get(playModeNodeInfo.characterNode) ?? playModeNodeInfo.characterNode.outgoingLines?.[0]?.toNode;
         let nextNodeInObject = getDialogueNodeById(playModeNodeInfo.characterID, nextNodeID);
         if (!nextNodeInObject) {
             drawDialogueBox('Connect this character to a dialogue node before playing.');
@@ -60,13 +61,22 @@ $(document).ready(attachEventHandlers);
 
 //RENDER PLAY MODE
 
-function renderPlayMode(nodeInfo) {
+function renderPlayMode(nodeInfo, page = 0) {
     console.log('renderPlayMode nodeInfo', nodeInfo);
     $('.playModeDialogueContainer').remove();
     let answerElements = ``;
 
     console.log('render playmode nodeInfo', nodeInfo);
     let character = nodeInfo.characterNode;
+    // Preview conditions are fulfilled manually with the existing test button.
+    if ((nodeInfo.dialogueNode.outgoingLines || []).some(line =>
+        (line.transitionConditions || []).some(condition => condition.waitUntilMet !== false)))
+        playModeWaitingNodes.set(character, nodeInfo.dialogueNode.dialogueID);
+    else playModeWaitingNodes.delete(character);
+    const pages = String(nodeInfo.dialogueNode.dialogueText || '').split(/\r?\n/);
+    const lastPage = page >= pages.length - 1;
+    const role = nodeInfo.dialogueNode.dialogueSpeakers?.[page] || (nodeInfo.dialogueNode.dialogueType === 'answer' ? 'player' : 'npc');
+    const speaker = role === 'player' ? 'You' : role === 'scene' ? 'Scene' : character.characterName;
 
     if (nodeInfo.dialogueNode.dialogueType == 'question') {
         console.log('its a question');
@@ -137,12 +147,15 @@ function renderPlayMode(nodeInfo) {
         answerElements += `<button class="continueButton btn" data-from-node="${nodeInfo.dialogueID}" data-to-node="${nextNodeID}">Continue</button>`;
     }
 
+    if (!lastPage) answerElements = '';
+    else if (nodeInfo.dialogueNode.dialogueType === 'question') answerElements = '<div class="answerSpeaker" style="color:#9bd9ff;font-weight:bold;margin-bottom:8px">You</div>' + answerElements;
     let playModeDialogueContainer = $(`
         <div class="playModeDialogueContainer">
             <div class="infoLine">
             Character: <span class="charName">${nodeInfo.characterName}</span> Dialogue: <span class="dialogueId">${nodeInfo.dialogueID}</span>
             <img class="exitPlayMode btnSmall" title="exit playmode" src="img/iconmonstr-x-mark-6-32.png">
             </div>
+            <div class="dialogueSpeaker" style="font-weight:bold;color:#9bd9ff;margin:12px 0 6px"></div>
             <div id="dialogueLine" class="dialogueLine">
                 <!-- The dialogue text will be added here by the typewriter function -->
             </div>
@@ -155,11 +168,16 @@ function renderPlayMode(nodeInfo) {
         </div>
         `);
     $('body').append(playModeDialogueContainer);
+    playModeDialogueContainer.find('.dialogueSpeaker').text(speaker);
 
 
 
     // Call the typewriter function for the dialogue text
-    typewriter('#dialogueLine', nodeInfo.dialogueNode.dialogueText, 0, 20, function () {
+    typewriter('#dialogueLine', pages[page], 0, 20, function () {
+        if (!lastPage) {
+            $('<button class="btn">Continue</button>').on('click', () => renderPlayMode(nodeInfo, page + 1)).appendTo(playModeDialogueContainer.find('.answerLine'));
+            return;
+        }
 
         console.log('nodeInfo', nodeInfo);
         console.log('nodeInfo.dialogueNode.nextNode value:', nodeInfo.dialogueNode.nextNode);

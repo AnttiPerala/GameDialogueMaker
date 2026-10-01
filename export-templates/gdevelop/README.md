@@ -1,4 +1,4 @@
-# Game Dialogue Maker — GDevelop playground
+# Game Dialogue Maker â€” GDevelop playground
 
 The downloadable apple-quest demo: talk to Mira, close the conversation, touch
 the red apple with green leaves, then return to Mira. Pickup removes the apple
@@ -28,10 +28,7 @@ no outgoing links. Variables start at zero (numbers) or empty text (strings).
 Both desktop preview and normal web exports have the DOM required by the UI.
 Touch/gamepad movement and multiplayer are not implemented.
 
-Dialogue is stored as JSON in the GDMDialogue scene variable, and original editor
-data is included in dialogue-source.json. Editing that standalone JSON alone does
-not update the game. Re-export after editing in Dialogue Maker, or update the
-scene variable directly. User text is rendered as textContent, never HTML/code.
+The registered dialogue.json JSON resource is the ordinary export from Dialogue Maker. Replace that file and restart preview to update writing. Keep game.json and your scene objects/events. DialogueCharacters is a separate scene variable mapping native object names to stable character IDs; preserve it during updates. New dialogue characters need their own objects and bindings. DialogueError and the native DialogueStatus text show loading failures. User text is rendered as textContent, never HTML/code.
 Names are data, so duplicate names and punctuation do not affect object IDs.
 
 For integration, runtimeScene.__gdmDialogue.variables contains mutable condition
@@ -59,3 +56,13 @@ pause/resume/unload when integrating the scene into another game.
 References:
 https://docs.gdevelop.io/GDJS%20Runtime%20Documentation/classes/gdjs.RuntimeObject.html
 https://github.com/GDevelopApp/GDevelop-examples/tree/main/examples/javascript-blocks-in-platformer
+
+Dialogue shortcuts: press 1–9 (top row or numeric keypad) to select the corresponding numbered option. Press 1 to continue a line or finish a conversation. Numbers appear separately from dialogue text; locked options cannot be selected. Shortcuts pause while Test variables is open. Options above 9 remain clickable.
+
+Waiting conditions: waitUntilMet defaults to true. Blocked waiting connections remember their upstream node per character for the current game runtime. On returning, the same node is displayed until its condition passes, then the connection is followed. Questions and fights still require a choice. Uncheck this setting to restart normally. This progress is in memory; add your own save-game integration for persistence across reloads.
+
+## Updating an existing integration
+
+Export once to bootstrap the engine project. Afterwards export ordinary JSON and replace only `dialogue.json (registered resource)`. Keep character/node IDs stable. Updates take effect at the next run, not mid-conversation; game saves need their own migration policy if nodes are deleted. Variable dictionaries remain game-owned while running; setting a condition never changes a variable automatically. New condition variables need wiring to your gameplay.
+
+Older exports require a one-time integration upgrade. Merge the updated initialization event, add dialogue.json as a JSON resource, and add the DialogueCharacters scene variable from the new export. Adjust its object/label names and characterId values to match your existing scene. Add the DialogueStatus Text object for load feedback; keep your game.json and scene objects.

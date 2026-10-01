@@ -5,6 +5,7 @@ var character: Dictionary
 var variables: Dictionary
 var nodes: Dictionary = {}
 var current: Dictionary = {}
+var waiting: Array = []
 
 func _init(data: Dictionary, game_variables: Dictionary) -> void:
 	character = data
@@ -14,6 +15,12 @@ func _init(data: Dictionary, game_variables: Dictionary) -> void:
 
 func go(id: Variant) -> Dictionary:
 	current = nodes.get(str(int(id)) if id != null else "", {})
+	waiting = []
+	for line in current.get("outgoingLines", []):
+		for condition in line.get("transitionConditions", []):
+			if condition.get("waitUntilMet", true) and not allows(line):
+				waiting.append(line)
+				break
 	return current
 
 func allows(line: Dictionary) -> bool:
@@ -36,6 +43,12 @@ func allows(line: Dictionary) -> bool:
 	return true
 
 func start() -> Dictionary:
+	if not current.is_empty() and not waiting.is_empty():
+		if current.dialogueType not in ["question", "fight"]:
+			for line in waiting:
+				if allows(line):
+					return go(line.toNode)
+		return current
 	current = {}
 	for line in character.get("outgoingLines", []):
 		if allows(line):

@@ -7,10 +7,10 @@
 namespace GDM
 {
 struct Value { bool Numeric = false; double Number = 0; std::string Text; };
-struct Condition { std::string Name, Op; Value Expected; };
+struct Condition { std::string Name, Op; Value Expected; bool WaitUntilMet = true; };
 struct Edge { std::string Target; std::vector<Condition> Conditions; };
-struct Node { std::string Id, Type, Text, Next; std::vector<Edge> Edges; };
-struct Character { std::string Name, Color; std::vector<Edge> Start; std::vector<Node> Nodes; };
+struct Node { std::string Id, Type, Text, Next; std::vector<Edge> Edges; std::vector<std::string> Speakers; };
+struct Character { std::string Name, Color; std::vector<Edge> Start; std::vector<Node> Nodes; std::string Id; };
 using Variables = std::map<std::string, Value>;
 struct Choice { std::string Text; bool Enabled; const Node* Answer; std::string Target; };
 
@@ -20,10 +20,16 @@ public:
     const Character& Person;
     Variables& Vars;
     const Node* Current = nullptr;
+    std::vector<Edge> Waiting;
     Session(const Character& InPerson, Variables& InVars) : Person(InPerson), Vars(InVars) {}
     const Node* Find(const std::string& Id) const
     { for (const auto& N : Person.Nodes) if (N.Id == Id) return &N; return nullptr; }
-    const Node* Go(const std::string& Id) { return Current = Find(Id); }
+    const Node* Go(const std::string& Id) {
+        Current = Find(Id); Waiting.clear();
+        if (Current) for (const auto& E : Current->Edges) for (const auto& C : E.Conditions)
+            if (C.WaitUntilMet && !Allows(E)) { Waiting.push_back(E); break; }
+        return Current;
+    }
     bool Allows(const Edge& E) const
     {
         for (const auto& C : E.Conditions)
@@ -46,7 +52,14 @@ public:
         return true;
     }
     const Node* Start()
-    { Current = nullptr; for (const auto& E : Person.Start) if (Allows(E)) return Go(E.Target); return Current; }
+    {
+        if (Current && !Waiting.empty()) {
+            if (Current->Type != "question" && Current->Type != "fight")
+                for (const auto& E : Waiting) if (Allows(E)) { const auto Target = E.Target; return Go(Target); }
+            return Current;
+        }
+        Current = nullptr; for (const auto& E : Person.Start) if (Allows(E)) return Go(E.Target); return Current;
+    }
     bool CanAdvance(const Node& N) const
     { if (N.Edges.empty()) return true; for (const auto& E : N.Edges) if (Allows(E)) return true; return false; }
     const Node* Advance(const Node& N)

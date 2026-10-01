@@ -5,6 +5,7 @@ namespace GameDialogueMakerUnity
     [RequireComponent(typeof(BoxCollider2D))]
     public class DialogueNpc : MonoBehaviour
     {
+        public string characterId;
         public int characterIndex;
         public string displayName;
         public DialogueController controller;
@@ -13,7 +14,10 @@ namespace GameDialogueMakerUnity
         {
             DialoguePlayer player = other.GetComponent<DialoguePlayer>();
             if (player != null && player.controller == controller && controller != null)
-                controller.OpenCharacter(characterIndex);
+            {
+                if (!string.IsNullOrEmpty(characterId)) controller.OpenCharacterId(characterId);
+                else controller.OpenCharacter(characterIndex);
+            }
         }
     }
 }

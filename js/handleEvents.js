@@ -1,15 +1,15 @@
 
 //CLICK ON THE MAIN PLUS BUTTON TO ADD A NEW CHARACTER 
 
-$('.plus').on('click', function () {
+function addCharacterAt(x, y) {
 
     let charactersSoFar = gameDialogueMakerProject.characters.length;
 
     let newCharacterNode = {
         characterName: 'Name the character',
         characterID: Math.max(0, ...gameDialogueMakerProject.characters.map(character => Number(character.characterID))) + 1,
-        characterNodeX: 271 * (charactersSoFar + 1),
-        characterNodeY: 85,
+        characterNodeX: x ?? 271 * (charactersSoFar + 1),
+        characterNodeY: y ?? 85,
         bgColor: '#4b4b4b',
         hideChildren: false,
         nodeElement: $('<div class="blockWrap characterRoot"></div>'),
@@ -21,8 +21,13 @@ $('.plus').on('click', function () {
 
     gameDialogueMakerProject.characters.push(newCharacterNode);
 
-    clearCanvasBeforeReDraw();
-    drawDialogueMakerProject();
+    storeMasterObjectToLocalStorage();
+    return newCharacterNode;
+
+}
+
+$('.plus').on('click', function () {
+    addCharacterAt();
 
 });
 
@@ -463,6 +468,7 @@ jQuery(document).on('click', '.conditionCircle', function () {
             <option value="&lt;=">&lt;= Less or equal</option>
         </select>
         <input type="text" class="variableValue elementInfoField" placeholder="Variable value" value="${variableValue}">
+        <label class="waitConditionLabel"><input type="checkbox" class="waitUntilMet" ${currentTransitionCondition?.waitUntilMet !== false ? 'checked' : ''}> Wait here until condition is met</label>
         <button class="okTransition">ADD</button>
         ${deleteButton}
         </div>
@@ -535,10 +541,12 @@ jQuery(document).on('click', '.conditionCircle .okTransition', function (event) 
         'variableName': variableNameFromInput,
         'comparisonOperator': comparisonOperatorFromInput,
         'variableValue': variableValueFromInput,
+        'waitUntilMet': $(conditionCircle).find('.waitUntilMet').prop('checked'),
 
     }
 
     theLine.transitionConditions.push(myElem);
+    storeMasterObjectToLocalStorage();
 
     //NOTE! What we set with .data() will NOT be visible in the HTML! It's only in memory. .attr() makes visible also in html
     //let's give this multiple data attributes at the same time:

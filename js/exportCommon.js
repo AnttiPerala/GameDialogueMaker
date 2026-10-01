@@ -3,6 +3,42 @@
 function createDemoApplePng() {
     return Uint8Array.from(atob('iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAjElEQVR4nGNgGAWjAA/Q2xfwnxAu91YmqAYZU90B5OCh4wBCgNTgp4kDaJoGiHUACFPV4EHngOc2Bv+xYWQH4FJDE4vJwWRb/n9yLRzTzRHImqjpAKIdMaAOQNdAbQcQdMSoAwadA2iBRx0w6gC8DqC1IwhaPigcQCtHEG05LRxBsuXEOoQY+VGADwAA4BLCA+gUeZgAAAAASUVORK5CYII='), c => c.charCodeAt(0));
 }
+// A 32px solid PNG with its colour in the image, so instances can keep a neutral tint.
+// Indexed pixels and a stored DEFLATE block keep this synchronous and dependency-free.
+function createSolidSpritePng(color) {
+    const bytes = color.map(value => Math.round(Math.max(0, Math.min(1, value)) * 255));
+    const chunk = (type, data) => {
+        const result = new Uint8Array(data.length + 12);
+        const view = new DataView(result.buffer);
+        view.setUint32(0, data.length);
+        result.set(new TextEncoder().encode(type), 4);
+        result.set(data, 8);
+        let crc = 0xffffffff;
+        for (const byte of result.subarray(4, result.length - 4)) {
+            crc ^= byte;
+            for (let bit = 0; bit < 8; bit++) crc = (crc >>> 1) ^ ((crc & 1) ? 0xedb88320 : 0);
+        }
+        view.setUint32(result.length - 4, (crc ^ 0xffffffff) >>> 0);
+        return result;
+    };
+    const header = new Uint8Array(13);
+    const dimensions = new DataView(header.buffer);
+    dimensions.setUint32(0, 32); dimensions.setUint32(4, 32);
+    header[8] = 8; header[9] = 3; // 8-bit palette, no interlace.
+    const size = 32 * 33; // Each scanline: filter 0 followed by 32 palette indices (all 0).
+    const compressed = new Uint8Array(size + 11);
+    compressed.set([0x78, 0x01, 0x01, size & 255, size >>> 8, (~size) & 255, ((~size) >>> 8) & 255]);
+    // Adler-32 of an all-zero buffer: sum1=1, sum2=size.
+    new DataView(compressed.buffer).setUint32(compressed.length - 4, (size << 16) | 1);
+    const parts = [new Uint8Array([137,80,78,71,13,10,26,10]), chunk('IHDR', header),
+        chunk('PLTE', new Uint8Array(bytes.slice(0,3))), chunk('tRNS', new Uint8Array([bytes[3] ?? 255])),
+        chunk('IDAT', compressed), chunk('IEND', new Uint8Array())];
+    const result = new Uint8Array(parts.reduce((total, part) => total + part.length, 0));
+    let offset = 0;
+    for (const part of parts) { result.set(part, offset); offset += part.length; }
+    return result;
+}
+
 function cleanDialogueProject(project) {
     const transient = new Set(['nodeElement', 'nextNodeLineElem', 'lineElem']);
     return JSON.parse(JSON.stringify(project, (key, value) => transient.has(key) ? undefined : value));
@@ -15,6 +51,11 @@ function validateDialogueProject(project) {
         const nodes = character.dialogueNodes || [];
         const ids = new Set();
         for (const node of nodes) {
+            if (node.dialogueSpeakers !== undefined && (!Array.isArray(node.dialogueSpeakers) ||
+                node.dialogueSpeakers.length !== String(node.dialogueText || '').split(/\r?\n/).length ||
+                node.dialogueSpeakers.some(role => !['npc', 'player', 'scene'].includes(role)))) {
+                throw new Error(`${name}: speaker roles must match the dialogue's text pages (${node.dialogueID}).`);
+            }
             const id = String(node.dialogueID);
             if (!Number.isInteger(Number(id)) || Number(id) <= 0 || ids.has(id)) throw new Error(`${name}: dialogue IDs must be unique positive numbers (${id}).`);
             ids.add(id);
@@ -24,6 +65,8 @@ function validateDialogueProject(project) {
             for (const line of node.outgoingLines || []) {
                 if (!ids.has(String(line.toNode))) throw new Error(`${name}: a connection points to missing dialogue ${line.toNode}.`);
                 for (const condition of line.transitionConditions || []) {
+                    if (typeof condition.variableValue !== 'string' && (typeof condition.variableValue !== 'number' || !Number.isFinite(condition.variableValue)))
+                        throw new Error(`Condition ${condition.variableName}: use a finite number or text value.`);
                     if (!condition.variableName || !['=', '!=', '<', '>', '<=', '>='].includes(condition.comparisonOperator)) {
                         throw new Error(`${name}: a connection has an invalid condition.`);
                     }
@@ -84,4 +127,4 @@ function downloadDialogueBlob(blob, filename) {
 }
 
 
-if (typeof module !== 'undefined') module.exports = { createDemoApplePng, cleanDialogueProject, validateDialogueProject, createExportZip, downloadDialogueBlob };
+if (typeof module !== 'undefined') module.exports = { createSolidSpritePng, createDemoApplePng, cleanDialogueProject, validateDialogueProject, createExportZip, downloadDialogueBlob };

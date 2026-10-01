@@ -5,6 +5,7 @@ signal busy_changed(locked: bool)
 const Session = preload("res://scripts/dialogue_session.gd")
 var characters: Array = []
 var variables: Dictionary = {}
+var sessions: Dictionary = {}
 var session: RefCounted
 var page: int = 0
 @onready var panel: PanelContainer = $DialoguePanel
@@ -19,6 +20,12 @@ func _ready() -> void:
 
 func configure(data: Array) -> void:
 	characters = data
+	sessions.clear()
+	for character in characters:
+		if not character.has("dialogueNodes"): character.dialogueNodes = []
+		if not character.has("outgoingLines"): character.outgoingLines = []
+		for node in character.dialogueNodes:
+			if not node.has("outgoingLines"): node.outgoingLines = []
 	for character in characters:
 		var sources: Array = [character] + character.get("dialogueNodes", [])
 		for source in sources:
@@ -70,10 +77,18 @@ func _toggle_variables() -> void:
 	variable_panel.visible = not variable_panel.visible
 	busy_changed.emit(is_busy())
 
+func open_character_id(character_id: String) -> void:
+	for index in range(characters.size()):
+		if str(int(characters[index].get("characterID", -1))) == character_id:
+			open_character(index)
+			return
+
 func open_character(index: int) -> void:
 	if is_busy() or index < 0 or index >= characters.size():
 		return
-	session = Session.new(characters[index], variables)
+	if not sessions.has(index):
+		sessions[index] = Session.new(characters[index], variables)
+	session = sessions[index]
 	session.start()
 	page = 0
 	panel.show()
@@ -90,6 +105,20 @@ func _input(event: InputEvent) -> void:
 		variable_panel.hide()
 		close_dialogue()
 		get_viewport().set_input_as_handled()
+	if not event is InputEventKey or not event.pressed or event.echo or session == null or variable_panel.visible:
+		return
+	if event.ctrl_pressed or event.alt_pressed or event.meta_pressed or event.shift_pressed:
+		return
+	if ["move_left", "move_right", "move_up", "move_down"].any(func(action): return event.is_action_pressed(action)):
+		close_dialogue()
+		return
+	var code: int = event.physical_keycode if event.physical_keycode else event.keycode
+	var index: int = code - KEY_1 if code >= KEY_1 and code <= KEY_9 else code - KEY_KP_1 if code >= KEY_KP_1 and code <= KEY_KP_9 else -1
+	var choices := content.get_node("Choices").get_children()
+	if index >= 0 and index < choices.size():
+		get_viewport().set_input_as_handled()
+		if not choices[index].disabled:
+			choices[index].pressed.emit()
 
 func _render(focus_choice: bool = true) -> void:
 	if session == null:
@@ -99,16 +128,29 @@ func _render(focus_choice: bool = true) -> void:
 	for child in choices.get_children():
 		choices.remove_child(child)
 		child.queue_free()
+	var answer_speaker := content.get_node_or_null("AnswerSpeaker")
+	if answer_speaker == null:
+		answer_speaker = Label.new()
+		answer_speaker.name = "AnswerSpeaker"
+		answer_speaker.text = "You"
+		answer_speaker.modulate = Color(0.61, 0.85, 1)
+		content.add_child(answer_speaker)
+		content.move_child(answer_speaker, choices.get_index())
+	answer_speaker.hide()
 	content.get_node("Hint").text = ""
 	if session.current.is_empty():
 		content.get_node("Line").text = "No available starting dialogue. Check the root connection or test variables."
 		_add_button("Try again", func(): session.start(); page = 0; _render())
 	else:
 		var pages := str(session.current.get("dialogueText", "")).replace("\r\n", "\n").split("\n")
+		var speakers: Array = session.current.get("dialogueSpeakers", [])
+		var role: String = str(speakers[page]) if page < speakers.size() else "player" if session.current.get("dialogueType") == "answer" else "npc"
+		content.get_node("Speaker").text = "You" if role == "player" else "Scene" if role == "scene" else str(session.character.get("characterName", "Unnamed character"))
 		content.get_node("Line").text = pages[page]
 		if page < pages.size() - 1:
 			_add_button("Continue", func(): page += 1; _render())
 		else:
+			answer_speaker.visible = session.current.get("dialogueType") == "question"
 			var options: Array = session.options()
 			for index in range(options.size()):
 				var option: Dictionary = options[index]
@@ -125,6 +167,20 @@ func _render(focus_choice: bool = true) -> void:
 func _add_button(text: String, action: Callable, enabled: bool = true) -> void:
 	var button := Button.new()
 	button.text = text
+	button.alignment = HORIZONTAL_ALIGNMENT_LEFT
+	# Keep the theme background while reserving a separate number gutter.
+	for state in ["normal", "hover", "pressed", "focus", "disabled"]:
+		var box := button.get_theme_stylebox(state).duplicate() as StyleBox
+		box.content_margin_left = 36
+		box.content_margin_right = 10
+		button.add_theme_stylebox_override(state, box)
+	var number := Label.new()
+	number.text = str(content.get_node("Choices").get_child_count() + 1)
+	number.position = Vector2(12, 10)
+	number.modulate.a = 0.45
+	number.add_theme_font_size_override("font_size", 12)
+	number.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	button.add_child(number)
 	button.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	button.custom_minimum_size.y = 40
 	button.disabled = not enabled

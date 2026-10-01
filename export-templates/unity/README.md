@@ -1,4 +1,4 @@
-# Game Dialogue Maker — Unity playground kit
+# Game Dialogue Maker â€” Unity playground kit
 
 The downloadable apple-quest demo: talk to Mira, close the conversation, touch
 the red apple with green leaves, then return to Mira. Pickup removes the apple
@@ -35,16 +35,13 @@ used only when there are no outgoing connections. Fights are simulated choices,
 not a combat system. Both the new Input System and legacy input are supported.
 
 Scripts/DialogueData.cs contains plain C# traversal and typed data models.
-Resources/GDMDialogue.json contains runtime data adapted for JsonUtility.
-Source/dialogue.json preserves the original editable data for Dialogue Maker.
+Resources/dialogue.json is the ordinary JSON export from Dialogue Maker. DialogueJson.cs reads it at runtime.
 Names and arbitrary text are data, not code or Unity object identifiers.
 Set DialogueController.Variables from your game to integrate conditions.
 
-Re-export and replace this kit's files to update dialogue; use Rebuild Playground
-when characters are added or removed. Back up scene customizations first. Use one
-kit per Unity project, as the namespace, resource paths, and menu are shared.
+To update writing, replace only Assets/GameDialogueMaker/Resources/dialogue.json and restart Play. Do not rebuild the playground or replace your scenes, scripts, sprites or UI. NPC characterId values remain stable if characters are reordered. Add/remove game objects yourself when the cast changes. Keep one kit per Unity project.
 
-No external assets, paid addons, TextMesh Pro, uGUI, or new packages are required.
+Install Unity's official com.unity.nuget.newtonsoft-json package (3.2.1) using Package Manager > Add package by name before importing the scripts. The included Packages/manifest.json lists the dependency for a new project; do not overwrite an existing project's manifest. No paid addons, TextMesh Pro or uGUI are needed.
 If your existing project changes the default 2D collision matrix, make sure
 Default-layer objects interact. For a standalone game build, add the generated
 scene to your project's build scene list.
@@ -52,3 +49,13 @@ scene to your project's build scene list.
 Validation: the exporter and plain C# dialogue traversal have automated tests.
 An actual Unity Editor import/Play test is still required; Unity was not installed
 in the environment where this kit was generated.
+
+Dialogue shortcuts: press 1–9 (top row or numeric keypad) to select the corresponding numbered option. Press 1 to continue a line or finish a conversation. Numbers appear separately from dialogue text; locked options cannot be selected. Shortcuts pause while Test variables is open. Options above 9 remain clickable.
+
+Waiting conditions: waitUntilMet defaults to true. Blocked waiting connections remember their upstream node per character for the current game runtime. On returning, the same node is displayed until its condition passes, then the connection is followed. Questions and fights still require a choice. Uncheck this setting to restart normally. This progress is in memory; add your own save-game integration for persistence across reloads.
+
+## Updating an existing integration
+
+Export once to bootstrap the engine project. Afterwards export ordinary JSON and replace only `Assets/GameDialogueMaker/Resources/dialogue.json`. Keep character/node IDs stable. Updates take effect at the next run, not mid-conversation; game saves need their own migration policy if nodes are deleted. Variable dictionaries remain game-owned while running; setting a condition never changes a variable automatically. New condition variables need wiring to your gameplay.
+
+Older exports require a one-time integration upgrade. Install com.unity.nuget.newtonsoft-json, add DialogueJson.cs, merge the controller/NPC updates, and assign Resources/dialogue.json to your existing controller. Keep the existing .meta file when replacing this asset. Set each NPC characterId; custom interactions can call OpenCharacterId. Do not rerun Rebuild Playground or overwrite Packages/manifest.json.

@@ -70,6 +70,9 @@ test('real Godot imports and runs the generated project, physics and dialogue UI
     fs.copyFileSync(path.join(__dirname, 'godot-smoke.gd'), smokeFile);
     assert.match(run(['--script', smokeFile, '--quit-after', '600']), /GODOT_SMOKE_PASS/);
     fs.unlinkSync(smokeFile);
+    fs.copyFileSync(path.join(__dirname, 'godot-update-smoke.gd'), smokeFile);
+    assert.match(run(['--script', smokeFile, '--quit-after', '600']), /GODOT_UPDATE_PASS/);
+    fs.unlinkSync(smokeFile);
     writeProject(require('./dialogue-sample')());
     run(['--editor', '--import', '--quit']);
     fs.copyFileSync(path.join(__dirname, 'godot-apple-smoke.gd'), smokeFile);

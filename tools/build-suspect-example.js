@@ -136,6 +136,44 @@ stage('closure', 'Leah: I understand why you asked. What happens to the suggesti
 ])
 ];
 
+// The officer speaks first on contact with either suspect.
+daniel[0] = stage('opening', 'You begin talking with Daniel Voss.', [
+ choice('Daniel, I am Officer Ellis. Could you take me through the evening, starting with the count?', 'Daniel: I supervised the count, closed the office, then went outside. I can give you the sequence, but some of the times will be approximate.'),
+ choice('Before we discuss the missing money, is there anything about your movements that you want to clarify?', 'Daniel: I was in the loading bay when the alarm went up. I know people have mentioned my debts. I want you to check where I was, not just what I owe.'),
+ choice('You were responsible for closing up. Who handled the deposit before you went outside?', 'Daniel: Leah counted with me and signed the sheet. I took the pouch to the office. Let me start at the count so we do not mix up the order.')
+]);
+leah[0] = stage('opening', 'You begin talking with Leah Mercer.', [
+ choice('Leah, I am Officer Ellis. Could you describe your part in the count and what happened afterward?', 'Leah: Daniel and I counted together. I signed the sheet and sealed the pouch, then I left. I will tell you exactly what I saw.'),
+ choice('What would help us check your account of the evening?', 'Leah: The count sheet and the entrance camera, for a start. There is also something about where I went that I need to correct. Please let me explain it properly.'),
+ choice('Your credential appears in the cabinet log. Before drawing any conclusions, can we go through your evening?', 'Leah: Yes. I understand why you need to ask, but I did not take the money. Start with the count. There are records you can check.')
+]);
+
+const evidenceGate = stage('evidence_gate', 'Daniel: I have told you I opened the cabinet. That does not tell you when the money disappeared. What puts it there before I went back?', [
+ {...choice('The treasurer verified the cash at 20:58. I have checked her signed sheet against the original photograph. What did you remove when you opened the cabinet?', 'Daniel: If you have checked that, then you know it was there. I took the pouch out. I need to explain what I thought I was doing.', 'admission'),
+    conditions:[{variableName:'cabinetRecordChecked',comparisonOperator:'=',variableValue:1}]},
+ choice('Let us keep the distinction clear. You accept opening it, but you have not explained what you did with the pouch?', 'Daniel: Correct. I opened it with the code. If you have a record showing the money was still there, check it before you tell me what it proves.', 'evidence_gate'),
+ choice('I will pause here and inspect the treasurers verification packet before asking you to answer that.', 'Ellis: I will check the original photograph and signed denomination sheet at the evidence desk. We will resume from this question when that check is complete.', 'pause')
+]);
+daniel.splice(daniel.findIndex(s=>s.key==='admission'),0,evidenceGate);
+
+const colleagueStages = [
+stage('briefing','Morgan: What do you need before you start?',[
+ choice('Give me the timeline and who we need to interview.', 'Morgan: Daniel Voss is the theatre manager; Leah Mercer helped count the deposit. The first count ended at 20:35 and the alarm came at 21:11. Leahs credential appears in the cabinet log. That gives us a lead, not the identity of the person who used it.', 'briefing'),
+ choice('Which evidence should I be careful with?', 'Morgan: The cabinet clock was slow. Keep the original times and the documented corrections separate. Do not feed either suspect details you later want to test as independent knowledge. There is also a treasurers verification packet at the evidence desk.', 'evidence'),
+ choice('Are both interviews ready to begin?', 'Morgan: Yes. Their advisers are present, the recording arrangements and safeguards have been explained, and welfare checks are complete. Start with your own question. Ask what they remember before presenting the records.', 'ready')
+]),
+stage('evidence','Morgan: The packet contains the original 20:58 photograph and the treasurers signed denomination sheet. A photograph of a closed pouch would not prove its contents. This check concerns the actual notes. What do you want clarified?',[
+ choice('What am I checking when I inspect that packet?', 'Morgan: Check that the signed count, the photographed notes, and the documented time refer to the same verification. Establish what was present, when, and who checked it. Do not claim you have inspected the originals until you have.', 'evidence'),
+ choice('When will that check matter in the interview?', 'Morgan: It matters later if Daniel accepts opening the cabinet but disputes whether the money was still inside beforehand. You can do most of the interview without it. The question relying on the verified packet must wait until you have inspected it.', 'briefing'),
+ choice('Understood. I will check the packet before relying on it. Anything else before I begin?', 'Morgan: Keep the two accounts separate. A false statement about one subject does not make every other statement false, and clearing one person does not automatically prove the other took the money.', 'ready')
+]),
+stage('ready','Morgan: You can speak to either suspect first. Take the evidence in stages, and come back if you need the briefing again.',[
+ choice('I will start with Daniel Voss.', 'Morgan: Daniel is ready. Give him a chance to explain his movements before testing the details.', 'finish'),
+ choice('I will start with Leah Mercer.', 'Morgan: Leah is ready. Check both the access record and anything that could establish she was somewhere else.', 'finish'),
+ choice('Before I go, remind me about the evidence packet.', 'Morgan: The packet is at the evidence desk. It is a separate inspection, not something this conversation can do for you.', 'evidence')
+])
+];
+
 function buildCharacter(id, name, color, stages, intro, endings, x) {
     let nextId = 1;
     const nodes = [], keys = {}, stageChoices = {};
@@ -147,7 +185,7 @@ function buildCharacter(id, name, color, stages, intro, endings, x) {
         nodes.push(node);if(key)keys[key]=node;return node;
     };
     const edge = (from, to, socket=0) => ({fromNode:from,fromSocket:socket,toNode:to,lineElem:'',transitionConditions:[]});
-    const start = make('line',intro,x+430,400,'intro');
+    const start = id === 3 ? make('line',intro,x+430,400,'intro') : null;
     stages.forEach((s,index)=>{
         const y=800+index*1000;
         const q=make('question',s.text,x+430,y,s.key);
@@ -157,11 +195,12 @@ function buildCharacter(id, name, color, stages, intro, endings, x) {
             const reply=make('line',c.reply,x+i*430,y+640);
             q.outgoingLines.push(edge(q.dialogueID,answer.dialogueID,i));
             answer.outgoingLines.push(edge(answer.dialogueID,reply.dialogueID));
+            if (c.conditions) answer.outgoingLines[0].transitionConditions = c.conditions;
             return reply;
         });
     });
     Object.entries(endings).forEach(([key,text],i)=>make('line',text,x+i*430,900+stages.length*1000,key));
-    start.outgoingLines.push(edge(start.dialogueID,keys[stages[0].key].dialogueID));
+    if (start) start.outgoingLines.push(edge(start.dialogueID,keys[stages[0].key].dialogueID));
     stages.forEach((s,index)=>s.choices.forEach((c,i)=>{
         const key=c.route || stages[index+1]?.key || 'resolution';
         if(!keys[key])throw Error('Unknown route '+key);
@@ -170,13 +209,13 @@ function buildCharacter(id, name, color, stages, intro, endings, x) {
         reply.outgoingLines.push(edge(reply.dialogueID, keys[key].dialogueID));
     }));
     return {characterID:id,characterName:name,characterNodeX:x+430,characterNodeY:160,
-        hideChildren:false,bgColor:color,nodeElement:'',outgoingLines:[edge(0,start.dialogueID)],dialogueNodes:nodes};
+        hideChildren:false,bgColor:color,nodeElement:'',outgoingLines:[edge(0,(start || keys[stages[0].key]).dialogueID)],dialogueNodes:nodes};
 }
 
 const project = {
     settings:{},
     title:'The Missing Benefit Deposit',
-    description:'A fictional evidence-led interview case. The player is Officer Ellis. Two separate suspect trees; all branches work in editor Play mode without external variables. Bracketed passages are scene or investigation updates, not suspect speech.',
+    description:'A fictional evidence-led interview case. Start with colleague Morgan, then question two suspects as Officer Ellis. Daniel has a late evidence condition controlled by the game. Bracketed passages later in the interviews are scene updates, not suspect speech.',
     caseNotes:{
         setting:'A fictional English-speaking city; procedures are deliberately not tied to a specific jurisdiction.',
         incident:'18,600 pounds from a benefit performance disappears from the North Wharf Theatre deposit cabinet.',
@@ -188,8 +227,8 @@ const project = {
             'Cabinet event raw time 21:06:14; documented 42-second correction gives 21:06:56.',
             'Alarm report at 21:11; orange tie is documented in first scene photograph.',
             'The player must distinguish identity, opportunity, knowledge, motive, and corroboration.'],
-        playInstructions:'Import this JSON with OPEN FILE. Play from either character root. Questions display interview context; answer buttons are Officer Ellis actions. Continue on line nodes when ready; some branches return to an earlier stage. Restart the selected interview to explore alternatives.',
-        design:'No automatic flags or unsupported node actions. Branch progress is encoded by explicit links, including return loops. The two interviews can be played in either order. Paused and inconclusive endings are deliberate alternatives. The successful outcome is an investigative finding, not an instant conviction.'
+        playInstructions:'Import this JSON with OPEN FILE. Start with colleague Morgan. Each suspect root opens directly on a short interaction caption with three Officer Ellis questions. Continue through replies when ready. The late verified-record question in Daniel requires cabinetRecordChecked = 1.',
+        design:'The developer places Morgan at the initial briefing and scripts evidence-desk inspection to set numeric cabinetRecordChecked from 0 to 1. No dialogue node changes variables. Suspects can be interviewed in either order. A game can preserve the evidence checkpoint across a break or restart the interview. Editor Play mode uses its existing manual condition simulation; engine exports evaluate the variable.'
     },
     characters:[
         buildCharacter(1,'Daniel Voss - theatre manager','#704747',daniel,
@@ -204,6 +243,22 @@ const project = {
              pause:'[LEAH: INTERVIEW PAUSED] The request for advice or a break is respected. No adverse inference is built into this example. Resume only through an appropriate process. Restart the interview to explore another approach.'},1900)
     ]
 };
+// Put the colleague first in the export cast and keep the three editor trees separate.
+const leahCharacter = project.characters.find(c=>c.characterID===2);
+leahCharacter.dialogueNodes = leahCharacter.dialogueNodes.filter(n=>!n.dialogueText.startsWith('[LEAH: INTERVIEW PAUSED]'));
+for (const character of project.characters) {
+    character.characterNodeX += 1740;
+    for (const node of character.dialogueNodes) node.dialogueNodeX += 1740;
+}
+project.characters.unshift(buildCharacter(3,'Colleague Morgan','#405c85',colleagueStages,
+    'Morgan: Ellis, we have a missing benefit deposit at the North Wharf Theatre: 18,600 pounds. You are interviewing two people who handled it, Daniel Voss and Leah Mercer. I will brief you before you speak to them. Keep an open mind; we need to test the records as well as their accounts.',
+    {finish:'Morgan: I will be here if you need to go over the facts again. Speak to the suspects when you are ready, and inspect the evidence packet before relying on it in your final questions.'},160));
+project.gameIntegration = {
+    firstInteractionCharacterID:3,
+    variables:{cabinetRecordChecked:{type:'number',initialValue:0,requiredValue:1,
+        setBy:'Game developer: evidence-desk inspection of the original 20:58 photograph and signed denomination sheet. This dialogue does not set the variable.'}},
+    evidenceCheckpoint:{characterID:1,dialogueID:project.characters.find(c=>c.characterID===1).dialogueNodes.find(n=>n.dialogueType==='question'&&n.dialogueText.startsWith('Daniel: I have told you I opened')).dialogueID}
+};
 // Keep apostrophes in prose while using simple single-quoted authoring strings above.
 for (const character of project.characters) {
     for (const node of character.dialogueNodes) {
@@ -214,6 +269,9 @@ for (const character of project.characters) {
         }
     }
 }
+require('./structure-example-speakers').structureExampleSpeakers(project);
+require('./streamline-investigation').streamlineInvestigation(project);
+require('./player-choice-only').playerChoiceOnly(project);
 validateDialogueProject(project);
 const output=path.join(__dirname,'../examples/two-suspects-investigation.json');
 fs.mkdirSync(path.dirname(output),{recursive:true});

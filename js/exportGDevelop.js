@@ -3,6 +3,7 @@ const gdevelopExportHelpers = typeof module !== 'undefined' ? require('./exportC
 
 function buildGDevelopProject(source, template, sessionFactory, gameRunner) {
     const data = gdevelopExportHelpers.cleanDialogueProject(source);
+    const plainJson = JSON.stringify(data);
     for (const character of data.characters || []) {
         character.dialogueNodes = character.dialogueNodes || [];
         for (const node of [character,...character.dialogueNodes]) {
@@ -21,7 +22,8 @@ function buildGDevelopProject(source, template, sessionFactory, gameRunner) {
     project.resources = {resources:[{file:'assets/character.png',kind:'image',metadata:'',name:'character.png',smoothed:false,userAdded:true}]};
     const scene = project.layouts[0];
     Object.assign(scene,{r:18,v:23,b:36,title:'Dialogue Playground'});
-    scene.variables = [{name:'GDMDialogue',type:'string',value:JSON.stringify(data)}];
+    project.resources.resources.push({file:'dialogue.json',kind:'json',metadata:'',name:'dialogue.json',userAdded:true});
+    scene.variables = [{name:'DialogueCharacters',type:'string',value:JSON.stringify(data.characters.map((c,i)=>({characterId:String(c.characterID),object:'NPC_'+(i+1),label:'Label_'+(i+1)})))}];
     const sprite = name => ({name,type:'Sprite',assetStoreId:'',adaptCollisionMaskAutomatically:true,updateIfNotVisible:false,
         variables:[],effects:[],behaviors:[],animations:[{name:'Idle',useMultipleDirections:false,directions:[{looping:false,timeBetweenFrames:1,
             sprites:[{image:'character.png',hasCustomCollisionMask:false,points:[],originPoint:{name:'origine',x:16,y:16},
@@ -33,8 +35,8 @@ function buildGDevelopProject(source, template, sessionFactory, gameRunner) {
             isShadowEnabled:false,shadowAngle:90,shadowBlurRadius:2,shadowColor:'0;0;0',shadowDistance:4,shadowOpacity:127}});
     const instance = (name,x,y,text = false) => ({name,x,y,angle:0,zOrder:text ? 2 : 1,layer:'',persistentUuid:crypto.randomUUID(),
         customSize:text,width:text ? 180 : 32,height:text ? 64 : 32,keepRatio:!text,numberProperties:[],stringProperties:[],initialVariables:[]});
-    scene.objects = [sprite('Player')];
-    scene.instances = [instance('Player',140,140)];
+    scene.objects = [sprite('Player'),label('DialogueStatus','Loading dialogue...')];
+    scene.instances = [instance('Player',140,140),instance('DialogueStatus',24,20,true)];
     if (data.demoAppleQuest === true) {
         project.resources.resources.push({file:'assets/apple.png',kind:'image',metadata:'',name:'apple.png',smoothed:false,userAdded:true});
         const apple = sprite('Apple');
@@ -49,18 +51,35 @@ function buildGDevelopProject(source, template, sessionFactory, gameRunner) {
         scene.instances.push(instance(npc,x,y),instance(text,x - 90,y + 26,true));
     });
     scene.objectsFolderStructure = {folderName:'__ROOT',children:scene.objects.map(o => ({objectName:o.name}))};
-    const code = `if (!runtimeScene.__gdmDialogue) {
-const data = JSON.parse(runtimeScene.getVariables().get("GDMDialogue").getAsString());
-runtimeScene.__gdmDialogue = (${gameRunner.toString()})(runtimeScene, data, ${sessionFactory.toString()}, gdjs);
+    const code = `if (!runtimeScene.__gdmDialogue && !runtimeScene.__dialogueLoading) {
+    runtimeScene.__dialogueLoading = true;
+    runtimeScene.getGame().getJsonManager().loadJson("dialogue.json", (error, source) => {
+        try {
+            if (error || !source) throw new Error("Could not load dialogue.json: " + (error || "empty resource"));
+            const data = JSON.parse(JSON.stringify(source));
+            (${gdevelopExportHelpers.validateDialogueProject.toString()})(data);
+            for (const character of data.characters) {
+                character.dialogueNodes ||= []; character.outgoingLines ||= [];
+                for (const node of character.dialogueNodes) node.outgoingLines ||= [];
+            }
+            const bindings = JSON.parse(runtimeScene.getVariables().get("DialogueCharacters").getAsString());
+            runtimeScene.getObjects("DialogueStatus").forEach(object=>object.setString(""));
+            runtimeScene.__gdmDialogue = (${gameRunner.toString()})(runtimeScene, data, ${sessionFactory.toString()}, gdjs, bindings);
+        } catch (failure) {
+            runtimeScene.getVariables().get("DialogueError").setString(String(failure.message));
+            runtimeScene.getObjects("DialogueStatus").forEach(object=>object.setString("Dialogue could not load: " + failure.message));
+            console.error(failure);
+        }
+    });
 }
-runtimeScene.__gdmDialogue.tick();`;
+if (runtimeScene.__gdmDialogue) runtimeScene.__gdmDialogue.tick();`;
     scene.events = [{type:'BuiltinCommonInstructions::Comment',color:{b:80,g:180,r:80},comment:
-        'Dialogue playground: move with WASD/arrows and touch NPCs. Edit the GDMDialogue scene variable to change runtime dialogue.'},
+        'Dialogue playground: move with WASD/arrows and touch NPCs. Replace the dialogue.json resource to update writing. DialogueCharacters maps scene objects to stable character IDs. DialogueError reports load failures.'},
         {type:'BuiltinCommonInstructions::JsCode',inlineCode:code.split('\n'),parameterObjects:'',useStrict:true,eventsSheetExpanded:false}];
     return {
         ...(data.demoAppleQuest === true ? {'assets/apple.png':gdevelopExportHelpers.createDemoApplePng()} : {}),
         'game.json':JSON.stringify(project,null,2),
-        'dialogue-source.json':JSON.stringify(data,null,2),
+        'dialogue.json':plainJson,
         'README.md':template.readme,
         'assets/character.png':Uint8Array.from(atob('iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAKUlEQVR4nO3OIQEAAAACIP+f1hkWWEB6FgEBAQEBAQEBAQEBAQEBgXdgl/rw4unIZ5cAAAAASUVORK5CYII='),c => c.charCodeAt(0))
     };

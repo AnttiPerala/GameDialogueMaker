@@ -17,10 +17,10 @@ test('GDevelop project preserves live editor state and embeds all characters as 
     const project = JSON.parse(files['game.json']), scene = project.layouts[0];
     assert.equal(source.characters[0].nodeElement,dom);
     delete source.characters[0].nodeElement;
-    assert.deepEqual(JSON.parse(files['dialogue-source.json']),source);
-    assert.deepEqual(JSON.parse(scene.variables[0].value),source);
+    assert.deepEqual(JSON.parse(files['dialogue.json']),source);
+    assert.deepEqual(JSON.parse(scene.variables[0].value).map(b=>b.characterId),source.characters.map(c=>String(c.characterID)));
     assert.equal(scene.objects.filter(o => o.type === 'Sprite').length,3);
-    assert.equal(scene.objects.filter(o => o.type === 'TextObject::Text').length,2);
+    assert.equal(scene.objects.filter(o => o.type === 'TextObject::Text').length,3);
     assert.equal(scene.objects.find(o => o.name === 'Label_1').content.text,source.characters[0].characterName);
     const names = new Set(scene.objects.map(o => o.name));
     for (const instance of scene.instances) assert.ok(names.has(instance.name));
@@ -33,7 +33,7 @@ test('GDevelop project preserves live editor state and embeds all characters as 
 test('GDevelop handles optional arrays and rejects invalid graph links and condition values', () => {
     const source = fixture();
     delete source.characters[1].dialogueNodes; delete source.characters[1].outgoingLines;
-    assert.equal(JSON.parse(build(source)['game.json']).layouts[0].objects.length,5);
+    assert.equal(JSON.parse(build(source)['game.json']).layouts[0].objects.length,6);
     source.characters[0].outgoingLines[0].toNode = 999;
     assert.throws(() => build(source),/missing dialogue 999/);
     source.characters[0].outgoingLines[0].toNode = 10;
@@ -51,10 +51,11 @@ test('official GDevelop core deserializes and round-trips the project, sprite an
     const gd = await require(process.env.LIBGD_JS)();
     gd.ProjectHelper.initializePlatforms();
     const project = gd.ProjectHelper.createNewGDJSProject();
+    // This bundled WASM binding reuses fromJSON handles; leave those temporaries to worker teardown.
     const input = gd.Serializer.fromJSON(build(fixture())['game.json']);
     project.unserializeFrom(input);
     assert.equal(project.getLayoutsCount(),1);
-    assert.equal(project.getLayoutAt(0).getObjects().getObjectsCount(),5);
+    assert.equal(project.getLayoutAt(0).getObjects().getObjectsCount(),6);
     assert.equal(project.getLayoutAt(0).getEvents().getEventsCount(),2);
     const output = new gd.SerializerElement(); project.serializeTo(output);
     const data = JSON.parse(gd.Serializer.toJSON(output)), scene = data.layouts[0];
@@ -63,7 +64,7 @@ test('official GDevelop core deserializes and round-trips the project, sprite an
     assert.equal(scene.events[1].type,'BuiltinCommonInstructions::JsCode');
     assert.match(scene.events[1].inlineCode.join('\n'),/startGDevelopDialogueGame/);
     assert.doesNotThrow(() => new Function('runtimeScene','gdjs',scene.events[1].inlineCode.join('\n')));
-    output.delete(); input.delete(); project.delete();
+    output.delete(); project.delete();
     const sampleProject = gd.ProjectHelper.createNewGDJSProject();
     const sampleInput = gd.Serializer.fromJSON(build(require('./dialogue-sample')())['game.json']);
     sampleProject.unserializeFrom(sampleInput);
@@ -71,10 +72,10 @@ test('official GDevelop core deserializes and round-trips the project, sprite an
     const sampleScene = JSON.parse(gd.Serializer.toJSON(sampleOutput)).layouts[0];
     assert.equal(sampleScene.objects.find(o => o.name === 'Apple').animations[0].directions[0].sprites[0].image, 'apple.png');
     assert.ok(sampleScene.instances.some(i => i.name === 'Apple'));
-    const sampleData = JSON.parse(sampleScene.variables.find(v => v.name === 'GDMDialogue').value);
+    const sampleData = JSON.parse(build(require('./dialogue-sample')())['dialogue.json']);
     assert.equal(createConstructDialogueSession(sampleData.characters[0], {hasApple:0}).start().dialogueID, 200);
     assert.equal(createConstructDialogueSession(sampleData.characters[0], {hasApple:1}).start().dialogueID, 210);
-    sampleOutput.delete(); sampleInput.delete(); sampleProject.delete();
+    sampleOutput.delete(); sampleProject.delete();
 });
 
 if (process.argv.includes('--sample')) {

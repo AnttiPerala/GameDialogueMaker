@@ -20,7 +20,8 @@ fetch('../artifacts/dialogue-fixture.json').then(response => response.json()).th
         if (options.transformY) Object.defineProperty(child, 'y', {get:()=>player.y+dy});
     };
     const events = new Map();
-    const runtime = {dt:1/60, layout:{width:960,height:640,scrollTo(){},addEventListener(){},removeEventListener(){}},
+    const globalVars = Object.fromEntries((project.constructVariables || [{name:'hasApple',initialValue:0}]).map(v=>[v.name,v.initialValue]));
+    const runtime = {globalVars,dt:1/60, layout:{width:960,height:640,scrollTo(){},addEventListener(){},removeEventListener(){}},
         objects:{Player:{getFirstInstance:()=>player},PlayerLabel:{getFirstInstance:()=>playerLabel},Apple:{getFirstInstance:()=>apple}},
         addEventListener(name, callback){events.set(name,callback)}, removeEventListener(name){events.delete(name)}};
     npcs.forEach((sprite,i) => runtime.objects[`NPC_${i+1}`] = {getFirstInstance:()=>sprite});

@@ -13,15 +13,15 @@ test('GameMaker export preserves Unicode, typed data, source and live editor sta
     const dom = {}; dom.circular = dom;
     source.characters[0].nodeElement = dom;
     const files = buildGameMakerProject(source, template);
-    const runtime = JSON.parse(files['datafiles/gdm_dialogue.json']);
+    const runtime = sessionHarness().gdm_parse_dialogue(JSON.parse(files['datafiles/dialogue.json']));
     assert.equal(source.characters[0].nodeElement, dom);
     assert.equal(runtime.characters[0].name, source.characters[0].characterName);
     assert.equal(runtime.characters[0].nodes[0].text, source.characters[0].dialogueNodes[0].dialogueText);
     assert.equal(runtime.characters[0].nodes[3].next, '60');
     assert.equal(runtime.characters[0].nodes[7].edges[0].conditions[0].value, 1);
-    assert.deepEqual(runtime.characters[1].nodes, []);
+    assert.equal(runtime.characters[1].nodes.length, 0);
     delete source.characters[0].nodeElement;
-    assert.deepEqual(JSON.parse(files['datafiles/dialogue-source.json']), source);
+    assert.deepEqual(JSON.parse(files['datafiles/dialogue.json']), source);
     assert.equal(Buffer.from(files['datafiles/character.png']).subarray(1,4).toString(), 'PNG');
 });
 
@@ -66,7 +66,7 @@ test('large casts expand the room, malformed graphs and non-finite conditions ar
         assert.throws(() => buildGameMakerProject(source, template), /finite number or text/);
     }
     condition.variableValue = '001';
-    assert.equal(JSON.parse(buildGameMakerProject(source, template)['datafiles/gdm_dialogue.json'])
+    assert.equal(parsePlain(buildGameMakerProject(source, template)['datafiles/dialogue.json'])
         .characters[0].nodes[7].edges[0].conditions[0].value, '001');
 });
 
@@ -77,8 +77,10 @@ test('GameMaker template bundle matches every editable source file', () => {
 
 // The actual GML session is deliberately limited to shared JS/GML syntax.
 // This checks its logic, NOT GML compiler compatibility or engine behavior.
+function parsePlain(json) { return sessionHarness().gdm_parse_dialogue(JSON.parse(json)); }
 function sessionHarness() {
     const context = vm.createContext({
+        string_lower:s=>s.toLowerCase(),string_length:s=>s.length,string_pos:(a,b)=>b.indexOf(a)+1,string_char_at:(s,i)=>s[i-1], max:Math.max,make_colour_rgb:(r,g,b)=>r+256*g+65536*b,
         array_length:a => a.length, array_push:(a,v) => a.push(v), string:String,
         is_real:v => typeof v === 'number', is_string:v => typeof v === 'string', is_undefined:v => v === undefined,
         variable_struct_get:(s,k) => Object.hasOwn(s,k) ? s[k] : undefined,
@@ -91,7 +93,7 @@ function sessionHarness() {
 
 test('unchanged GML session logic traverses exported branches, conditions, fights, loops and empty trees', () => {
     const api = sessionHarness();
-    const data = JSON.parse(buildGameMakerProject(fixture(), template)['datafiles/gdm_dialogue.json']);
+    const data = parsePlain(buildGameMakerProject(fixture(), template)['datafiles/dialogue.json']);
     const vars = api.gdm_defaults(data.characters);
     const session = api.gdm_session(data.characters[0], vars);
     assert.equal(vars.keys, 0);
@@ -124,7 +126,7 @@ test('unchanged GML session logic traverses exported branches, conditions, fight
 test('apple sample changes Mira root condition after player pickup', () => {
     const api = sessionHarness();
     const files = buildGameMakerProject(require('./dialogue-sample')(), template);
-    const data = JSON.parse(files['datafiles/gdm_dialogue.json']);
+    const data = parsePlain(files['datafiles/dialogue.json']);
     const variables = api.gdm_defaults(data.characters);
     const mira = () => api.gdm_start(api.gdm_session(data.characters[0], variables)).id;
     assert.equal(mira(), '200');
@@ -145,6 +147,44 @@ test('apple sample changes Mira root condition after player pickup', () => {
     assert.ok(files['datafiles/apple.png']);
 });
 
+test('GameMaker keyboard step advances pages and branches without bypassing conditions', () => {
+    const api = sessionHarness();
+    const data = parsePlain(buildGameMakerProject(fixture(), template)['datafiles/dialogue.json']);
+    let pressed = 0;
+    Object.assign(api, {error_message:'', show_variables:false, player:null, page:0, scroll:0, buttons:[],
+        instance_exists:()=>false, device_mouse_x_to_gui:()=>0, device_mouse_y_to_gui:()=>0,
+        point_in_rectangle:()=>false, keyboard_check:()=>false, keyboard_check_pressed:k=>k===pressed,
+        mouse_check_button_pressed:()=>false, ord:c=>c.charCodeAt(0),
+        vk_left:37, vk_up:38, vk_right:39, vk_down:40, vk_escape:27, vk_control:17, vk_alt:18, vk_shift:16, vk_numpad1:97, mb_left:1,
+        string_replace_all:(s,a,b)=>s.replaceAll(a,b), string_split:(s,separator)=>s.split(separator)});
+    api.session = api.gdm_session(data.characters[0], api.gdm_defaults(data.characters));
+    api.gdm_start(api.session);
+    // Only translate GML's event exit statement; execute the actual exported step.
+    const step = '(function(){' + template['objects/obj_gdm_controller/Step_0.gml'].replace(/\bexit;/g,'return;') + '})()';
+    const key = code=>{ pressed=code; vm.runInContext(step,api); };
+    key(50); assert.equal(api.page,0);
+    key(49); assert.equal(api.page,1);
+    key(97); assert.equal(api.session.current.id,'20');
+    key(51); assert.equal(api.session.current.id,'20');
+    api.show_variables=true; key(50); assert.equal(api.session.current.id,'20'); api.show_variables=false;
+    key(98); assert.equal(api.session.current.id,'60');
+    key(49); assert.equal(api.session,undefined);
+});
+
+test('GameMaker NPC contact does not restart a closed conversation until exit and re-entry',()=>{
+    const api=sessionHarness();
+    const data=parsePlain(buildGameMakerProject(fixture(),template)['datafiles/dialogue.json']);
+    const controller={data,sessions:{},variables:api.gdm_defaults(data.characters),session:undefined,show_variables:false};
+    let touching=true;
+    Object.assign(api,{global:{gdm:controller},x:0,y:0,obj_gdm_player:1,character_index:0,character_id:"",was_touching:false,place_meeting:()=>touching});
+    const step=()=>vm.runInContext(template['objects/obj_gdm_npc/Step_0.gml'],api);
+    step();assert.ok(controller.session);
+    controller.session=undefined;
+    for(let i=0;i<5;i++)step();
+    assert.equal(controller.session,undefined);
+    touching=false;step();touching=true;step();assert.ok(controller.session);
+});
+
 if (process.argv.includes('--sample')) {
     const output = path.join(__dirname, '..', 'artifacts', 'gamemaker-playground');
     const files = buildGameMakerProject(require('./dialogue-sample')(), template);
@@ -156,3 +196,29 @@ if (process.argv.includes('--sample')) {
     createExportZip(files).arrayBuffer().then(buffer => fs.writeFileSync(
         path.join(output,'..','dialogue-gamemaker.zip'),Buffer.from(buffer)));
 }
+
+
+test('GameMaker remembers waiting conditions and respects opt-out',()=>{
+    for(const waitUntilMet of [true,false]) {
+        const source=fixture(), c=source.characters[0];
+        c.dialogueNodes.find(n=>n.dialogueID===60).outgoingLines=[{toNode:70,transitionConditions:[{variableName:'apple',comparisonOperator:'=',variableValue:1,waitUntilMet}]}];
+        const data=parsePlain(buildGameMakerProject(source,template)['datafiles/dialogue.json']);
+        const api=sessionHarness(), vars=api.gdm_defaults(data.characters), session=api.gdm_session(data.characters[0],vars);
+        api.gdm_start(session);api.gdm_go(session,'60');
+        assert.equal(api.gdm_start(session).id,waitUntilMet?'60':'10');
+        vars.apple=1;assert.equal(api.gdm_start(session).id,waitUntilMet?'70':'10');
+        assert.equal(api.gdm_start(session).id,'10');
+    }
+});
+
+
+test('GameMaker plain JSON replacement preserves existing NPC character identity',()=>{
+    const api=sessionHarness(),source=fixture();
+    source.characters.reverse();
+    source.characters[1].dialogueNodes[0].dialogueText='Updated princess greeting';
+    const data=api.gdm_parse_dialogue(JSON.parse(JSON.stringify(source)));
+    const controller={data,sessions:{},variables:api.gdm_defaults(data.characters),session:undefined,show_variables:false};
+    Object.assign(api,{global:{gdm:controller},x:0,y:0,obj_gdm_player:1,character_index:0,character_id:'9',was_touching:false,place_meeting:()=>true});
+    vm.runInContext(template['objects/obj_gdm_npc/Step_0.gml'],api);
+    assert.equal(api.character_index,1);assert.equal(controller.session.current.text,'Updated princess greeting');
+});

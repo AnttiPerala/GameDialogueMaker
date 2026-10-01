@@ -2,6 +2,7 @@ extends Area2D
 
 signal talk_requested(character_index: int)
 @export var character_index: int = 0
+@export var character_id: String = ""
 @export var tint := Color("b68af7")
 
 func _ready() -> void:

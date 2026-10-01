@@ -15,6 +15,7 @@ namespace GameDialogueMakerUnity
     [Serializable] public class NodeData
     {
         public string id, type, text, next;
+        public string[] speakers;
         public EdgeData[] edges;
     }
     [Serializable] public class EdgeData { public string target; public ConditionData[] conditions; }
@@ -22,6 +23,7 @@ namespace GameDialogueMakerUnity
     {
         public string name, op, kind, text;
         public double number;
+        public bool waitUntilMet = true;
     }
 
     public class VariableValue
@@ -49,6 +51,8 @@ namespace GameDialogueMakerUnity
         public readonly Dictionary<string, VariableValue> Variables;
         readonly Dictionary<string, NodeData> nodes = new Dictionary<string, NodeData>();
 
+        readonly List<EdgeData> waiting = new List<EdgeData>();
+
         public DialogueSession(CharacterData character, Dictionary<string, VariableValue> variables)
         {
             Character = character;
@@ -60,6 +64,10 @@ namespace GameDialogueMakerUnity
         {
             NodeData node;
             Current = id != null && nodes.TryGetValue(id, out node) ? node : null;
+            waiting.Clear();
+            if (Current != null) foreach (EdgeData edge in Current.edges)
+                foreach (ConditionData condition in edge.conditions)
+                    if (condition.waitUntilMet && !Allows(edge)) { waiting.Add(edge); break; }
             return Current;
         }
 
@@ -92,6 +100,11 @@ namespace GameDialogueMakerUnity
 
         public NodeData Start()
         {
+            if (Current != null && waiting.Count > 0) {
+                if (Current.type != "question" && Current.type != "fight")
+                    foreach (EdgeData edge in waiting) if (Allows(edge)) return Go(edge.target);
+                return Current;
+            }
             Current = null;
             foreach (EdgeData edge in Character.start) if (Allows(edge)) return Go(edge.target);
             return Current;

@@ -37,7 +37,14 @@ if (show_variables) {
 
 if (is_undefined(session)) exit;
 gdm_panel(60, 234, 840, 394);
-draw_text_ext(80, 246, session.character.name, 20, 800);
+var _role = "npc";
+if (!is_undefined(session.current)) {
+    _role = session.current.type == "answer" ? "player" : "npc";
+    if (variable_struct_exists(session.current, "speakers") && page < array_length(session.current.speakers)) _role = session.current.speakers[page];
+}
+draw_set_colour(make_colour_rgb(155, 217, 255));
+draw_text_ext(80, 246, _role == "player" ? "You" : _role == "scene" ? "Scene" : session.character.name, 20, 800);
+draw_set_colour(c_white);
 // Draw GUI scissor coordinates are back-buffer pixels, not GUI coordinates.
 var _old_scissor = gpu_get_scissor();
 var _sx = window_get_width() / 960;
@@ -60,10 +67,16 @@ if (is_undefined(session.current)) {
         gdm_button(80, _yy, 800, 38, "Continue", "page", 0, true);
         _yy += 46;
     } else {
+        if (session.current.type == "question") {
+            draw_set_colour(make_colour_rgb(155, 217, 255));
+            draw_text(80, _yy, "You");
+            draw_set_colour(c_white);
+            _yy += 28;
+        }
         var _choices = gdm_options(session);
         for (var _j = 0; _j < array_length(_choices); ++_j) {
             var _choice = _choices[_j];
-            var _height = max(38, string_height_ext(_choice.text, 20, 780) + 16);
+            var _height = max(38, string_height_ext(_choice.text, 20, 754) + 16);
             gdm_button(80, _yy, 800, _height, _choice.text, "choice", _j, _choice.enabled);
             _yy += _height + 8;
         }

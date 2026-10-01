@@ -15,17 +15,17 @@ test('Unity export preserves source and normalizes typed runtime data without mu
     const dom = {}; dom.circular = dom;
     source.characters[0].nodeElement = dom;
     const files = buildUnityProject(source, template);
-    const runtime = JSON.parse(files[root + 'Resources/GDMDialogue.json']);
+    const runtime = JSON.parse(files[root + 'Resources/dialogue.json']);
     assert.equal(source.characters[0].nodeElement, dom);
     assert.equal(runtime.characters.length, 2);
-    assert.equal(runtime.characters[0].name, source.characters[0].characterName);
-    assert.equal(runtime.characters[0].nodes[0].text, source.characters[0].dialogueNodes[0].dialogueText);
-    assert.equal(runtime.characters[0].nodes[3].next, '60');
-    assert.deepEqual(runtime.characters[1].nodes, []);
-    assert.deepEqual(runtime.characters[0].nodes[7].edges[0].conditions[0],
-        {name:'keys', op:'>=', kind:'number', number:1, text:''});
+    assert.equal(runtime.characters[0].characterName, source.characters[0].characterName);
+    assert.equal(runtime.characters[0].dialogueNodes[0].dialogueText, source.characters[0].dialogueNodes[0].dialogueText);
+    assert.equal(runtime.characters[0].dialogueNodes[3].nextNode, 60);
+    assert.deepEqual(runtime.characters[1].dialogueNodes, []);
+    assert.deepEqual(runtime.characters[0].dialogueNodes[7].outgoingLines[0].transitionConditions[0],
+        {variableName:'keys', comparisonOperator:'>=', variableValue:1});
     delete source.characters[0].nodeElement;
-    assert.deepEqual(JSON.parse(files[root + 'Source/dialogue.json']), source);
+    assert.deepEqual(JSON.parse(files[root + 'Resources/dialogue.json']), source);
     assert.equal(Buffer.from(files[root + 'Art/character.png']).subarray(1, 4).toString(), 'PNG');
 });
 
@@ -37,9 +37,9 @@ test('Unity rejects dangling links and unsupported condition values; numeric tex
         assert.throws(() => buildUnityProject(source, template), /finite number or text/);
     }
     condition.variableValue = '001';
-    const runtime = JSON.parse(buildUnityProject(source, template)[root + 'Resources/GDMDialogue.json']);
-    assert.equal(runtime.characters[0].nodes[7].edges[0].conditions[0].text, '001');
-    assert.equal(runtime.characters[0].nodes[7].edges[0].conditions[0].kind, 'text');
+    const runtime = JSON.parse(buildUnityProject(source, template)[root + 'Resources/dialogue.json']);
+    assert.equal(runtime.characters[0].dialogueNodes[7].outgoingLines[0].transitionConditions[0].variableValue, '001');
+
     source.characters[0].outgoingLines[0].toNode = 999;
     assert.throws(() => buildUnityProject(source, template), /missing dialogue 999/);
 });
@@ -62,15 +62,17 @@ const compiler = process.env.CSC_BIN || 'C:/Windows/Microsoft.NET/Framework64/v4
 test('exported data runs through the actual C# dialogue session', {skip: !fs.existsSync(compiler)}, () => {
     writeProject();
     const exe = path.join(output, '..', 'unity-session-smoke.exe');
-    const compile = spawnSync(compiler, ['/nologo', '/out:' + exe, '/reference:System.Web.Extensions.dll',
+    const jsonDll = process.env.NEWTONSOFT_DLL || 'C:/Program Files/Microsoft Visual Studio/2022/Community/Common7/Tools/Newtonsoft.Json.dll';
+    fs.copyFileSync(jsonDll,path.join(path.dirname(exe),'Newtonsoft.Json.dll'));
+    const compile = spawnSync(compiler, ['/nologo', '/out:' + exe, '/reference:System.Web.Extensions.dll', '/reference:'+jsonDll, path.join(output,root,'Scripts/DialogueJson.cs'),
         path.join(output, root, 'Scripts/DialogueData.cs'), path.join(__dirname, 'unity-session-smoke.cs')],
         {encoding:'utf8', windowsHide:true});
     assert.equal(compile.status, 0, compile.stdout + compile.stderr);
-    const run = spawnSync(exe, [path.join(output, root, 'Resources/GDMDialogue.json')], {encoding:'utf8', windowsHide:true});
+    const run = spawnSync(exe, [path.join(output, root, 'Resources/dialogue.json')], {encoding:'utf8', windowsHide:true});
     assert.equal(run.status, 0, run.stdout + run.stderr);
     assert.match(run.stdout, /UNITY_SESSION_PASS/);
     writeProject(require('./dialogue-sample')());
-    const quest = spawnSync(exe, [path.join(output, root, 'Resources/GDMDialogue.json')], {encoding:'utf8', windowsHide:true});
+    const quest = spawnSync(exe, [path.join(output, root, 'Resources/dialogue.json')], {encoding:'utf8', windowsHide:true});
     assert.equal(quest.status, 0, quest.stdout + quest.stderr);
     assert.match(quest.stdout, /UNITY_APPLE_PASS/);
 });

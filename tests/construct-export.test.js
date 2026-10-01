@@ -8,6 +8,31 @@ const { createConstructDialogueSession: session, startConstructDialogueGame: run
 
 const fixture = require('./dialogue-fixture');
 
+test('conditions export as visible typed native globals with declared defaults', () => {
+    const source = fixture();
+    source.gameIntegration = {variables:{keys:{type:'number',initialValue:2}, location:{type:'string',initialValue:'the "office"'}}};
+    const files = exporter.buildConstructProject(source, template, session, runner);
+    const sheet = JSON.parse(files['eventSheets/Dialogue events.json']);
+    const globals = sheet.events.filter(e=>e.eventType==='variable' && e.comment.startsWith('Dialogue condition:'));
+    assert.deepEqual(globals.map(v=>[v.name,v.type,v.initialValue]), [['keys','number','2'],['location','string','the "office"']]);
+    assert.ok(globals.every(v=>!v.isConstant && !v.isStatic && Number.isInteger(v.sid)));
+    assert.equal(source.constructVariables,undefined,'export leaves editor data unchanged');
+    const investigation = exporter.buildConstructProject(require('../examples/two-suspects-investigation.json'),template,session,runner);
+    assert.ok(JSON.parse(investigation['eventSheets/Dialogue events.json']).events.some(e=>e.name==='cabinetRecordChecked' && e.initialValue==='0'));
+});
+
+test('native globals deduplicate names, map invalid identifiers and reject conflicting types', () => {
+    const source = fixture();
+    source.gameIntegration = {variables:Object.fromEntries(['door open','door_open','Player','1st','KEYS'].map(name=>[name,{type:'number',initialValue:0}]))};
+    const files = exporter.buildConstructProject(source,template,session,runner);
+    const bindings = JSON.parse(files['files/construct-bindings.json']).variables;
+    assert.equal(new Set(bindings.map(v=>v.name.toLowerCase())).size,bindings.length);
+    assert.ok(bindings.every(v=>/^[A-Za-z_][A-Za-z0-9_]*$/.test(v.name)));
+    assert.notEqual(bindings.find(v=>v.dialogueName==='Player').name,'Player');
+    source.gameIntegration.variables.keys = {type:'string',initialValue:''};
+    assert.throws(()=>exporter.buildConstructProject(source,template,session,runner), /both number and text/);
+});
+
 test('downloadable demo has playable English characters and distinct player and NPC labels', () => {
     const sample = require('./dialogue-sample')();
     const files = exporter.buildConstructProject(sample, template, session, runner);
@@ -17,14 +42,31 @@ test('downloadable demo has playable English characters and distinct player and 
         assert.ok(session(character, {hasApple:0}).start(), `${character.characterName} needs a starting conversation`);
     }
     const rowan = session(data.characters[1], {});
-    assert.match(rowan.start().dialogueText, /Rowan/);
+    assert.match(rowan.start().dialogueText, /Welcome to our village/);
     rowan.options()[0].choose();
     assert.match(rowan.current.dialogueText, /Mira/);
     rowan.options()[0].choose();
     assert.equal(rowan.current, null);
     const instances = JSON.parse(files['layouts/Dialogue Playground.json']).layers[0].instances;
-    const red = instances.find(instance => instance.type === 'NPC_1').world.color;
-    const green = instances.find(instance => instance.type === 'NPC_2').world.color;
+    for (const instance of instances.filter(instance => instance.type === 'Player' || instance.type.startsWith('NPC_')))
+        assert.deepEqual(instance.world.color,[1,1,1,1],'replacement artwork must inherit no tint');
+    const palette = name => {
+        const png = Buffer.from(files[`images/${name}-default-000.png`]);
+        let color, pixels;
+        for(let offset=8;offset<png.length;) {
+            const size=png.readUInt32BE(offset), type=png.toString('ascii',offset+4,offset+8);
+            const data=png.subarray(offset+8,offset+8+size);
+            if(type==='PLTE')color=[...data];
+            if(type==='IDAT')pixels=require('node:zlib').inflateSync(data);
+            offset+=size+12;
+        }
+        assert.equal(pixels.length,32*33);assert.ok(pixels.every(value=>value===0));
+        return color;
+    };
+    const red = palette('npc_mira');
+    const green = palette('npc_rowan');
+    const blue = palette('player');
+    assert.ok(blue[2]>blue[0]);
     assert.ok(red[0] > red[1] && red[0] > red[2]);
     assert.ok(green[1] > green[0] && green[1] > green[2]);
     assert.equal(instances.find(instance => instance.type === 'PlayerLabel').properties.text, 'Player');
@@ -46,7 +88,7 @@ test('project settings use values accepted by Construct r495.2', () => {
     const properties = project.properties;
     assert.ok(['splash', 'progress-logo', 'progress', 'percent', 'none'].includes(properties.loaderStyle));
     assert.ok(['worker', 'auto', 'dom'].includes(project.useWorker));
-    // The generated runner uses document/window, so auto/worker is unsuitable.
+    // Keep the existing project setting; the native bridge no longer needs DOM access.
     assert.equal(project.useWorker, 'dom');
     assert.ok(['off', 'scale-inner', 'integer-scale-inner', 'scale-outer', 'integer-scale-outer', 'letterbox-scale', 'letterbox-integer-scale'].includes(properties.fullscreenMode));
     assert.ok(['2d', 'auto', '3d'].includes(properties.renderingMode));
@@ -65,7 +107,7 @@ test('export preserves live DOM references, Unicode, quotes, newlines and duplic
     const data = JSON.parse(files['files/dialogue.json']);
     assert.equal(data.characters[0].characterName, source.characters[0].characterName);
     assert.equal(data.characters[0].dialogueNodes[0].dialogueText, source.characters[0].dialogueNodes[0].dialogueText);
-    assert.ok(files['objectTypes/NPC_1.json']); assert.ok(files['objectTypes/NPC_2.json']);
+    assert.ok(files['objectTypes/NPC_Mira_Hello.json']); assert.ok(files['objectTypes/NPC_Mira_Hello_2.json']);
     assert.equal(data.characters[0].nodeElement, undefined);
 });
 

@@ -10,6 +10,13 @@ func expect(value: bool, message: String) -> void:
 func _initialize() -> void:
 	_run.call_deferred()
 
+func press_number(ui: Node, code: Key, repeated: bool = false) -> void:
+	var event := InputEventKey.new()
+	event.physical_keycode = code
+	event.pressed = true
+	event.echo = repeated
+	ui._input(event)
+
 func _run() -> void:
 	var game = load("res://scenes/main.tscn").instantiate()
 	root.add_child(game)
@@ -37,22 +44,39 @@ func _run() -> void:
 		quit(1)
 		return
 	var stopped: Vector2 = player.position
+	ui.session.current.dialogueSpeakers = ["player", "npc"]
+	ui._render()
+	expect(ui.content.get_node("Speaker").text == "You", "player speaker label is separate")
+	ui.session.character.characterName = "Renamed NPC"
 	Input.action_press("move_right")
 	for frame in range(5):
 		await physics_frame
 	Input.action_release("move_right")
 	expect(player.position == stopped, "input cannot move player during conversation")
-	ui.content.get_node("Choices").get_child(0).pressed.emit()
+	expect(ui.content.get_node("Choices").get_child(0).get_child(0).text == "1", "continue has a separate number label")
+	press_number(ui, KEY_1, true)
+	expect(ui.page == 0, "held key does not skip dialogue")
+	press_number(ui, KEY_2)
+	expect(ui.page == 0, "missing choice does not advance")
+	press_number(ui, KEY_1)
 	expect(ui.content.get_node("Line").text == "Welcome to the playground.", "newline advances one page")
-	ui.content.get_node("Choices").get_child(0).pressed.emit()
+	expect(ui.content.get_node("Speaker").text == "Renamed NPC", "NPC speaker follows root name")
+	press_number(ui, KEY_KP_1)
 	expect(int(ui.session.current.dialogueID) == 20, "continue reaches question")
 	expect(ui.content.get_node("Choices").get_child_count() == 3, "question shows all answers")
+	expect(ui.content.get_node("AnswerSpeaker").visible, "answer options are labelled You")
 	expect(ui.content.get_node("Choices").get_child(2).disabled, "conditional answer is disabled")
+	press_number(ui, KEY_3)
+	expect(int(ui.session.current.dialogueID) == 20, "number shortcut cannot bypass a condition")
+	ui.variable_panel.show()
+	press_number(ui, KEY_2)
+	expect(int(ui.session.current.dialogueID) == 20, "variable entry cannot select answers")
+	ui.variable_panel.hide()
 	ui._set_variable("keys", 1.0)
 	expect(not ui.content.get_node("Choices").get_child(2).disabled, "test variable unlocks answer")
-	ui.content.get_node("Choices").get_child(2).pressed.emit()
+	press_number(ui, KEY_KP_3)
 	expect(int(ui.session.current.dialogueID) == 60, "answer follows reaction edge")
-	ui.content.get_node("Choices").get_child(0).pressed.emit()
+	press_number(ui, KEY_1)
 	expect(not ui.panel.visible and not player.movement_locked, "terminal node closes and resumes movement")
 	for frame in range(5):
 		await physics_frame
@@ -95,6 +119,34 @@ func _run() -> void:
 	for comparison in [["=",2.0,true], ["!=",2.0,false], ["<",3.0,true], [">",1.0,true], ["<=",2.0,true], [">=",2.0,true], ["=","2",false]]:
 		session.variables.x = 2.0
 		expect(session.allows({"transitionConditions":[{"variableName":"x","comparisonOperator":comparison[0],"variableValue":comparison[1]}]}) == comparison[2], "typed condition " + comparison[0])
+	# Verify close/reopen through the real UI cache, then release the waiting point.
+	ui.close_dialogue()
+	var request: Dictionary = ui.characters[0].dialogueNodes[5]
+	var gate := {"variableName":"apple", "comparisonOperator":"=", "variableValue":1.0}
+	request.outgoingLines = [{"toNode":70, "transitionConditions":[gate]}]
+	ui.variables.apple = 0.0
+	ui.open_character(0)
+	ui.session.go(60)
+	ui.close_dialogue()
+	ui.open_character(0)
+	expect(int(ui.session.current.dialogueID) == 60, "waiting line survives close")
+	ui.close_dialogue()
+	ui.variables.apple = 1.0
+	ui.open_character(0)
+	expect(int(ui.session.current.dialogueID) == 70, "unlocked condition resumes downstream")
+	ui.close_dialogue()
+	ui.open_character(0)
+	expect(int(ui.session.current.dialogueID) == 10, "checkpoint consumed")
+	gate.waitUntilMet = false
+	ui.variables.apple = 0.0
+	ui.session.go(60)
+	ui.close_dialogue()
+	ui.open_character(0)
+	expect(int(ui.session.current.dialogueID) == 10, "unchecked condition restarts")
+	for movement_key in [KEY_LEFT, KEY_RIGHT, KEY_UP, KEY_DOWN]:
+		ui.open_character(0)
+		press_number(ui, movement_key)
+		expect(not ui.is_busy() and not player.movement_locked, "movement key closes dialogue and unlocks player")
 	game.queue_free()
 	await process_frame
 	if failures == 0:

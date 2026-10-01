@@ -1,4 +1,4 @@
-# Game Dialogue Maker — GameMaker playground
+# Game Dialogue Maker â€” GameMaker playground
 
 The downloadable apple-quest demo: talk to Mira, close the conversation, touch
 the red apple with green leaves, then return to Mira. Pickup removes the apple
@@ -31,10 +31,7 @@ Next navigates long lists. Invalid numbers leave the previous value unchanged.
 Numeric and string types stay distinct. Edit global.gdm.variables in your game
 code to drive conditions; fights here are test choices, not a combat system.
 
-datafiles/gdm_dialogue.json is the normalized runtime data. The untouched editable
-dialogue is in datafiles/dialogue-source.json. These are Included Files, so they
-travel with desktop builds. User text stays in JSON and never becomes GML code,
-resource identifiers, or filenames. Re-export to update dialogue and world size.
+datafiles/dialogue.json is the ordinary JSON export, registered in Included Files. Replace only that file and restart Run to update writing. Keep your .yyp, rooms, objects, scripts and artwork. gdm_parse_dialogue converts it in memory. For your own room, set create_demo_world = false in the controller Create event and place your own objects. Set each NPC character_id to its stable Dialogue Maker ID; reordering JSON does not reassign existing NPCs.
 The simple sprite is loaded from character.png and tinted per NPC.
 
 Scripts and events are editable GML. Replace the runtime square with your own
@@ -60,3 +57,13 @@ of the official YoYoGames/GMEXT-Photon example; no example gameplay or assets ar
 included.
 https://manual.gamemaker.io/monthly/en/Additional_Information/Project_Format.htm
 https://github.com/YoYoGames/GMEXT-Photon/tree/main/source/Photon_gml
+
+Dialogue shortcuts: press 1–9 (top row or numeric keypad) to select the corresponding numbered option. Press 1 to continue a line or finish a conversation. Numbers appear separately from dialogue text; locked options cannot be selected. Shortcuts pause while Test variables is open. Options above 9 remain clickable.
+
+Waiting conditions: waitUntilMet defaults to true. Blocked waiting connections remember their upstream node per character for the current game runtime. On returning, the same node is displayed until its condition passes, then the connection is followed. Questions and fights still require a choice. Uncheck this setting to restart normally. This progress is in memory; add your own save-game integration for persistence across reloads.
+
+## Updating an existing integration
+
+Export once to bootstrap the engine project. Afterwards export ordinary JSON and replace only `datafiles/dialogue.json`. Keep character/node IDs stable. Updates take effect at the next run, not mid-conversation; game saves need their own migration policy if nodes are deleted. Variable dictionaries remain game-owned while running; setting a condition never changes a variable automatically. New condition variables need wiring to your gameplay.
+
+Older exports require a one-time integration upgrade. Merge the updated gdm_session script and controller/NPC events. Register dialogue.json in Included Files and remove the old gdm_dialogue.json dependency. Set character_id on existing NPCs. Set create_demo_world = false when using your own placed room objects.
